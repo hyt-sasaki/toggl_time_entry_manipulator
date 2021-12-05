@@ -5,6 +5,7 @@ import (
     "strings"
     "encoding/json"
     "strconv"
+    "time"
 
     "github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
@@ -29,6 +30,12 @@ type entryArgs struct {
     Project int
     Tag string
     TimeEstimation int  // minutes
+}
+type estimation struct {
+    Duration int    `firestore:"duration"`
+    Memo string     `firestore:"memo"`
+    CreatedTm time.Time `firestore:"createdTm"`
+    UpdatedTm time.Time `firestore:"updatedTm"`
 }
 
 func (c AddEntryCommand) About() alfred.CommandDef {
@@ -106,6 +113,17 @@ func (c AddEntryCommand) Do(data string) (out string, err error) {
     timeEstimation := sd.Args.TimeEstimation
     if timeEstimation != 0 {
         dlog.Printf("TimeEstimation is %d", timeEstimation)
+
+        _, err = firestoreClient.Collection("time_entry_estimations").Doc(strconv.Itoa(time_entry.ID)).Set(firestoreCtx, estimation{
+            Duration: timeEstimation,
+            Memo: "",
+            CreatedTm: time.Now(),
+            UpdatedTm: time.Now(),
+        })
+        if err != nil {
+            dlog.Printf("Failed to add time entry estimation: %v", err)
+        }
+
     } else {
         dlog.Printf("TimeEstimation is not entered")
     }
