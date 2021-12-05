@@ -1,0 +1,5 @@
+*
+!*.go
+!info.plist
+!go.mod
+!go.sum
