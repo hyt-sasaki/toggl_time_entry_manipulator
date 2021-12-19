@@ -70,6 +70,7 @@ func main() {
 
     workflow.Run([]alfred.Command{
         AddEntryCommand{},
+        GetEntryCommand{},
     })
 
     firestoreClient.Close()
