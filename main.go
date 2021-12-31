@@ -5,12 +5,11 @@ import (
 	"log"
 	"os"
 	"path"
-    "context"
+    "google.golang.org/api/option"
 
-	"cloud.google.com/go/firestore"
-	firebase "firebase.google.com/go"
+
 	"github.com/jason0x43/go-alfred"
-	"google.golang.org/api/option"
+    "toggl_time_entry_manipulator/estimation_client"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator]", log.LstdFlags)
@@ -20,8 +19,7 @@ var config Config
 var cacheFile string
 var cache Cache
 
-var firestoreClient *firestore.Client
-var firestoreCtx context.Context
+var firestoreClient *estimation_client.EstimationClient
 
 var workflow alfred.Workflow
 
@@ -53,16 +51,8 @@ func main() {
 	}
 
     // firestore
-    // TODO べた書きなのをきれいにする
-    firestoreCtx = context.Background()
-    serviceAccount := option.WithCredentialsFile("credential/secret.json")
-
-    var app *firebase.App
-    if app, err = firebase.NewApp(firestoreCtx, nil, serviceAccount); err != nil {
-        log.Fatalln(err)
-    }
-
-    firestoreClient, err = app.Firestore(firestoreCtx)
+    serviceAccount := option.WithCredentialsFile("../credential/secret.json")
+    firestoreClient, err = estimation_client.Init(serviceAccount)
     if err != nil {
         log.Fatalln(err)
         os.Exit(1)

@@ -1,13 +1,13 @@
 package estimation_client
 
 import (
-    "fmt"
-    "strconv"
-    "context"
-    "time"
+	"context"
+	"strconv"
+	"time"
+
 	"cloud.google.com/go/firestore"
-	"google.golang.org/api/option"
 	firebase "firebase.google.com/go"
+	"google.golang.org/api/option"
 )
 
 type Estimation struct {
@@ -30,8 +30,6 @@ func Init(serviceAccount option.ClientOption) (client *EstimationClient, err err
 
     var app *firebase.App
     app, err = firebase.NewApp(firestoreCtx, nil, serviceAccount)
-    fmt.Printf("app: %v\n", app)
-    fmt.Printf("firestoreCtx: %v\n", firestoreCtx)
     if err != nil {
         return 
     }
@@ -48,7 +46,7 @@ func Init(serviceAccount option.ClientOption) (client *EstimationClient, err err
     return 
 }
 
-func (client *EstimationClient) Fetch(entryIds []int64) (estimations []Estimation) {
+func (client *EstimationClient) Fetch(entryIds []int64) (estimations []Estimation, err error) {
     // https://qiita.com/miyukiaizawa/items/88c174c00e9e99d3871b
     collectionRef := client.firestoreClient.Collection(collectionName)
 
@@ -58,13 +56,21 @@ func (client *EstimationClient) Fetch(entryIds []int64) (estimations []Estimatio
     }
 
     docSnaps, err := client.firestoreClient.GetAll(client.firestoreCtx, tmpDocs)
-    if err != nil {
-        // TODO error handling
-    }
     for _, ds := range docSnaps {
         var estimation = Estimation{}
-        ds.DataTo(&estimation)
-        estimations = append(estimations, estimation)
+        if err := ds.DataTo(&estimation); err == nil {
+            estimations = append(estimations, estimation)
+        }
     }
     return
+}
+
+func (client *EstimationClient) Insert(id string, estimation Estimation) (err error){
+    _, err = client.firestoreClient.Collection(collectionName).Doc(id).Set(client.firestoreCtx, estimation)
+
+    return
+}
+
+func (client *EstimationClient) Close() {
+    client.firestoreClient.Close()
 }
