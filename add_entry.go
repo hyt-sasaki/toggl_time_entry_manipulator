@@ -12,7 +12,10 @@ import (
     "toggl_time_entry_manipulator/estimation_client"
 )
 
-type AddEntryCommand struct {}
+type AddEntryCommand struct {
+    firestoreClient *estimation_client.EstimationClient
+}
+
 const AddEntryKeyword = "add_entry"
 type stateData struct {
     Current  state
@@ -109,7 +112,7 @@ func (c AddEntryCommand) Do(data string) (out string, err error) {
     if timeEstimation != 0 {
         dlog.Printf("TimeEstimation is %d", timeEstimation)
 
-        if err = firestoreClient.Insert(strconv.Itoa(time_entry.ID), estimation_client.Estimation{
+        if err = c.firestoreClient.Insert(strconv.Itoa(time_entry.ID), estimation_client.Estimation{
             Duration: timeEstimation,
             Memo: "",
             CreatedTm: time.Now(),
@@ -150,7 +153,6 @@ func generateProjectItems(args entryArgs, enteredArg string) (items []alfred.Ite
             }
         }
         item := alfred.Item{
-            UID: fmt.Sprintf("%s.project.%d", workflow.BundleID(), project.ID),
             Title: fmt.Sprintf("Project: %s", project.Name),
             Subtitle: "Select the project for your time entry",
             Autocomplete: fmt.Sprintf("Project: %s", project.Name),
@@ -183,7 +185,6 @@ func generateTagItems(args entryArgs, enteredArg string) (items []alfred.Item) {
 
     if enteredArg == "" {
         noTagItem := alfred.Item{
-            UID: fmt.Sprintf("%s.tag.null", workflow.BundleID()),
             Title: "No tag",
             Arg: &alfred.ItemArg{
                 Keyword: AddEntryKeyword,
@@ -204,7 +205,6 @@ func generateTagItems(args entryArgs, enteredArg string) (items []alfred.Item) {
             }
         }
         item := alfred.Item{
-            UID: fmt.Sprintf("%s.tag.%d", workflow.BundleID(), tag.ID),
             Title: fmt.Sprintf("Tag: %s", tag.Name),
             Subtitle: "Select the tag for your time entry",
             Autocomplete: fmt.Sprintf("Tag: %s", tag.Name),

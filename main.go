@@ -15,16 +15,12 @@ import (
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator]", log.LstdFlags)
 
 var configFile string
-var config Config
 var cacheFile string
+var config Config
 var cache Cache
 
-var firestoreClient *estimation_client.EstimationClient
-
-var workflow alfred.Workflow
-
 func main() {
-
+    var workflow alfred.Workflow
     var err error
     if workflow, err = alfred.OpenWorkflow("..", true); err != nil {
         fmt.Printf("Error: %s", err)
@@ -52,15 +48,19 @@ func main() {
 
     // firestore
     serviceAccount := option.WithCredentialsFile("credential/secret.json")
-    firestoreClient, err = estimation_client.Init(serviceAccount)
+    firestoreClient, err := estimation_client.Init(serviceAccount)
     if err != nil {
         log.Fatalln(err)
         os.Exit(1)
     }
 
     workflow.Run([]alfred.Command{
-        AddEntryCommand{},
-        GetEntryCommand{},
+        AddEntryCommand{
+            firestoreClient: firestoreClient,
+        },
+        GetEntryCommand{
+            firestoreClient: firestoreClient,
+        },
     })
 
     firestoreClient.Close()
