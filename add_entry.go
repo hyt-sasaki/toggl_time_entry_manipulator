@@ -9,9 +9,13 @@ import (
 
     "github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
+    "toggl_time_entry_manipulator/estimation_client"
 )
 
-type AddEntryCommand struct {}
+type AddEntryCommand struct {
+    firestoreClient *estimation_client.EstimationClient
+}
+
 const AddEntryKeyword = "add_entry"
 type stateData struct {
     Current  state
@@ -30,12 +34,6 @@ type entryArgs struct {
     Project int
     Tag string
     TimeEstimation int  // minutes
-}
-type estimation struct {
-    Duration int    `firestore:"duration"`
-    Memo string     `firestore:"memo"`
-    CreatedTm time.Time `firestore:"createdTm"`
-    UpdatedTm time.Time `firestore:"updatedTm"`
 }
 
 func (c AddEntryCommand) About() alfred.CommandDef {
@@ -114,13 +112,12 @@ func (c AddEntryCommand) Do(data string) (out string, err error) {
     if timeEstimation != 0 {
         dlog.Printf("TimeEstimation is %d", timeEstimation)
 
-        _, err = firestoreClient.Collection("time_entry_estimations").Doc(strconv.Itoa(time_entry.ID)).Set(firestoreCtx, estimation{
+        if err = c.firestoreClient.Insert(strconv.Itoa(time_entry.ID), estimation_client.Estimation{
             Duration: timeEstimation,
             Memo: "",
             CreatedTm: time.Now(),
             UpdatedTm: time.Now(),
-        })
-        if err != nil {
+        }); err != nil {
             dlog.Printf("Failed to add time entry estimation: %v", err)
         }
 
@@ -156,7 +153,6 @@ func generateProjectItems(args entryArgs, enteredArg string) (items []alfred.Ite
             }
         }
         item := alfred.Item{
-            UID: fmt.Sprintf("%s.project.%d", workflow.BundleID(), project.ID),
             Title: fmt.Sprintf("Project: %s", project.Name),
             Subtitle: "Select the project for your time entry",
             Autocomplete: fmt.Sprintf("Project: %s", project.Name),
@@ -189,7 +185,6 @@ func generateTagItems(args entryArgs, enteredArg string) (items []alfred.Item) {
 
     if enteredArg == "" {
         noTagItem := alfred.Item{
-            UID: fmt.Sprintf("%s.tag.null", workflow.BundleID()),
             Title: "No tag",
             Arg: &alfred.ItemArg{
                 Keyword: AddEntryKeyword,
@@ -210,7 +205,6 @@ func generateTagItems(args entryArgs, enteredArg string) (items []alfred.Item) {
             }
         }
         item := alfred.Item{
-            UID: fmt.Sprintf("%s.tag.%d", workflow.BundleID(), tag.ID),
             Title: fmt.Sprintf("Tag: %s", tag.Name),
             Subtitle: "Select the tag for your time entry",
             Autocomplete: fmt.Sprintf("Tag: %s", tag.Name),
