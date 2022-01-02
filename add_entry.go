@@ -13,7 +13,7 @@ import (
 )
 
 type AddEntryCommand struct {
-    firestoreClient *estimation_client.EstimationClient
+    firestoreClient estimation_client.IEstimationClient
 }
 
 const AddEntryKeyword = "add_entry"

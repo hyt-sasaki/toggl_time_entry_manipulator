@@ -24,7 +24,13 @@ type EstimationClient struct {
     firestoreCtx context.Context
 }
 
-func Init(serviceAccount option.ClientOption) (client *EstimationClient, err error) {
+type IEstimationClient interface {
+    Fetch([]int64) ([]Estimation, error)
+    Insert(string, Estimation) error
+    Close()
+}
+
+func NewEstimationClient(serviceAccount option.ClientOption) (client *EstimationClient, err error) {
     var firestoreClient *firestore.Client
     var firestoreCtx = context.Background()
 

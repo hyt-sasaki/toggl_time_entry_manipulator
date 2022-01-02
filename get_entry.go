@@ -9,7 +9,7 @@ import (
 )
 
 type GetEntryCommand struct {
-    firestoreClient *estimation_client.EstimationClient
+    firestoreClient estimation_client.IEstimationClient
 }
 
 const GetEntryKeyword = "get_entry"

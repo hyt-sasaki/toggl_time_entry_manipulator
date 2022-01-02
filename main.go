@@ -48,7 +48,7 @@ func main() {
 
     // firestore
     serviceAccount := option.WithCredentialsFile("credential/secret.json")
-    firestoreClient, err := estimation_client.Init(serviceAccount)
+    firestoreClient, err := estimation_client.NewEstimationClient(serviceAccount)
     if err != nil {
         log.Fatalln(err)
         os.Exit(1)
@@ -65,3 +65,4 @@ func main() {
 
     firestoreClient.Close()
 }
+
