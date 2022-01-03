@@ -1,19 +1,20 @@
 package main
 
 import (
-    "fmt"
-    "strings"
-    "encoding/json"
-    "strconv"
-    "time"
+	"encoding/json"
+	"fmt"
+	"strconv"
+	"strings"
 
-    "github.com/jason0x43/go-alfred"
+	"toggl_time_entry_manipulator/domain"
+	cacheRepo "toggl_time_entry_manipulator/repository/cache"
+
+	"github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
-    "toggl_time_entry_manipulator/estimation_client"
 )
 
 type AddEntryCommand struct {
-    firestoreClient estimation_client.IEstimationClient
+    repo *cacheRepo.CachedRepository
 }
 
 const AddEntryKeyword = "add_entry"
@@ -45,11 +46,6 @@ func (c AddEntryCommand) About() alfred.CommandDef {
 }
 
 func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
-    // fetch toggl info
-	if err = checkRefresh(); err != nil {
-		return
-	}
-
     // load from alfred variable
     var sd stateData
 
@@ -70,9 +66,19 @@ func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         case DescriptionEdit:
             items = append(items, generateDescriptionItems(sd.Args, arg)...)
         case ProjectEdit:
-            items = append(items, generateProjectItems(sd.Args, arg)...)
+            var projects []toggl.Project
+            projects, err = c.repo.GetProjects()
+            if err != nil {
+                return
+            }
+            items = append(items, generateProjectItems(sd.Args, arg, projects)...)
         case TagEdit:
-            items = append(items, generateTagItems(sd.Args, arg)...)
+            var tags []toggl.Tag
+            tags, err = c.repo.GetTags()
+            if err != nil {
+                return
+            }
+            items = append(items, generateTagItems(sd.Args, arg, tags)...)
         case TimeEstimationEdit:
             items = append(items, generateTimeEstimationItems(sd.Args, arg)...)
     }
@@ -84,7 +90,6 @@ func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error
 
 func (c AddEntryCommand) Do(data string) (out string, err error) {
     dlog.Printf("data is %s", data)
-	session := toggl.OpenSession(config.APIKey)
 
     var sd stateData
 	if data != "" {
@@ -95,34 +100,10 @@ func (c AddEntryCommand) Do(data string) (out string, err error) {
         dlog.Printf("data should not be empty")
     }
 
-    var time_entry toggl.TimeEntry
-    time_entry, err = session.StartTimeEntryForProject(sd.Args.Description, sd.Args.Project, false)
-    if err != nil {
-        dlog.Printf("Something wrong. %s", err)
-    }
-    if sd.Args.Tag != "" {
-        time_entry.Tags = []string{sd.Args.Tag}
-        _, err = session.UpdateTimeEntry(time_entry)
-        if err != nil {
-            dlog.Printf("Something wrong. %s", err)
-        }
-    }
+    entity := domain.Create(sd.Args.Description, sd.Args.Project, sd.Args.Tag, sd.Args.TimeEstimation)
 
-    timeEstimation := sd.Args.TimeEstimation
-    if timeEstimation != 0 {
-        dlog.Printf("TimeEstimation is %d", timeEstimation)
-
-        if err = c.firestoreClient.Insert(strconv.Itoa(time_entry.ID), estimation_client.Estimation{
-            Duration: timeEstimation,
-            Memo: "",
-            CreatedTm: time.Now(),
-            UpdatedTm: time.Now(),
-        }); err != nil {
-            dlog.Printf("Failed to add time entry estimation: %v", err)
-        }
-
-    } else {
-        dlog.Printf("TimeEstimation is not entered")
+    if err = c.repo.Insert(&entity); err != nil {
+        return
     }
 
     return
@@ -144,8 +125,7 @@ func generateDescriptionItems(args entryArgs, enteredDescription string) (items 
 }
 
 // project
-func generateProjectItems(args entryArgs, enteredArg string) (items []alfred.Item) {
-    projects := cache.Account.Data.Projects
+func generateProjectItems(args entryArgs, enteredArg string, projects []toggl.Project) (items []alfred.Item) {
     for _, project := range projects {
         if enteredArg != "" {
             if !strings.Contains(project.Name, enteredArg) {
@@ -180,8 +160,7 @@ func generateArgsOfProjectItem(args entryArgs, project toggl.Project) (out entry
 }
 
 // tag
-func generateTagItems(args entryArgs, enteredArg string) (items []alfred.Item) {
-    tags := cache.Account.Data.Tags
+func generateTagItems(args entryArgs, enteredArg string, tags []toggl.Tag) (items []alfred.Item) {
 
     if enteredArg == "" {
         noTagItem := alfred.Item{

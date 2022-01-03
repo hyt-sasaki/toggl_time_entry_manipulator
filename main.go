@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
     "google.golang.org/api/option"
 
 
@@ -13,11 +12,6 @@ import (
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator]", log.LstdFlags)
-
-var configFile string
-var cacheFile string
-var config Config
-var cache Cache
 
 func main() {
     var workflow alfred.Workflow
@@ -30,22 +24,6 @@ func main() {
     dlog.Printf("cache file dir: %s", workflow.CacheDir())
     dlog.Printf("config file dir: %s", workflow.DataDir())
 
-	configFile = path.Join(workflow.DataDir(), "config.json")
-	if err := alfred.LoadJSON(configFile, &config); err != nil {
-		dlog.Println("Error loading config:", err)
-	}
-
-    if config.APIKey == "" {
-        fmt.Printf("APIKey is empty. Please write TOGGL_API_KEY to %s", configFile)
-        os.Exit(1)
-    }
-    dlog.Printf("APIKey : %s", config.APIKey)
-
-	cacheFile = path.Join(workflow.CacheDir(), "cache.json")
-	if err := alfred.LoadJSON(cacheFile, &cache); err != nil {
-		dlog.Println("Error loading cache:", err)
-	}
-
     // firestore
     serviceAccount := option.WithCredentialsFile("credential/secret.json")
     firestoreClient, err := estimation_client.NewEstimationClient(serviceAccount)
@@ -54,12 +32,19 @@ func main() {
         os.Exit(1)
     }
 
+    repo, err := initializeRepository(workflow, serviceAccount)
+    if err != nil {
+        log.Fatalln(err)
+        os.Exit(1)
+    }
+    dlog.Print("repo!!")
+    dlog.Print(repo)
     workflow.Run([]alfred.Command{
         AddEntryCommand{
-            firestoreClient: firestoreClient,
+            repo: repo,
         },
         GetEntryCommand{
-            firestoreClient: firestoreClient,
+            repo: repo,
         },
     })
 

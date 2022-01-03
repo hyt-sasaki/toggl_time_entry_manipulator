@@ -2,6 +2,7 @@ package domain
 
 
 import (
+    "time"
     "strconv"
     "github.com/jason0x43/go-toggl"
     "toggl_time_entry_manipulator/estimation_client"
@@ -25,6 +26,8 @@ func Create(description string, pid int, tag string, duration int) (entity TimeE
         },
         Estimation: estimation_client.Estimation{
             Duration: duration,
+            CreatedTm: time.Now(),
+            UpdatedTm: time.Now(),
         },
     }
 }

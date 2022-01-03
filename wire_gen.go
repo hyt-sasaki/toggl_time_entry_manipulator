@@ -11,29 +11,29 @@ import (
 	"google.golang.org/api/option"
 	"toggl_time_entry_manipulator/estimation_client"
 	"toggl_time_entry_manipulator/repository"
-	cache2 "toggl_time_entry_manipulator/repository/cache"
+	"toggl_time_entry_manipulator/repository/cache"
 )
 
 // Injectors from wire.go:
 
-func initializeRepository(workflow alfred.Workflow, serviceAccount option.ClientOption) (*cache2.CachedRepository, error) {
-	cacheCacheFile := NewCacheFile(workflow)
-	cacheCache, err := NewCache(cacheCacheFile)
+func initializeRepository(workflow alfred.Workflow, serviceAccount option.ClientOption) (*cache.CachedRepository, error) {
+	cacheFile := NewCacheFile(workflow)
+	cacheCache, err := NewCache(cacheFile)
 	if err != nil {
 		return nil, err
 	}
-	repositoryConfigFile := NewConfigFile(workflow)
-	repositoryConfig, err := NewConfig(repositoryConfigFile)
+	configFile := NewConfigFile(workflow)
+	config, err := NewConfig(configFile)
 	if err != nil {
 		return nil, err
 	}
-	togglApiKey := repositoryConfig.TogglAPIKey
+	togglApiKey := config.TogglAPIKey
 	togglClient := estimation_client.NewTogglClient(togglApiKey)
 	estimationClient, err := estimation_client.NewEstimationClient(serviceAccount)
 	if err != nil {
 		return nil, err
 	}
-	timeEntryRepository := repository.NewTimeEntryRepository(repositoryConfig, togglClient, estimationClient)
-	cachedRepository := cache2.NewCachedRepository(cacheCache, cacheCacheFile, timeEntryRepository)
+	timeEntryRepository := repository.NewTimeEntryRepository(config, togglClient, estimationClient)
+	cachedRepository := cache.NewCachedRepository(cacheCache, timeEntryRepository)
 	return cachedRepository, nil
 }

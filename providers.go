@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
 	"path"
 	"github.com/jason0x43/go-alfred"
     "toggl_time_entry_manipulator/repository"
@@ -16,9 +17,15 @@ func NewConfigFile(workflow alfred.Workflow) repository.ConfigFile {
 }
 
 func NewConfig(configFile repository.ConfigFile) (config *repository.Config, err error) {
-	if err := alfred.LoadJSON(string(configFile), &config); err != nil {
+	if err = alfred.LoadJSON(string(configFile), &config); err != nil {
 		dlog.Println("Error loading config:", err)
+        return
 	}
+    if config.TogglAPIKey == "" {
+        dlog.Printf("APIKey is empty. Please write TOGGL_API_KEY to %s", configFile)
+        err = fmt.Errorf("APIKey is empty. Please write TOGGL_API_KEY to %s", configFile)
+        return
+    }
 
     return 
 }
@@ -29,10 +36,16 @@ func NewCacheFile(workflow alfred.Workflow) cacheRepo.CacheFile {
 }
 
 func NewCache(cacheFile cacheRepo.CacheFile) (cache *cacheRepo.Cache, err error) {
-	if err = alfred.LoadJSON(string(cacheFile), &cache); err != nil {
+    var data *cacheRepo.Data
+	if err = alfred.LoadJSON(string(cacheFile), &data); err != nil {
 		dlog.Println("Error loading cache:", err)
         return
 	}
+    cache = &cacheRepo.Cache{
+        Data: data,
+        File: cacheFile,
+    }
+    dlog.Println(cache)
 
     return
 }

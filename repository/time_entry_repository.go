@@ -19,7 +19,7 @@ type ConfigFile string
 type ITimeEntryRepository interface {
     Fetch(toggl.Account) ([]domain.TimeEntryEntity, error)
     FetchTogglAccount() (toggl.Account, error)
-    Insert(domain.TimeEntryEntity) error
+    Insert(*domain.TimeEntryEntity) error
 }
 
 type TimeEntryRepository struct {
