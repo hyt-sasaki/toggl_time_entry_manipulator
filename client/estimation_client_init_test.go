@@ -1,4 +1,4 @@
-package estimation_client
+package client
 
 import (
     "testing"
@@ -10,7 +10,7 @@ func TestInit(t *testing.T) {
     // given
     serviceAccount := option.WithCredentialsFile("../credential/secret.json")
     // when
-    estimationClient, _ := Init(serviceAccount)
+    estimationClient, _ := NewEstimationClient(serviceAccount)
     // then
     assert.NotNil(t, estimationClient.firestoreClient)
     assert.NotNil(t, estimationClient.firestoreCtx)

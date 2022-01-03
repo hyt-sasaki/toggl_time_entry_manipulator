@@ -4,19 +4,14 @@ import (
     "fmt"
     "strconv"
     "github.com/jason0x43/go-alfred"
-    "github.com/jason0x43/go-toggl"
-    "toggl_time_entry_manipulator/estimation_client"
+    "toggl_time_entry_manipulator/repository"
 )
 
 type GetEntryCommand struct {
-    firestoreClient *estimation_client.EstimationClient
+    repo *repository.CachedRepository
 }
 
 const GetEntryKeyword = "get_entry"
-type EntryWithEstimation struct {
-    Entry toggl.TimeEntry
-    Estimation estimation_client.Estimation
-}
 
 func (c GetEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{
@@ -28,11 +23,11 @@ func (c GetEntryCommand) About() alfred.CommandDef {
 
 func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
     dlog.Printf("Items")
-    entryWithEstimations, err := c.getEntries()
-    for _, entryWithEstimation := range entryWithEstimations {
+    entities, err := c.repo.Fetch()
+    for _, entity := range entities {
         item := alfred.Item{
-            Title: fmt.Sprintf("Description: %s", entryWithEstimation.Entry.Description),
-            Subtitle: fmt.Sprintf("actual duration: %s, estimation: %d", convertDuration(entryWithEstimation.Entry.Duration), entryWithEstimation.Estimation.Duration),
+            Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
+            Subtitle: fmt.Sprintf("actual duration: %s, estimation: %d", convertDuration(entity.Entry.Duration), entity.Estimation.Duration),
             Arg: &alfred.ItemArg{
                 Keyword: GetEntryKeyword,
                 Mode: alfred.ModeTell,
@@ -41,30 +36,6 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         items = append(items, item)
     }
     return
-}
-
-func (c GetEntryCommand) getEntries() (entryWithEstimations []EntryWithEstimation, err error){
-    // fetch toggl info
-	if err = checkRefresh(); err != nil {
-		return
-	}
-    dlog.Printf("getEntries")
-    entries := cache.Account.Data.TimeEntries
-    dlog.Println(entries)
-    var entryIds []int64
-    for _, entry := range entries {
-        entryIds = append(entryIds, int64(entry.ID))
-    }
-    estimations, err := c.firestoreClient.Fetch(entryIds)
-    dlog.Printf("estimations")
-    for idx, estimation := range estimations {
-        entryWithEstimations = append(entryWithEstimations, EntryWithEstimation{
-            Entry: entries[idx],
-            Estimation: estimation,
-        })
-    }
-    
-    return 
 }
 
 func convertDuration(duration int64) string {

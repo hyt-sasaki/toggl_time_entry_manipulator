@@ -5,6 +5,7 @@ go 1.17
 require (
 	cloud.google.com/go/firestore v1.6.1
 	firebase.google.com/go v3.13.0+incompatible
+	github.com/google/wire v0.5.0
 	github.com/jason0x43/go-alfred v0.0.0-20211113201834-ddd6850b79bb
 	github.com/jason0x43/go-toggl v0.0.0-20210518224841-9af0e37bf5f1
 	github.com/stretchr/testify v1.6.1
@@ -27,6 +28,7 @@ require (
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/objx v0.1.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
