@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
 	"path"
+	"google.golang.org/api/option"
 	"github.com/jason0x43/go-alfred"
     "toggl_time_entry_manipulator/repository"
     "toggl_time_entry_manipulator/repository/myCache"
@@ -10,6 +11,11 @@ import (
 
 const configFileName = "config.json"
 const cacheFileName = "cache.json"
+
+func NewServiceAccount() (serviceAccount option.ClientOption) {
+    serviceAccount = option.WithCredentialsFile("credential/secret.json")
+    return
+}
 
 func NewConfigFile(workflow alfred.Workflow) repository.ConfigFile {
     configFile := path.Join(workflow.DataDir(), configFileName)

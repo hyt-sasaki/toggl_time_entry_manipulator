@@ -1,4 +1,4 @@
-package main
+package command
 
 import (
     "fmt"
@@ -8,7 +8,7 @@ import (
 )
 
 type GetEntryCommand struct {
-    repo *repository.CachedRepository
+    Repo *repository.CachedRepository
 }
 
 const GetEntryKeyword = "get_entry"
@@ -23,7 +23,7 @@ func (c GetEntryCommand) About() alfred.CommandDef {
 
 func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
     dlog.Printf("Items")
-    entities, err := c.repo.Fetch()
+    entities, err := c.Repo.Fetch()
     for _, entity := range entities {
         item := alfred.Item{
             Title: fmt.Sprintf("Description: %s", entity.Entry.Description),

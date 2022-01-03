@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-    "google.golang.org/api/option"
 
 	"github.com/jason0x43/go-alfred"
+    "toggl_time_entry_manipulator/command"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator]", log.LstdFlags)
@@ -23,20 +23,18 @@ func main() {
     dlog.Printf("config file dir: %s", workflow.DataDir())
 
     // firestore
-    serviceAccount := option.WithCredentialsFile("credential/secret.json")
-
-    repo, err := initializeRepository(workflow, serviceAccount)
+    repo, err := initializeRepository(workflow)
     if err != nil {
         log.Fatalln(err)
         os.Exit(1)
     }
 
     workflow.Run([]alfred.Command{
-        AddEntryCommand{
-            repo: repo,
+        command.AddEntryCommand{
+            Repo: repo,
         },
-        GetEntryCommand{
-            repo: repo,
+        command.GetEntryCommand{
+            Repo: repo,
         },
     })
 }

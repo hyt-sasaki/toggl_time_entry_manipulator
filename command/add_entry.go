@@ -1,8 +1,10 @@
-package main
+package command
 
 import (
 	"encoding/json"
 	"fmt"
+    "log"
+    "os"
 	"strconv"
 	"strings"
 
@@ -13,8 +15,10 @@ import (
 	"github.com/jason0x43/go-toggl"
 )
 
+var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command]", log.LstdFlags)
+
 type AddEntryCommand struct {
-    repo *repository.CachedRepository
+    Repo *repository.CachedRepository
 }
 
 const AddEntryKeyword = "add_entry"
@@ -67,14 +71,14 @@ func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error
             items = append(items, generateDescriptionItems(sd.Args, arg)...)
         case ProjectEdit:
             var projects []toggl.Project
-            projects, err = c.repo.GetProjects()
+            projects, err = c.Repo.GetProjects()
             if err != nil {
                 return
             }
             items = append(items, generateProjectItems(sd.Args, arg, projects)...)
         case TagEdit:
             var tags []toggl.Tag
-            tags, err = c.repo.GetTags()
+            tags, err = c.Repo.GetTags()
             if err != nil {
                 return
             }
@@ -102,7 +106,7 @@ func (c AddEntryCommand) Do(data string) (out string, err error) {
 
     entity := domain.Create(sd.Args.Description, sd.Args.Project, sd.Args.Tag, sd.Args.TimeEstimation)
 
-    if err = c.repo.Insert(&entity); err != nil {
+    if err = c.Repo.Insert(&entity); err != nil {
         return
     }
 

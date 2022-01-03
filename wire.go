@@ -8,11 +8,11 @@ import (
     "toggl_time_entry_manipulator/client"
     "toggl_time_entry_manipulator/repository"
     "toggl_time_entry_manipulator/repository/myCache"
-	"google.golang.org/api/option"
 )
 
-func initializeRepository(workflow alfred.Workflow, serviceAccount option.ClientOption) (repo *repository.CachedRepository, err error) {
+func initializeRepository(workflow alfred.Workflow) (repo *repository.CachedRepository, err error) {
     wire.Build(
+        NewServiceAccount,
         NewCacheFile,
         NewCache,
         NewConfigFile,

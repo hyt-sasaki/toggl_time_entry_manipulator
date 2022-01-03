@@ -8,14 +8,13 @@ package main
 
 import (
 	"github.com/jason0x43/go-alfred"
-	"google.golang.org/api/option"
 	"toggl_time_entry_manipulator/client"
 	"toggl_time_entry_manipulator/repository"
 )
 
 // Injectors from wire.go:
 
-func initializeRepository(workflow alfred.Workflow, serviceAccount option.ClientOption) (*repository.CachedRepository, error) {
+func initializeRepository(workflow alfred.Workflow) (*repository.CachedRepository, error) {
 	cacheFile := NewCacheFile(workflow)
 	cache, err := NewCache(cacheFile)
 	if err != nil {
@@ -28,7 +27,8 @@ func initializeRepository(workflow alfred.Workflow, serviceAccount option.Client
 	}
 	togglApiKey := config.TogglAPIKey
 	togglClient := client.NewTogglClient(togglApiKey)
-	estimationClient, err := client.NewEstimationClient(serviceAccount)
+	clientOption := NewServiceAccount()
+	estimationClient, err := client.NewEstimationClient(clientOption)
 	if err != nil {
 		return nil, err
 	}
