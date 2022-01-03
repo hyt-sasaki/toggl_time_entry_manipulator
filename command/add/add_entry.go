@@ -62,7 +62,6 @@ func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error
             Current: DescriptionEdit,
         }
     }
-    dlog.Printf("sd data is %s", data)
 
 
     // generate items
@@ -93,8 +92,6 @@ func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error
 
 
 func (c AddEntryCommand) Do(data string) (out string, err error) {
-    dlog.Printf("data is %s", data)
-
     var sd stateData
 	if data != "" {
 		if err := json.Unmarshal([]byte(data), &sd); err != nil {
@@ -225,7 +222,7 @@ func generateTimeEstimationItems(args entryArgs, enteredEstimationStr string) (i
     }
 
     item := alfred.Item{
-        Title: fmt.Sprintf("Time estimatune [min]: %d", estimationTime),
+        Title: fmt.Sprintf("Time estimation [min]: %d", estimationTime),
         Subtitle: "Enter time estimation for your time entry (default: 30 min)",
         Arg: &alfred.ItemArg{
             Keyword: AddEntryKeyword,
