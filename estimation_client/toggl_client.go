@@ -10,7 +10,7 @@ type TogglClient struct {
 }
 type ITogglClient interface {
     GetAccount() (toggl.Account, error)
-    StartTimeEntry(string, int, []string) error
+    StartTimeEntry(string, int, []string) (toggl.TimeEntry, error)
 }
 
 func NewTogglClient(apiKey TogglApiKey) (*TogglClient) {
@@ -28,10 +28,10 @@ func (c *TogglClient) GetAccount() (account toggl.Account, err error) {
     return
 }
 
-func (c *TogglClient) StartTimeEntry(description string, pid int, tags []string) (err error) {
+func (c *TogglClient) StartTimeEntry(description string, pid int, tags []string) (entry toggl.TimeEntry, err error) {
     s := c.getSession()
 
-    entry, err := s.StartTimeEntryForProject(description, pid, false)
+    entry, err = s.StartTimeEntryForProject(description, pid, false)
     if err != nil {
         return
     }

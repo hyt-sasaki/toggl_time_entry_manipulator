@@ -8,7 +8,6 @@ import (
 )
 
 type TimeEntryEntity struct {
-    id int
     Entry toggl.TimeEntry
     Estimation estimation_client.Estimation
 }
@@ -28,4 +27,8 @@ func Create(description string, pid int, tag string, duration int) (entity TimeE
             Duration: duration,
         },
     }
+}
+
+func (entity *TimeEntryEntity) UpdateTimeEntry(timeEntry toggl.TimeEntry) {
+    entity.Entry = timeEntry
 }

@@ -23,4 +23,5 @@ go.work
 # my settings
 cmd/
 credential/
+wire_gen.go
 toggl_time_entry_manipulator

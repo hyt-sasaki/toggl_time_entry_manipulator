@@ -64,8 +64,9 @@ func (repo *TimeEntryRepository) Fetch(account toggl.Account) (entities []domain
     return
 }
 
-func (repo *TimeEntryRepository) Insert(entity domain.TimeEntryEntity) (err error) {
-    repo.togglClient.StartTimeEntry(entity.Entry.Description, entity.Entry.Pid, entity.Entry.Tags)
+func (repo *TimeEntryRepository) Insert(entity *domain.TimeEntryEntity) (err error) {
+    entry, err := repo.togglClient.StartTimeEntry(entity.Entry.Description, entity.Entry.Pid, entity.Entry.Tags)
+    entity.UpdateTimeEntry(entry)
 
     if err = repo.estimationClient.Insert(entity.GetId(), entity.Estimation); err != nil {
         return

@@ -14,7 +14,7 @@ func (m *MockedEstimationClient) Fetch(entryIds []int64) ([]Estimation, error) {
     return args.Get(0).([]Estimation), args.Error(1)
 }
 
-func (m *MockedEstimationClient) Insert(id string, estimation Estimation) (err error) {
+func (m *MockedEstimationClient) Insert(id string, estimation Estimation) (error) {
     args := m.Called(id, estimation)
     return args.Error(0)
 }
@@ -27,13 +27,13 @@ type MockedToggleClient struct {
     mock.Mock
 }
 
-func (m *MockedToggleClient) GetAccount() (account toggl.Account, err error) {
+func (m *MockedToggleClient) GetAccount() (toggl.Account, error) {
     args := m.Called()
     return args.Get(0).(toggl.Account), args.Error(1)
 }
 
-func (m *MockedToggleClient) StartTimeEntry(description string, pid int, tags []string) (err error) {
+func (m *MockedToggleClient) StartTimeEntry(description string, pid int, tags []string) (toggl.TimeEntry, error) {
     args := m.Called(description, pid, tags)
-    return args.Error(0)
+    return args.Get(0).(toggl.TimeEntry), args.Error(1)
 }
 
