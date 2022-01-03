@@ -6,7 +6,8 @@ import (
 	"os"
 
 	"github.com/jason0x43/go-alfred"
-    "toggl_time_entry_manipulator/command"
+    "toggl_time_entry_manipulator/command/add"
+    "toggl_time_entry_manipulator/command/get"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator]", log.LstdFlags)
@@ -30,10 +31,10 @@ func main() {
     }
 
     workflow.Run([]alfred.Command{
-        command.AddEntryCommand{
+        add.AddEntryCommand{
             Repo: repo,
         },
-        command.GetEntryCommand{
+        get.GetEntryCommand{
             Repo: repo,
         },
     })

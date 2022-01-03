@@ -1,4 +1,4 @@
-package command
+package add
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ import (
 	"github.com/jason0x43/go-toggl"
 )
 
-var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command]", log.LstdFlags)
+var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.add]", log.LstdFlags)
 
 type AddEntryCommand struct {
     Repo *repository.CachedRepository

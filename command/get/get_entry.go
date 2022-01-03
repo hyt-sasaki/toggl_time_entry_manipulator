@@ -1,11 +1,15 @@
-package command
+package get
 
 import (
     "fmt"
+    "log"
+    "os"
     "strconv"
     "github.com/jason0x43/go-alfred"
     "toggl_time_entry_manipulator/repository"
 )
+
+var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.add]", log.LstdFlags)
 
 type GetEntryCommand struct {
     Repo *repository.CachedRepository
