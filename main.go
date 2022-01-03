@@ -6,9 +6,7 @@ import (
 	"os"
     "google.golang.org/api/option"
 
-
 	"github.com/jason0x43/go-alfred"
-    "toggl_time_entry_manipulator/estimation_client"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator]", log.LstdFlags)
@@ -26,19 +24,13 @@ func main() {
 
     // firestore
     serviceAccount := option.WithCredentialsFile("credential/secret.json")
-    firestoreClient, err := estimation_client.NewEstimationClient(serviceAccount)
-    if err != nil {
-        log.Fatalln(err)
-        os.Exit(1)
-    }
 
     repo, err := initializeRepository(workflow, serviceAccount)
     if err != nil {
         log.Fatalln(err)
         os.Exit(1)
     }
-    dlog.Print("repo!!")
-    dlog.Print(repo)
+
     workflow.Run([]alfred.Command{
         AddEntryCommand{
             repo: repo,
@@ -47,7 +39,5 @@ func main() {
             repo: repo,
         },
     })
-
-    firestoreClient.Close()
 }
 

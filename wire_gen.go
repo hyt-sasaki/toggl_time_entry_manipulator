@@ -9,7 +9,7 @@ package main
 import (
 	"github.com/jason0x43/go-alfred"
 	"google.golang.org/api/option"
-	"toggl_time_entry_manipulator/estimation_client"
+	"toggl_time_entry_manipulator/client"
 	"toggl_time_entry_manipulator/repository"
 )
 
@@ -27,8 +27,8 @@ func initializeRepository(workflow alfred.Workflow, serviceAccount option.Client
 		return nil, err
 	}
 	togglApiKey := config.TogglAPIKey
-	togglClient := estimation_client.NewTogglClient(togglApiKey)
-	estimationClient, err := estimation_client.NewEstimationClient(serviceAccount)
+	togglClient := client.NewTogglClient(togglApiKey)
+	estimationClient, err := client.NewEstimationClient(serviceAccount)
 	if err != nil {
 		return nil, err
 	}

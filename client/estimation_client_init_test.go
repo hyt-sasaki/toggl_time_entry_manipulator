@@ -1,4 +1,4 @@
-package estimation_client
+package client
 
 import (
     "testing"

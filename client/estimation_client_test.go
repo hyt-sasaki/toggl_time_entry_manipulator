@@ -1,4 +1,4 @@
-package estimation_client
+package client
 
 
 import (
@@ -8,6 +8,7 @@ import (
     "context"
 	"cloud.google.com/go/firestore"
     "github.com/stretchr/testify/assert"
+    "toggl_time_entry_manipulator/domain"
 )
 
 var estimationClient *EstimationClient
@@ -18,7 +19,7 @@ func TestMain(m *testing.M) {
         os.Exit(1)
     }
     estimationClient = initTestClient()
-    estimationClient.Insert("1", Estimation{
+    estimationClient.Insert("1", domain.Estimation{
         Duration: 30,
         Memo: "memo",
     })

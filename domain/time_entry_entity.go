@@ -5,12 +5,17 @@ import (
     "time"
     "strconv"
     "github.com/jason0x43/go-toggl"
-    "toggl_time_entry_manipulator/estimation_client"
 )
 
 type TimeEntryEntity struct {
     Entry toggl.TimeEntry
-    Estimation estimation_client.Estimation
+    Estimation Estimation
+}
+type Estimation struct {
+    Duration int        `firestore:"duration"`
+    Memo string         `firestore:"memo"`
+    CreatedTm time.Time `firestore:"createdTm"`
+    UpdatedTm time.Time `firestore:"updatedTm"`
 }
 
 func (entity TimeEntryEntity) GetId() string {
@@ -24,7 +29,7 @@ func Create(description string, pid int, tag string, duration int) (entity TimeE
             Description: description,
             Tags: []string{tag},
         },
-        Estimation: estimation_client.Estimation{
+        Estimation: Estimation{
             Duration: duration,
             CreatedTm: time.Now(),
             UpdatedTm: time.Now(),
