@@ -11,14 +11,13 @@ import (
 	"google.golang.org/api/option"
 	"toggl_time_entry_manipulator/estimation_client"
 	"toggl_time_entry_manipulator/repository"
-	"toggl_time_entry_manipulator/repository/cache"
 )
 
 // Injectors from wire.go:
 
-func initializeRepository(workflow alfred.Workflow, serviceAccount option.ClientOption) (*cache.CachedRepository, error) {
+func initializeRepository(workflow alfred.Workflow, serviceAccount option.ClientOption) (*repository.CachedRepository, error) {
 	cacheFile := NewCacheFile(workflow)
-	cacheCache, err := NewCache(cacheFile)
+	cache, err := NewCache(cacheFile)
 	if err != nil {
 		return nil, err
 	}
@@ -34,6 +33,6 @@ func initializeRepository(workflow alfred.Workflow, serviceAccount option.Client
 		return nil, err
 	}
 	timeEntryRepository := repository.NewTimeEntryRepository(config, togglClient, estimationClient)
-	cachedRepository := cache.NewCachedRepository(cacheCache, timeEntryRepository)
+	cachedRepository := repository.NewCachedRepository(cache, timeEntryRepository)
 	return cachedRepository, nil
 }

@@ -7,14 +7,14 @@ import (
 	"strings"
 
 	"toggl_time_entry_manipulator/domain"
-	cacheRepo "toggl_time_entry_manipulator/repository/cache"
+	"toggl_time_entry_manipulator/repository"
 
 	"github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
 )
 
 type AddEntryCommand struct {
-    repo *cacheRepo.CachedRepository
+    repo *repository.CachedRepository
 }
 
 const AddEntryKeyword = "add_entry"

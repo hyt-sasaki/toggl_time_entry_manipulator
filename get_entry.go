@@ -4,11 +4,11 @@ import (
     "fmt"
     "strconv"
     "github.com/jason0x43/go-alfred"
-    cacheRepo "toggl_time_entry_manipulator/repository/cache"
+    "toggl_time_entry_manipulator/repository"
 )
 
 type GetEntryCommand struct {
-    repo *cacheRepo.CachedRepository
+    repo *repository.CachedRepository
 }
 
 const GetEntryKeyword = "get_entry"

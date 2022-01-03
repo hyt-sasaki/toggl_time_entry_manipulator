@@ -7,11 +7,11 @@ import (
     "github.com/google/wire"
     "toggl_time_entry_manipulator/estimation_client"
     "toggl_time_entry_manipulator/repository"
-    cacheRepo "toggl_time_entry_manipulator/repository/cache"
+    "toggl_time_entry_manipulator/repository/myCache"
 	"google.golang.org/api/option"
 )
 
-func initializeRepository(workflow alfred.Workflow, serviceAccount option.ClientOption) (repo *cacheRepo.CachedRepository, err error) {
+func initializeRepository(workflow alfred.Workflow, serviceAccount option.ClientOption) (repo *repository.CachedRepository, err error) {
     wire.Build(
         NewCacheFile,
         NewCache,
@@ -20,10 +20,11 @@ func initializeRepository(workflow alfred.Workflow, serviceAccount option.Client
         estimation_client.NewEstimationClient,
         estimation_client.NewTogglClient,
         repository.NewTimeEntryRepository,
-        cacheRepo.NewCachedRepository,
+        repository.NewCachedRepository,
         wire.FieldsOf(new(*repository.Config), "TogglAPIKey"),
         wire.Bind(new(estimation_client.ITogglClient), new(*estimation_client.TogglClient)),
         wire.Bind(new(estimation_client.IEstimationClient), new(*estimation_client.EstimationClient)),
+        wire.Bind(new(myCache.ICache), new(*myCache.Cache)),
     )
-    return &cacheRepo.CachedRepository{}, nil
+    return &repository.CachedRepository{}, nil
 }
