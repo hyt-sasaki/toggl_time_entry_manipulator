@@ -14,6 +14,13 @@ type CachedRepository struct {
     timeEntryRepository *TimeEntryRepository
 }
 
+type ICachedRepository interface {
+    Fetch() ([]domain.TimeEntryEntity, error)
+    GetProjects() ([]toggl.Project, error)
+    GetTags() ([]toggl.Tag, error)
+    Insert(*domain.TimeEntryEntity) (error)
+}
+
 func NewCachedRepository(
     cache myCache.ICache,
     timeEntryRepository *TimeEntryRepository) (repo *CachedRepository) {

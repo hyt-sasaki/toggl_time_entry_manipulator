@@ -12,7 +12,7 @@ import (
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.add]", log.LstdFlags)
 
 type GetEntryCommand struct {
-    Repo *repository.CachedRepository
+    Repo repository.ICachedRepository
 }
 
 const GetEntryKeyword = "get_entry"

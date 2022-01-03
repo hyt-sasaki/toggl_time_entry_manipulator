@@ -3,7 +3,7 @@ package repository
 import (
 	"testing"
 	"toggl_time_entry_manipulator/domain"
-	"toggl_time_entry_manipulator/estimation_client"
+	"toggl_time_entry_manipulator/client"
 
 	"github.com/jason0x43/go-toggl"
 	"github.com/stretchr/testify/assert"
@@ -12,8 +12,8 @@ import (
 
 type RepositoryTestSuite struct {
     suite.Suite
-    mockedToggleClient *estimation_client.MockedToggleClient
-    mockedEstimationClient *estimation_client.MockedEstimationClient
+    mockedToggleClient *client.MockedToggleClient
+    mockedEstimationClient *client.MockedEstimationClient
     repo *TimeEntryRepository
 }
 
@@ -22,8 +22,8 @@ func TestSuite(t *testing.T) {
 }
 
 func (suite *RepositoryTestSuite) SetupTest() {
-    suite.mockedEstimationClient = &estimation_client.MockedEstimationClient{}
-    suite.mockedToggleClient = &estimation_client.MockedToggleClient{}
+    suite.mockedEstimationClient = &client.MockedEstimationClient{}
+    suite.mockedToggleClient = &client.MockedToggleClient{}
     suite.repo = &TimeEntryRepository{
         config: &Config{
             TogglAPIKey: "test",
@@ -68,7 +68,7 @@ func (suite *RepositoryTestSuite) TestFetch() {
         { ID: 1, }, 
         { ID: 2, },
     }
-    mockedEstimations := []estimation_client.Estimation{
+    mockedEstimations := []domain.Estimation{
         { Duration: 30, Memo: "memo1", },
         { Duration: 40, Memo: "memo2", },
     }
