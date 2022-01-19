@@ -8,6 +8,7 @@ import (
 	"strings"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
+    "toggl_time_entry_manipulator/command/get"
 
 	"github.com/jason0x43/go-alfred"
 )
@@ -38,7 +39,7 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
             Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
             Subtitle: fmt.Sprintf("actual duration: %s, estimation: %d", convertDuration(entity.Entry.Duration), entity.Estimation.Duration),
             Arg: &alfred.ItemArg{
-                Keyword: ListEntryKeyword,
+                Keyword: get.GetEntryKeyword,
                 Mode: alfred.ModeTell,
             },
         }
