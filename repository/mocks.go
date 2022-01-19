@@ -16,6 +16,11 @@ func (m *MockedCachedRepository) Fetch() ([]domain.TimeEntryEntity, error) {
     return args.Get(0).([]domain.TimeEntryEntity), args.Error(1)
 }
 
+func (m *MockedCachedRepository) FindOneById(entryId int) (domain.TimeEntryEntity, error) {
+    args := m.Called()
+    return args.Get(0).(domain.TimeEntryEntity), args.Error(1)
+}
+
 func (m *MockedCachedRepository) GetProjects() ([]toggl.Project, error) {
     args := m.Called()
     return args.Get(0).([]toggl.Project), args.Error(1)

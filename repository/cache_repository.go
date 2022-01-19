@@ -1,6 +1,7 @@
 package repository
 
 import (
+    "fmt"
 	"time"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository/myCache"
@@ -16,6 +17,7 @@ type CachedRepository struct {
 
 type ICachedRepository interface {
     Fetch() ([]domain.TimeEntryEntity, error)
+    FindOneById(int) (domain.TimeEntryEntity, error)
     GetProjects() ([]toggl.Project, error)
     GetTags() ([]toggl.Tag, error)
     Insert(*domain.TimeEntryEntity) (error)
@@ -36,6 +38,25 @@ func (c *CachedRepository) Fetch() (entities []domain.TimeEntryEntity, err error
 		return
 	}
     entities = c.cache.GetData().Entities
+    return
+}
+
+// TODO test, mock追加
+func (c *CachedRepository) FindOneById(entryId int) (entity domain.TimeEntryEntity, err error) {
+	if err = c.checkRefresh(); err != nil {
+		return
+	}
+    entities := c.cache.GetData().Entities
+    
+    for _, e := range entities {
+        if e.Entry.ID == entryId {
+            entity = e
+            return
+        }
+    }
+
+    err = fmt.Errorf("Resource not found: %d", entryId)
+
     return
 }
 
