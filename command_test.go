@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"toggl_time_entry_manipulator/command/add"
-	"toggl_time_entry_manipulator/command/get"
+	"toggl_time_entry_manipulator/command/list"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
 )
@@ -160,24 +160,24 @@ func (suite *AddEntryTestSuite) TestDo() {
 }
 
 
-type GetEntryTestSuite struct {
+type ListEntryTestSuite struct {
     suite.Suite
     mockedRepo *repository.MockedCachedRepository
-    com *get.GetEntryCommand
+    com *list.ListEntryCommand
 }
 
-func TestGetEntryTestSuite(t *testing.T) {
-    suite.Run(t, new(GetEntryTestSuite))
+func testListEntryTestSuite(t *testing.T) {
+    suite.Run(t, new(ListEntryTestSuite))
 }
 
-func (suite *GetEntryTestSuite) SetupTest() {
+func (suite *ListEntryTestSuite) SetupTest() {
     suite.mockedRepo = &repository.MockedCachedRepository{}
-    suite.com = &get.GetEntryCommand{
+    suite.com = &list.ListEntryCommand{
         Repo: suite.mockedRepo,
     }
 }
 
-func (suite *GetEntryTestSuite) TestItems() {
+func (suite *ListEntryTestSuite) TestItems() {
     // given
     arg := "2"
     dataStr := ""

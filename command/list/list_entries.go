@@ -1,4 +1,4 @@
-package get
+package list
 
 import (
 	"fmt"
@@ -12,23 +12,23 @@ import (
 	"github.com/jason0x43/go-alfred"
 )
 
-var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.add]", log.LstdFlags)
+var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.list]", log.LstdFlags)
 
-type GetEntryCommand struct {
+type ListEntryCommand struct {
     Repo repository.ICachedRepository
 }
 
-const GetEntryKeyword = "get_entry"
+const ListEntryKeyword = "list_entries"
 
-func (c GetEntryCommand) About() alfred.CommandDef {
+func (c ListEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{
-        Keyword: GetEntryKeyword,
+        Keyword: ListEntryKeyword,
         Description: "get entries",
         IsEnabled: true,
     }
 }
 
-func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
+func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
     entities, err := c.Repo.Fetch()
     for _, entity := range entities {
         if !filterByArg(arg, entity) {
@@ -38,7 +38,7 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
             Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
             Subtitle: fmt.Sprintf("actual duration: %s, estimation: %d", convertDuration(entity.Entry.Duration), entity.Estimation.Duration),
             Arg: &alfred.ItemArg{
-                Keyword: GetEntryKeyword,
+                Keyword: ListEntryKeyword,
                 Mode: alfred.ModeTell,
             },
         }
