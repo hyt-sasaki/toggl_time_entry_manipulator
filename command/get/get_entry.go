@@ -1,12 +1,15 @@
 package get
 
 import (
-    "fmt"
-    "log"
-    "os"
-    "strconv"
-    "github.com/jason0x43/go-alfred"
-    "toggl_time_entry_manipulator/repository"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+	"toggl_time_entry_manipulator/domain"
+	"toggl_time_entry_manipulator/repository"
+
+	"github.com/jason0x43/go-alfred"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.add]", log.LstdFlags)
@@ -26,9 +29,11 @@ func (c GetEntryCommand) About() alfred.CommandDef {
 }
 
 func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
-    dlog.Printf("Items")
     entities, err := c.Repo.Fetch()
     for _, entity := range entities {
+        if !filterByArg(arg, entity) {
+            continue
+        }
         item := alfred.Item{
             Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
             Subtitle: fmt.Sprintf("actual duration: %s, estimation: %d", convertDuration(entity.Entry.Duration), entity.Estimation.Duration),
@@ -48,4 +53,13 @@ func convertDuration(duration int64) string {
     }
     min := int(duration / 60)
     return strconv.Itoa(min)
+}
+
+func filterByArg(arg string, entity domain.TimeEntryEntity) (res bool) {
+    if arg == "" {
+        res = true
+        return
+    }
+    res = strings.Contains(entity.Entry.Description, arg)
+    return
 }

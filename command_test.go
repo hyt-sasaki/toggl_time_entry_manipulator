@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"toggl_time_entry_manipulator/command/add"
+	"toggl_time_entry_manipulator/command/get"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
 )
@@ -156,4 +157,42 @@ func (suite *AddEntryTestSuite) TestDo() {
     assert.Equal(t, "arg", entity.Entry.Description)
     assert.Equal(t, []string{"hoge"}, entity.Entry.Tags)
     assert.Equal(t, 30, entity.Estimation.Duration)
+}
+
+
+type GetEntryTestSuite struct {
+    suite.Suite
+    mockedRepo *repository.MockedCachedRepository
+    com *get.GetEntryCommand
+}
+
+func TestGetEntryTestSuite(t *testing.T) {
+    suite.Run(t, new(GetEntryTestSuite))
+}
+
+func (suite *GetEntryTestSuite) SetupTest() {
+    suite.mockedRepo = &repository.MockedCachedRepository{}
+    suite.com = &get.GetEntryCommand{
+        Repo: suite.mockedRepo,
+    }
+}
+
+func (suite *GetEntryTestSuite) TestItems() {
+    // given
+    arg := "2"
+    dataStr := ""
+    suite.mockedRepo.On("Fetch").Return([]domain.TimeEntryEntity{
+        domain.Create("item1-1", 1, "", 10),
+        domain.Create("item2-1", 2, "tag2", 20),
+        domain.Create("item2-2", 2, "tag3", 30),
+    }, nil).Once()
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, 2, len(items))
+    item := items[0]
+    assert.Equal(t, "Description: item2-1", item.Title)
 }
