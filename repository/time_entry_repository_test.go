@@ -2,6 +2,7 @@ package repository
 
 import (
 	"testing"
+    "time"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/client"
 
@@ -119,4 +120,23 @@ func (suite *RepositoryTestSuite) TestInsert() {
     suite.mockedToggleClient.AssertExpectations(t)
     suite.mockedEstimationClient.AssertExpectations(t)
     assert.Equal(t, entity.Entry, timeEntry)
+}
+
+func (suite *RepositoryTestSuite) TestStop() {
+    // given
+    start := time.Now().Add(-time.Hour)
+    stop := time.Now()
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ ID: 10, Start: &start },
+    }
+    suite.mockedToggleClient.On("StopTimeEntry", entity.Entry).Return(toggl.TimeEntry{
+        ID: 10, Start: &start, Stop: &stop,
+    }, nil).Once()
+
+    // when
+    suite.repo.Stop(&entity)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, entity.Entry.Stop.After(*entity.Entry.Start), true)
 }

@@ -55,8 +55,9 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     stopItem := alfred.Item{
         Title: "Stop this entry",
         Arg: &alfred.ItemArg{
-            Keyword: command.GetEntryKeyword,   // TODO StopKeyword
-            Mode: alfred.ModeTell,      // TODO ModeDoに変える
+            Keyword: command.StopEntryKeyword,
+            Mode: alfred.ModeDo,
+            Data: data,
         },
     }
     items = append(items, stopItem)
