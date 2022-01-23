@@ -3,6 +3,7 @@ package get
 
 import (
 	"encoding/json"
+    "time"
     "fmt"
 	"log"
 	"os"
@@ -47,11 +48,50 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     descriptionItem := alfred.Item{
         Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
         Arg: &alfred.ItemArg{
-            Keyword: command.GetEntryKeyword,   // TODO ModifyDescriptionKeywordを実装
+            Keyword: command.GetEntryKeyword,   // TODO ModifyTogglEntryを実装
             Mode: alfred.ModeTell,
         },
     }
     items = append(items, descriptionItem)
+
+    estimatedDurationItem := alfred.Item{
+        Title: fmt.Sprintf("Estimated duration: %d [min]", entity.Estimation.Duration),
+        Arg: &alfred.ItemArg{
+            Keyword: command.GetEntryKeyword,   // TODO ModifyEstimationを実装
+            Mode: alfred.ModeTell,
+        },
+    }
+    items = append(items, estimatedDurationItem)
+
+    timeLayout := "2006/01/02 15:04"
+    loc, _ := time.LoadLocation("Asia/Tokyo")
+    startTimeItem := alfred.Item{
+        Title: fmt.Sprintf("Start: %s", entity.Entry.Start.In(loc).Format(timeLayout)),
+        Arg: &alfred.ItemArg{
+            Keyword: command.GetEntryKeyword,   // TODO ModifyTogglEntryを実装
+            Mode: alfred.ModeTell,
+        },
+    }
+    items = append(items, startTimeItem)
+
+    stopTimeItem := alfred.Item{
+        Title: fmt.Sprintf("Stop: %s", entity.Entry.Stop.In(loc).Format(timeLayout)),
+        Arg: &alfred.ItemArg{
+            Keyword: command.GetEntryKeyword,   // TODO ModifyTogglEntryを実装
+            Mode: alfred.ModeTell,
+        },
+    }
+    items = append(items, stopTimeItem)
+
+    memoItem := alfred.Item{
+        Title: fmt.Sprintf("Memo: %s", entity.Estimation.Memo),
+        Arg: &alfred.ItemArg{
+            Keyword: command.GetEntryKeyword,   // TODO ModifyEstimationを実装
+            Mode: alfred.ModeTell,
+        },
+    }
+    items = append(items, memoItem)
+
     stopItem := alfred.Item{
         Title: "Stop this entry",
         Arg: &alfred.ItemArg{

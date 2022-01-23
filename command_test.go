@@ -228,8 +228,16 @@ func (suite *GetEntryTestSuite) TestItems() {
     data := command.DetailRefData{ID: 42}
     dataBytes, _ := json.Marshal(data)
     dataStr := string(dataBytes)
+    loc, _ := time.LoadLocation("Asia/Tokyo")
+    timeLayout := "2006-01-02 15:04:05"
+    start, _ := time.ParseInLocation(timeLayout, "2022-01-24 13:50:31", loc)
+    stop, _ := time.ParseInLocation(timeLayout, "2022-01-24 15:53:01", loc)
     suite.mockedRepo.On("FindOneById", 42).Return(domain.TimeEntryEntity{
-        Entry: toggl.TimeEntry{ID: 42, Description: "item42"},
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start, Stop: &stop},
+        Estimation: domain.Estimation{
+            Duration: 66,
+            Memo: "memo test",
+        },
     }, nil).Once()
 
 
@@ -238,9 +246,13 @@ func (suite *GetEntryTestSuite) TestItems() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 2, len(items))
+    assert.Equal(t, 6, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
-    assert.Equal(t, "Stop this entry", items[1].Title)
+    assert.Equal(t, "Estimated duration: 66 [min]", items[1].Title)
+    assert.Equal(t, "Start: 2022/01/24 13:50", items[2].Title)
+    assert.Equal(t, "Stop: 2022/01/24 15:53", items[3].Title)
+    assert.Equal(t, "Memo: memo test", items[4].Title)
+    assert.Equal(t, "Stop this entry", items[5].Title)
 }
 
 type StopEntryTestSuite struct {
