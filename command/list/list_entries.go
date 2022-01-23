@@ -14,6 +14,9 @@ import (
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.list]", log.LstdFlags)
+type ItemData struct {
+    ID int
+}
 
 type ListEntryCommand struct {
     Repo repository.ICachedRepository
@@ -41,6 +44,7 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
             Arg: &alfred.ItemArg{
                 Keyword: get.GetEntryKeyword,
                 Mode: alfred.ModeTell,
+                Data: alfred.Stringify(ItemData{ID: entity.Entry.ID}),
             },
         }
         items = append(items, item)

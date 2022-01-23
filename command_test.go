@@ -13,6 +13,7 @@ import (
 
 	"toggl_time_entry_manipulator/command/add"
 	"toggl_time_entry_manipulator/command/list"
+	"toggl_time_entry_manipulator/command/get"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
 )
@@ -166,7 +167,7 @@ type ListEntryTestSuite struct {
     com *list.ListEntryCommand
 }
 
-func testListEntryTestSuite(t *testing.T) {
+func TestListEntryTestSuite(t *testing.T) {
     suite.Run(t, new(ListEntryTestSuite))
 }
 
@@ -182,9 +183,9 @@ func (suite *ListEntryTestSuite) TestItems() {
     arg := "2"
     dataStr := ""
     suite.mockedRepo.On("Fetch").Return([]domain.TimeEntryEntity{
-        domain.Create("item1-1", 1, "", 10),
-        domain.Create("item2-1", 2, "tag2", 20),
-        domain.Create("item2-2", 2, "tag3", 30),
+        {Entry: toggl.TimeEntry{ID: 1, Description: "item1"}},
+        {Entry: toggl.TimeEntry{ID: 2, Description: "item2-1"}},
+        {Entry: toggl.TimeEntry{ID: 3, Description: "item2-2"}},
     }, nil).Once()
 
     // when
@@ -195,4 +196,25 @@ func (suite *ListEntryTestSuite) TestItems() {
     assert.Equal(t, 2, len(items))
     item := items[0]
     assert.Equal(t, "Description: item2-1", item.Title)
+    var itemData list.ItemData
+    err := json.Unmarshal([]byte(item.Arg.Data), &itemData)
+    assert.Nil(t, err)
+    assert.Equal(t, 1, itemData.ID)
+}
+
+type GetEntryTestSuite struct {
+    suite.Suite
+    mockedRepo *repository.MockedCachedRepository
+    com *get.GetEntryCommand
+}
+
+func TestGetEntryTestSuite(t *testing.T) {
+    suite.Run(t, new(GetEntryTestSuite))
+}
+
+func (suite *GetEntryTestSuite) SetupTest() {
+    suite.mockedRepo = &repository.MockedCachedRepository{}
+    suite.com = &get.GetEntryCommand{
+        Repo: suite.mockedRepo,
+    }
 }
