@@ -38,3 +38,7 @@ func (m *MockedToggleClient) StartTimeEntry(description string, pid int, tags []
     return args.Get(0).(toggl.TimeEntry), args.Error(1)
 }
 
+func (m *MockedToggleClient) StopTimeEntry(entry toggl.TimeEntry) (toggl.TimeEntry, error) {
+    args := m.Called(entry)
+    return args.Get(0).(toggl.TimeEntry), args.Error(1)
+}

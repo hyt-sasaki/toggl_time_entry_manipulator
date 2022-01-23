@@ -10,6 +10,7 @@ import (
 
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
+	"toggl_time_entry_manipulator/command"
 
 	"github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
@@ -21,7 +22,6 @@ type AddEntryCommand struct {
     Repo repository.ICachedRepository
 }
 
-const AddEntryKeyword = "add_entry"
 type stateData struct {
     Current  state
     Args entryArgs
@@ -43,7 +43,7 @@ type entryArgs struct {
 
 func (c AddEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{
-        Keyword: AddEntryKeyword,
+        Keyword: command.AddEntryKeyword,
         Description: "add entry: description -> project -> tag",
         IsEnabled: true,
     }
@@ -116,7 +116,7 @@ func generateDescriptionItems(args entryArgs, enteredDescription string) (items 
         Title: fmt.Sprintf("New description: %s", enteredDescription),
         Subtitle: "Create new description for your time entry",
         Arg: &alfred.ItemArg{
-            Keyword: AddEntryKeyword,
+            Keyword: command.AddEntryKeyword,
             Mode: alfred.ModeTell,
             Data: alfred.Stringify(stateData{Current: ProjectEdit, Args: entryArgs{Description: enteredDescription}}),
         },
@@ -138,7 +138,7 @@ func generateProjectItems(args entryArgs, enteredArg string, projects []toggl.Pr
             Subtitle: "Select the project for your time entry",
             Autocomplete: fmt.Sprintf("Project: %s", project.Name),
             Arg: &alfred.ItemArg{
-                Keyword: AddEntryKeyword,
+                Keyword: command.AddEntryKeyword,
                 Mode: alfred.ModeTell,
                 Data: alfred.Stringify(stateData{
                     Current: TagEdit,
@@ -167,7 +167,7 @@ func generateTagItems(args entryArgs, enteredArg string, tags []toggl.Tag) (item
         noTagItem := alfred.Item{
             Title: "No tag",
             Arg: &alfred.ItemArg{
-                Keyword: AddEntryKeyword,
+                Keyword: command.AddEntryKeyword,
                 Mode: alfred.ModeDo,
                 Data: alfred.Stringify(stateData{
                     Current: TimeEstimationEdit,
@@ -189,7 +189,7 @@ func generateTagItems(args entryArgs, enteredArg string, tags []toggl.Tag) (item
             Subtitle: "Select the tag for your time entry",
             Autocomplete: fmt.Sprintf("Tag: %s", tag.Name),
             Arg: &alfred.ItemArg{
-                Keyword: AddEntryKeyword,
+                Keyword: command.AddEntryKeyword,
                 Mode: alfred.ModeTell,
                 Data: alfred.Stringify(stateData{
                     Current: TimeEstimationEdit,
@@ -225,7 +225,7 @@ func generateTimeEstimationItems(args entryArgs, enteredEstimationStr string) (i
         Title: fmt.Sprintf("Time estimation [min]: %d", estimationTime),
         Subtitle: "Enter time estimation for your time entry (default: 30 min)",
         Arg: &alfred.ItemArg{
-            Keyword: AddEntryKeyword,
+            Keyword: command.AddEntryKeyword,
             Mode: alfred.ModeDo,
             Data: alfred.Stringify(stateData{
                 Current: EndEdit,

@@ -7,7 +7,9 @@ import (
 
 	"github.com/jason0x43/go-alfred"
     "toggl_time_entry_manipulator/command/add"
+    "toggl_time_entry_manipulator/command/list"
     "toggl_time_entry_manipulator/command/get"
+    "toggl_time_entry_manipulator/command/stop"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator]", log.LstdFlags)
@@ -34,7 +36,13 @@ func main() {
         add.AddEntryCommand{
             Repo: repo,
         },
+        list.ListEntryCommand{
+            Repo: repo,
+        },
         get.GetEntryCommand{
+            Repo: repo,
+        },
+        stop.StopEntryCommand{
             Repo: repo,
         },
     })

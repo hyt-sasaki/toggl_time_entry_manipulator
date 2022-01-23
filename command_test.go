@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+    "time"
 	"testing"
 
 	"github.com/jason0x43/go-alfred"
@@ -11,7 +12,11 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
+	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/command/add"
+	"toggl_time_entry_manipulator/command/list"
+	"toggl_time_entry_manipulator/command/get"
+	"toggl_time_entry_manipulator/command/stop"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
 )
@@ -156,4 +161,122 @@ func (suite *AddEntryTestSuite) TestDo() {
     assert.Equal(t, "arg", entity.Entry.Description)
     assert.Equal(t, []string{"hoge"}, entity.Entry.Tags)
     assert.Equal(t, 30, entity.Estimation.Duration)
+}
+
+
+type ListEntryTestSuite struct {
+    suite.Suite
+    mockedRepo *repository.MockedCachedRepository
+    com *list.ListEntryCommand
+}
+
+func TestListEntryTestSuite(t *testing.T) {
+    suite.Run(t, new(ListEntryTestSuite))
+}
+
+func (suite *ListEntryTestSuite) SetupTest() {
+    suite.mockedRepo = &repository.MockedCachedRepository{}
+    suite.com = &list.ListEntryCommand{
+        Repo: suite.mockedRepo,
+    }
+}
+
+func (suite *ListEntryTestSuite) TestItems() {
+    // given
+    arg := "2"
+    dataStr := ""
+    suite.mockedRepo.On("Fetch").Return([]domain.TimeEntryEntity{
+        {Entry: toggl.TimeEntry{ID: 1, Description: "item1"}},
+        {Entry: toggl.TimeEntry{ID: 2, Description: "item2-1"}},
+        {Entry: toggl.TimeEntry{ID: 3, Description: "item2-2"}},
+    }, nil).Once()
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, 2, len(items))
+    item := items[0]
+    assert.Equal(t, "Description: item2-1", item.Title)
+    var itemData command.DetailRefData
+    err := json.Unmarshal([]byte(item.Arg.Data), &itemData)
+    assert.Nil(t, err)
+    assert.Equal(t, 2, itemData.ID)
+}
+
+type GetEntryTestSuite struct {
+    suite.Suite
+    mockedRepo *repository.MockedCachedRepository
+    com *get.GetEntryCommand
+}
+
+func TestGetEntryTestSuite(t *testing.T) {
+    suite.Run(t, new(GetEntryTestSuite))
+}
+
+func (suite *GetEntryTestSuite) SetupTest() {
+    suite.mockedRepo = &repository.MockedCachedRepository{}
+    suite.com = &get.GetEntryCommand{
+        Repo: suite.mockedRepo,
+    }
+}
+
+func (suite *GetEntryTestSuite) TestItems() {
+    // given
+    arg := ""
+    data := command.DetailRefData{ID: 42}
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    suite.mockedRepo.On("FindOneById", 42).Return(domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42"},
+    }, nil).Once()
+
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, 2, len(items))
+    assert.Equal(t, "Description: item42", items[0].Title)
+    assert.Equal(t, "Stop this entry", items[1].Title)
+}
+
+type StopEntryTestSuite struct {
+    suite.Suite
+    mockedRepo *repository.MockedCachedRepository
+    com *stop.StopEntryCommand
+}
+
+func TestStopEntryTestSuite(t *testing.T) {
+    suite.Run(t, new(StopEntryTestSuite))
+}
+
+func (suite *StopEntryTestSuite) SetupTest() {
+    suite.mockedRepo = &repository.MockedCachedRepository{}
+    suite.com = &stop.StopEntryCommand{
+        Repo: suite.mockedRepo,
+    }
+}
+
+func (suite *StopEntryTestSuite) TestDo() {
+    // given
+    // given
+    data := command.DetailRefData{ID: 42}
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    start := time.Now().Add(-time.Hour)
+    runningEntity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start},
+    }
+    suite.mockedRepo.On("FindOneById", 42).Return(runningEntity, nil).Once()
+    suite.mockedRepo.On("Stop", &runningEntity).Return(nil).Once()
+
+    // when
+    out, _ := suite.com.Do(dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, "Entry has stopped. Description: item42", out)     // TODO WIP
 }

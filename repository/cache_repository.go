@@ -1,6 +1,7 @@
 package repository
 
 import (
+    "fmt"
 	"time"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository/myCache"
@@ -11,19 +12,21 @@ import (
 
 type CachedRepository struct {
     cache myCache.ICache
-    timeEntryRepository *TimeEntryRepository
+    timeEntryRepository ITimeEntryRepository
 }
 
 type ICachedRepository interface {
     Fetch() ([]domain.TimeEntryEntity, error)
+    FindOneById(int) (domain.TimeEntryEntity, error)
     GetProjects() ([]toggl.Project, error)
     GetTags() ([]toggl.Tag, error)
     Insert(*domain.TimeEntryEntity) (error)
+    Stop(*domain.TimeEntryEntity) (error)
 }
 
 func NewCachedRepository(
     cache myCache.ICache,
-    timeEntryRepository *TimeEntryRepository) (repo *CachedRepository) {
+    timeEntryRepository ITimeEntryRepository) (repo *CachedRepository) {
     repo = &CachedRepository{
         cache: cache,
         timeEntryRepository: timeEntryRepository,
@@ -36,6 +39,24 @@ func (c *CachedRepository) Fetch() (entities []domain.TimeEntryEntity, err error
 		return
 	}
     entities = c.cache.GetData().Entities
+    return
+}
+
+func (c *CachedRepository) FindOneById(entryId int) (entity domain.TimeEntryEntity, err error) {
+	if err = c.checkRefresh(); err != nil {
+		return
+	}
+    entities := c.cache.GetData().Entities
+
+    for _, e := range entities {
+        if e.Entry.ID == entryId {
+            entity = e
+            return
+        }
+    }
+
+    err = fmt.Errorf("Resource not found: %d", entryId)
+
     return
 }
 
@@ -64,7 +85,20 @@ func (c *CachedRepository) Insert(entity *domain.TimeEntryEntity) (err error) {
     if err = c.timeEntryRepository.Insert(entity); err != nil {
         return
     }
+	if err = c.refresh(); err != nil {
+		return
+	}
+    return
+}
+
+func (c *CachedRepository) Stop(entity *domain.TimeEntryEntity) (err error) {
 	if err = c.checkRefresh(); err != nil {
+		return
+	}
+    if err = c.timeEntryRepository.Stop(entity); err != nil {
+        return
+    }
+	if err = c.refresh(); err != nil {
 		return
 	}
     return
@@ -73,7 +107,7 @@ func (c *CachedRepository) Insert(entity *domain.TimeEntryEntity) (err error) {
 
 func (c *CachedRepository) checkRefresh() error {
     t := c.cache.GetData().Time
-	if time.Now().Sub(t).Minutes() < 5.0 {
+	if time.Now().Sub(t).Minutes() < 1.0 {
 		return nil
 	}
 

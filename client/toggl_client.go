@@ -11,6 +11,7 @@ type TogglClient struct {
 type ITogglClient interface {
     GetAccount() (toggl.Account, error)
     StartTimeEntry(string, int, []string) (toggl.TimeEntry, error)
+    StopTimeEntry(toggl.TimeEntry) (toggl.TimeEntry, error)
 }
 
 func NewTogglClient(apiKey TogglApiKey) (*TogglClient) {
@@ -43,6 +44,14 @@ func (c *TogglClient) StartTimeEntry(description string, pid int, tags []string)
             return
         }
     }
+    return
+}
+
+func (c *TogglClient) StopTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.TimeEntry, err error) {
+    s := c.getSession()
+
+    resultEntry, err = s.StopTimeEntry(entry)
+
     return
 }
 
