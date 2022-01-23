@@ -17,7 +17,7 @@ func (m *MockedCachedRepository) Fetch() ([]domain.TimeEntryEntity, error) {
 }
 
 func (m *MockedCachedRepository) FindOneById(entryId int) (domain.TimeEntryEntity, error) {
-    args := m.Called()
+    args := m.Called(entryId)
     return args.Get(0).(domain.TimeEntryEntity), args.Error(1)
 }
 
@@ -41,7 +41,7 @@ type MockedTimeEntryRepository struct {
 }
 
 func (m *MockedTimeEntryRepository) Fetch(account toggl.Account) ([]domain.TimeEntryEntity, error) {
-    args := m.Called()
+    args := m.Called(account)
     return args.Get(0).([]domain.TimeEntryEntity), args.Error(1)
 }
 
@@ -51,6 +51,6 @@ func (m *MockedTimeEntryRepository) FetchTogglAccount() (toggl.Account, error) {
 }
 
 func (m *MockedTimeEntryRepository) Insert(entity *domain.TimeEntryEntity) error {
-    args := m.Called()
+    args := m.Called(entity)
     return args.Error(0)
 }

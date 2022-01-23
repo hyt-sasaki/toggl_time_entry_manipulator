@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
+	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/command/add"
 	"toggl_time_entry_manipulator/command/list"
 	"toggl_time_entry_manipulator/command/get"
@@ -196,10 +197,10 @@ func (suite *ListEntryTestSuite) TestItems() {
     assert.Equal(t, 2, len(items))
     item := items[0]
     assert.Equal(t, "Description: item2-1", item.Title)
-    var itemData list.ItemData
+    var itemData command.DetailRefData
     err := json.Unmarshal([]byte(item.Arg.Data), &itemData)
     assert.Nil(t, err)
-    assert.Equal(t, 1, itemData.ID)
+    assert.Equal(t, 2, itemData.ID)
 }
 
 type GetEntryTestSuite struct {
@@ -217,4 +218,25 @@ func (suite *GetEntryTestSuite) SetupTest() {
     suite.com = &get.GetEntryCommand{
         Repo: suite.mockedRepo,
     }
+}
+
+func (suite *GetEntryTestSuite) TestItems() {
+    // given
+    arg := ""
+    data := command.DetailRefData{ID: 42}
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    suite.mockedRepo.On("FindOneById", 42).Return(domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42"},
+    }, nil).Once()
+
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, 2, len(items))
+    assert.Equal(t, "Description: item42", items[0].Title)
+    assert.Equal(t, "Stop this entry", items[1].Title)
 }

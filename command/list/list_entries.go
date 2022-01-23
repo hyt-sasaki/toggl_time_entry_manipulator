@@ -8,25 +8,21 @@ import (
 	"strings"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
-    "toggl_time_entry_manipulator/command/get"
+    "toggl_time_entry_manipulator/command"
 
 	"github.com/jason0x43/go-alfred"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.list]", log.LstdFlags)
-type ItemData struct {
-    ID int
-}
 
 type ListEntryCommand struct {
     Repo repository.ICachedRepository
 }
 
-const ListEntryKeyword = "list_entries"
 
 func (c ListEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{
-        Keyword: ListEntryKeyword,
+        Keyword: command.ListEntryKeyword,
         Description: "get entries",
         IsEnabled: true,
     }
@@ -42,9 +38,9 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
             Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
             Subtitle: fmt.Sprintf("actual duration: %s, estimation: %d", convertDuration(entity.Entry.Duration), entity.Estimation.Duration),
             Arg: &alfred.ItemArg{
-                Keyword: get.GetEntryKeyword,
+                Keyword: command.GetEntryKeyword,
                 Mode: alfred.ModeTell,
-                Data: alfred.Stringify(ItemData{ID: entity.Entry.ID}),
+                Data: alfred.Stringify(command.DetailRefData{ID: entity.Entry.ID}),
             },
         }
         items = append(items, item)

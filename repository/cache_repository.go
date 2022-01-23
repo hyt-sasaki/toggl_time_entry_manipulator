@@ -46,7 +46,7 @@ func (c *CachedRepository) FindOneById(entryId int) (entity domain.TimeEntryEnti
 		return
 	}
     entities := c.cache.GetData().Entities
-    
+
     for _, e := range entities {
         if e.Entry.ID == entryId {
             entity = e
