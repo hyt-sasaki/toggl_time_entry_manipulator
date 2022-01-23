@@ -17,7 +17,7 @@ type RepositoryTestSuite struct {
     repo *TimeEntryRepository
 }
 
-func TestSuite(t *testing.T) {
+func TestRepositoryTestSuite(t *testing.T) {
     suite.Run(t, new(RepositoryTestSuite))
 }
 

@@ -12,7 +12,7 @@ import (
 
 type CachedRepository struct {
     cache myCache.ICache
-    timeEntryRepository *TimeEntryRepository
+    timeEntryRepository ITimeEntryRepository
 }
 
 type ICachedRepository interface {
@@ -25,7 +25,7 @@ type ICachedRepository interface {
 
 func NewCachedRepository(
     cache myCache.ICache,
-    timeEntryRepository *TimeEntryRepository) (repo *CachedRepository) {
+    timeEntryRepository ITimeEntryRepository) (repo *CachedRepository) {
     repo = &CachedRepository{
         cache: cache,
         timeEntryRepository: timeEntryRepository,
@@ -41,7 +41,6 @@ func (c *CachedRepository) Fetch() (entities []domain.TimeEntryEntity, err error
     return
 }
 
-// TODO test, mock追加
 func (c *CachedRepository) FindOneById(entryId int) (entity domain.TimeEntryEntity, err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
