@@ -10,9 +10,9 @@ type MockedEstimationClient struct {
     mock.Mock
 }
 
-func (m *MockedEstimationClient) Fetch(entryIds []int64) ([]domain.Estimation, error) {
+func (m *MockedEstimationClient) Fetch(entryIds []int64) ([]*domain.Estimation, error) {
     args := m.Called(entryIds)
-    return args.Get(0).([]domain.Estimation), args.Error(1)
+    return args.Get(0).([]*domain.Estimation), args.Error(1)
 }
 
 func (m *MockedEstimationClient) Insert(id string, estimation domain.Estimation) (error) {

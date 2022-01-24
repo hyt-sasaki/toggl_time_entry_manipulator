@@ -69,7 +69,7 @@ func (suite *RepositoryTestSuite) TestFetch() {
         { ID: 1, }, 
         { ID: 2, },
     }
-    mockedEstimations := []domain.Estimation{
+    mockedEstimations := []*domain.Estimation{
         { Duration: 30, Memo: "memo1", },
         { Duration: 40, Memo: "memo2", },
     }
@@ -84,16 +84,45 @@ func (suite *RepositoryTestSuite) TestFetch() {
     assert.Equal(t, []domain.TimeEntryEntity{
         {
             Entry: account.Data.TimeEntries[0],
-            Estimation: mockedEstimations[0],
+            Estimation: *mockedEstimations[0],
         },
         {
             Entry: account.Data.TimeEntries[1],
-            Estimation: mockedEstimations[1],
+            Estimation: *mockedEstimations[1],
         },
     }, entities)
     assert.Equal(t, "1", entities[0].GetId())
     assert.Equal(t, "2", entities[1].GetId())
     suite.mockedToggleClient.AssertExpectations(t)
+}
+
+func (suite *RepositoryTestSuite) TestFetch_whenSomeEstimationsDoNotExist() {
+
+    // given
+    entryIds := []int64{1, 2}
+
+    // mock
+    account := toggl.Account{}
+    account.Data.TimeEntries = []toggl.TimeEntry{
+        { ID: 1, }, 
+        { ID: 2, },
+    }
+    mockedEstimations := []*domain.Estimation{
+        nil,
+        { Duration: 40, Memo: "memo2", },
+    }
+
+    suite.mockedEstimationClient.On("Fetch", entryIds).Return(mockedEstimations, nil).Once()
+
+    // when
+    entities, _ := suite.repo.Fetch(account)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, "1", entities[0].GetId())
+    assert.Equal(t, "2", entities[1].GetId())
+    assert.Equal(t, domain.Estimation{}, entities[0].Estimation)
+    assert.Equal(t, *mockedEstimations[1], entities[1].Estimation)
 }
 
 func (suite *RepositoryTestSuite) TestInsert() {

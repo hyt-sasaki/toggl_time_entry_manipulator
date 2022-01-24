@@ -57,10 +57,16 @@ func (repo *TimeEntryRepository) Fetch(account toggl.Account) (entities []domain
     }
     estimations, err := repo.estimationClient.Fetch(entryIds)
     for idx, estimation := range estimations {
-        entities = append(entities, domain.TimeEntryEntity{
-            Entry: entries[idx],
-            Estimation: estimation,
-        })
+        if estimation == nil {
+            entities = append(entities, domain.TimeEntryEntity{
+                Entry: entries[idx],
+            })
+        } else {
+            entities = append(entities, domain.TimeEntryEntity{
+                Entry: entries[idx],
+                Estimation: *estimation,
+            })
+        }
     }
     return
 }

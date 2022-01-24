@@ -18,7 +18,7 @@ type EstimationClient struct {
 }
 
 type IEstimationClient interface {
-    Fetch([]int64) ([]domain.Estimation, error)
+    Fetch([]int64) ([]*domain.Estimation, error)
     Insert(string, domain.Estimation) error
     Close()
 }
@@ -45,7 +45,7 @@ func NewEstimationClient(serviceAccount option.ClientOption) (client *Estimation
     return 
 }
 
-func (client *EstimationClient) Fetch(entryIds []int64) (estimations []domain.Estimation, err error) {
+func (client *EstimationClient) Fetch(entryIds []int64) (estimations []*domain.Estimation, err error) {
     // https://qiita.com/miyukiaizawa/items/88c174c00e9e99d3871b
     collectionRef := client.firestoreClient.Collection(collectionName)
 
@@ -56,9 +56,13 @@ func (client *EstimationClient) Fetch(entryIds []int64) (estimations []domain.Es
 
     docSnaps, err := client.firestoreClient.GetAll(client.firestoreCtx, tmpDocs)
     for _, ds := range docSnaps {
-        var estimation = domain.Estimation{}
-        if err := ds.DataTo(&estimation); err == nil {
-            estimations = append(estimations, estimation)
+        if ds.Exists() {
+            var estimation = domain.Estimation{}
+            if err := ds.DataTo(&estimation); err == nil {
+                estimations = append(estimations, &estimation)
+            }
+        } else {
+            estimations = append(estimations, nil)
         }
     }
     return

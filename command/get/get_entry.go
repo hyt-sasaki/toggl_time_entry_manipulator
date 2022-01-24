@@ -54,14 +54,16 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     }
     items = append(items, descriptionItem)
 
-    estimatedDurationItem := alfred.Item{
-        Title: fmt.Sprintf("Estimated duration: %d [min]", entity.Estimation.Duration),
-        Arg: &alfred.ItemArg{
-            Keyword: command.GetEntryKeyword,   // TODO ModifyEstimationを実装
-            Mode: alfred.ModeTell,
-        },
+    if entity.HasEstimation() {
+        estimatedDurationItem := alfred.Item{
+            Title: fmt.Sprintf("Estimated duration: %d [min]", entity.Estimation.Duration),
+            Arg: &alfred.ItemArg{
+                Keyword: command.GetEntryKeyword,   // TODO ModifyEstimationを実装
+                Mode: alfred.ModeTell,
+            },
+        }
+        items = append(items, estimatedDurationItem)
     }
-    items = append(items, estimatedDurationItem)
 
     timeLayout := "2006/01/02 15:04"
     loc, _ := time.LoadLocation("Asia/Tokyo")
@@ -83,14 +85,16 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     }
     items = append(items, stopTimeItem)
 
-    memoItem := alfred.Item{
-        Title: fmt.Sprintf("Memo: %s", entity.Estimation.Memo),
-        Arg: &alfred.ItemArg{
-            Keyword: command.GetEntryKeyword,   // TODO ModifyEstimationを実装
-            Mode: alfred.ModeTell,
-        },
+    if entity.HasEstimation() {
+        memoItem := alfred.Item{
+            Title: fmt.Sprintf("Memo: %s", entity.Estimation.Memo),
+            Arg: &alfred.ItemArg{
+                Keyword: command.GetEntryKeyword,   // TODO ModifyEstimationを実装
+                Mode: alfred.ModeTell,
+            },
+        }
+        items = append(items, memoItem)
     }
-    items = append(items, memoItem)
 
     stopItem := alfred.Item{
         Title: "Stop this entry",
