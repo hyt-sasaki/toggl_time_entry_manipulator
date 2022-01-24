@@ -3,8 +3,10 @@ package repository
 import (
 	"log"
 	"os"
-    "toggl_time_entry_manipulator/domain"
-    "toggl_time_entry_manipulator/client"
+	"sort"
+	"toggl_time_entry_manipulator/client"
+	"toggl_time_entry_manipulator/domain"
+
 	"github.com/jason0x43/go-toggl"
 )
 
@@ -51,6 +53,9 @@ func (repo *TimeEntryRepository) FetchTogglAccount() (account toggl.Account, err
 
 func (repo *TimeEntryRepository) Fetch(account toggl.Account) (entities []domain.TimeEntryEntity, err error) {
     entries := account.Data.TimeEntries
+    sort.SliceStable(entries, func(i, j int) bool {
+        return entries[i].StartTime().After(entries[j].StartTime());
+    })
     var entryIds []int64
     for _, entry := range entries {
         entryIds = append(entryIds, int64(entry.ID))
