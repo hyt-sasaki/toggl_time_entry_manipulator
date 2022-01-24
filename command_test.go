@@ -190,6 +190,7 @@ func (suite *ListEntryTestSuite) TestItems() {
         {Entry: toggl.TimeEntry{ID: 2, Description: "item2-1"}},
         {Entry: toggl.TimeEntry{ID: 3, Description: "item2-2"}},
     }, nil).Once()
+    suite.mockedRepo.On("GetProjects").Return([]toggl.Project{}, nil)
 
     // when
     items, _ := suite.com.Items(arg, dataStr)
@@ -198,7 +199,7 @@ func (suite *ListEntryTestSuite) TestItems() {
     t := suite.T()
     assert.Equal(t, 2, len(items))
     item := items[0]
-    assert.Equal(t, "Description: item2-1", item.Title)
+    assert.Equal(t, "item2-1 (-)", item.Title)
     assert.Equal(t, "actual duration: 0 [min], estimation: -", item.Subtitle)
     var itemData command.DetailRefData
     err := json.Unmarshal([]byte(item.Arg.Data), &itemData)

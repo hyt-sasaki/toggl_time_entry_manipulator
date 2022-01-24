@@ -11,6 +11,7 @@ import (
     "toggl_time_entry_manipulator/command"
 
 	"github.com/jason0x43/go-alfred"
+	"github.com/jason0x43/go-toggl"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.list]", log.LstdFlags)
@@ -30,12 +31,21 @@ func (c ListEntryCommand) About() alfred.CommandDef {
 
 func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
     entities, err := c.Repo.Fetch()
+    if err != nil {
+        return
+    }
+    projects, err := c.Repo.GetProjects()
+    if err != nil {
+        return
+    }
+
     for _, entity := range entities {
-        if !filterByArg(arg, entity) {
+        title := getTitle(entity, projects)
+        if !filterByArg(arg, title) {
             continue
         }
         item := alfred.Item{
-            Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
+            Title: getTitle(entity, projects),
             Subtitle: getSubtitle(entity),
             Arg: &alfred.ItemArg{
                 Keyword: command.GetEntryKeyword,
@@ -45,6 +55,17 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
         }
         items = append(items, item)
     }
+    return
+}
+
+func getTitle(entity domain.TimeEntryEntity, projects []toggl.Project) (title string){
+    projectName := "-"
+    for _, p := range projects {
+        if entity.Entry.Pid == p.ID {
+            projectName = p.Name
+        }
+    }
+    title = fmt.Sprintf("%s (%s)", entity.Entry.Description, projectName)
     return
 }
 
@@ -66,11 +87,14 @@ func convertDuration(duration int64) string {
     return strconv.Itoa(min)
 }
 
-func filterByArg(arg string, entity domain.TimeEntryEntity) (res bool) {
+func filterByArg(arg, title string) (res bool) {
+    res = true
     if arg == "" {
-        res = true
         return
     }
-    res = strings.Contains(entity.Entry.Description, arg)
+    args := strings.Split(arg, " ")
+    for _, a := range(args) {
+        res = res && strings.Contains(title, a)
+    }
     return
 }
