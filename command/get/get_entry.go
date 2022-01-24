@@ -76,14 +76,16 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     }
     items = append(items, startTimeItem)
 
-    stopTimeItem := alfred.Item{
-        Title: fmt.Sprintf("Stop: %s", entity.Entry.Stop.In(loc).Format(timeLayout)),
-        Arg: &alfred.ItemArg{
-            Keyword: command.GetEntryKeyword,   // TODO ModifyTogglEntryを実装
-            Mode: alfred.ModeTell,
-        },
+    if !entity.IsRunning() {
+        stopTimeItem := alfred.Item{
+            Title: fmt.Sprintf("Stop: %s", entity.Entry.Stop.In(loc).Format(timeLayout)),
+            Arg: &alfred.ItemArg{
+                Keyword: command.GetEntryKeyword,   // TODO ModifyTogglEntryを実装
+                Mode: alfred.ModeTell,
+            },
+        }
+        items = append(items, stopTimeItem)
     }
-    items = append(items, stopTimeItem)
 
     if entity.HasEstimation() {
         memoItem := alfred.Item{
@@ -96,14 +98,17 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         items = append(items, memoItem)
     }
 
-    stopItem := alfred.Item{
-        Title: "Stop this entry",
-        Arg: &alfred.ItemArg{
-            Keyword: command.StopEntryKeyword,
-            Mode: alfred.ModeDo,
-            Data: data,
-        },
+    if entity.IsRunning() {
+        stopItem := alfred.Item{
+            Title: "Stop this entry",
+            Arg: &alfred.ItemArg{
+                Keyword: command.StopEntryKeyword,
+                Mode: alfred.ModeDo,
+                Data: data,
+            },
+        }
+        items = append(items, stopItem)
     }
-    items = append(items, stopItem)
+
     return
 }

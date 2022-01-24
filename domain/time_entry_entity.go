@@ -45,3 +45,7 @@ func (entity *TimeEntryEntity) UpdateTimeEntry(timeEntry toggl.TimeEntry) {
 func (entity *TimeEntryEntity) HasEstimation() bool {
     return !(entity.Estimation.CreatedTm.IsZero() && entity.Estimation.Duration == 0);
 }
+
+func (entity *TimeEntryEntity) IsRunning() bool {
+    return entity.Entry.IsRunning();
+}
