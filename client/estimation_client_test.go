@@ -63,7 +63,21 @@ func TestFetchWhenEntryIdsIncorrect(t * testing.T) {
     estimations, _ := estimationClient.Fetch(entryIds[:])
 
     // then
-    assert.Equal(t, 0, len(estimations))
+    assert.Equal(t, 1, len(estimations))
+    assert.Nil(t, estimations[0])
+}
+
+func TestFetchWhenEntryIdsIncorrect2(t * testing.T) {
+    // given
+    entryIds := [...] int64{1,3}
+
+    // when
+    estimations, _ := estimationClient.Fetch(entryIds[:])
+
+    // then
+    assert.Equal(t, 2, len(estimations))
+    assert.NotNil(t, estimations[0])
+    assert.Nil(t, estimations[1])
 }
 
 func initTestClient() (client *EstimationClient) {

@@ -36,7 +36,7 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
         }
         item := alfred.Item{
             Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
-            Subtitle: fmt.Sprintf("actual duration: %s, estimation: %d", convertDuration(entity.Entry.Duration), entity.Estimation.Duration),
+            Subtitle: getSubtitle(entity),
             Arg: &alfred.ItemArg{
                 Keyword: command.GetEntryKeyword,
                 Mode: alfred.ModeTell,
@@ -45,6 +45,16 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
         }
         items = append(items, item)
     }
+    return
+}
+
+func getSubtitle(entity domain.TimeEntryEntity) (subtitle string) {
+    if entity.HasEstimation() {
+        subtitle = fmt.Sprintf("actual duration: %s [min], estimation: %d [min]", convertDuration(entity.Entry.Duration), entity.Estimation.Duration)
+    } else {
+        subtitle = fmt.Sprintf("actual duration: %s [min], estimation: -", convertDuration(entity.Entry.Duration))
+    }
+
     return
 }
 

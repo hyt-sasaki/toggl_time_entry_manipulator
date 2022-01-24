@@ -40,3 +40,12 @@ func Create(description string, pid int, tag string, duration int) (entity TimeE
 func (entity *TimeEntryEntity) UpdateTimeEntry(timeEntry toggl.TimeEntry) {
     entity.Entry = timeEntry
 }
+
+// TODO test追加
+func (entity *TimeEntryEntity) HasEstimation() bool {
+    return !(entity.Estimation.CreatedTm.IsZero() && entity.Estimation.Duration == 0);
+}
+
+func (entity *TimeEntryEntity) IsRunning() bool {
+    return entity.Entry.IsRunning();
+}
