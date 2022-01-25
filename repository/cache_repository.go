@@ -21,6 +21,7 @@ type ICachedRepository interface {
     GetProjects() ([]toggl.Project, error)
     GetTags() ([]toggl.Tag, error)
     Insert(*domain.TimeEntryEntity) (error)
+    Update(*domain.TimeEntryEntity) (error)
     Stop(*domain.TimeEntryEntity) (error)
 }
 
@@ -83,6 +84,19 @@ func (c *CachedRepository) Insert(entity *domain.TimeEntryEntity) (err error) {
 		return
 	}
     if err = c.timeEntryRepository.Insert(entity); err != nil {
+        return
+    }
+	if err = c.refresh(); err != nil {
+		return
+	}
+    return
+}
+
+func (c *CachedRepository) Update(entity *domain.TimeEntryEntity) (err error) {
+	if err = c.checkRefresh(); err != nil {
+		return
+	}
+    if err = c.timeEntryRepository.Update(entity); err != nil {
         return
     }
 	if err = c.refresh(); err != nil {

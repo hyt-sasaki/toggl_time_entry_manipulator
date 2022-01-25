@@ -22,6 +22,7 @@ type ITimeEntryRepository interface {
     Fetch(toggl.Account) ([]domain.TimeEntryEntity, error)
     FetchTogglAccount() (toggl.Account, error)
     Insert(*domain.TimeEntryEntity) error
+    Update(*domain.TimeEntryEntity) error
     Stop(*domain.TimeEntryEntity) error
 }
 
@@ -81,6 +82,17 @@ func (repo *TimeEntryRepository) Insert(entity *domain.TimeEntryEntity) (err err
     entity.UpdateTimeEntry(entry)
 
     if err = repo.estimationClient.Insert(entity.GetId(), entity.Estimation); err != nil {
+        return
+    }
+
+    return
+}
+
+func (repo *TimeEntryRepository) Update(entity *domain.TimeEntryEntity) (err error) {
+    entry, err := repo.togglClient.UpdateTimeEntry(entity.Entry)
+    entity.UpdateTimeEntry(entry)
+
+    if err = repo.estimationClient.Update(entity.GetId(), entity.Estimation); err != nil {
         return
     }
 

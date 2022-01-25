@@ -36,6 +36,11 @@ func (m *MockedCachedRepository) Insert(entity *domain.TimeEntryEntity) error {
     return args.Error(0)
 }
 
+func (m *MockedCachedRepository) Update(entity *domain.TimeEntryEntity) error {
+    args := m.Called(entity)
+    return args.Error(0)
+}
+
 func (m *MockedCachedRepository) Stop(entity *domain.TimeEntryEntity) error {
     args := m.Called(entity)
     return args.Error(0)
@@ -56,6 +61,11 @@ func (m *MockedTimeEntryRepository) FetchTogglAccount() (toggl.Account, error) {
 }
 
 func (m *MockedTimeEntryRepository) Insert(entity *domain.TimeEntryEntity) error {
+    args := m.Called(entity)
+    return args.Error(0)
+}
+
+func (m *MockedTimeEntryRepository) Update(entity *domain.TimeEntryEntity) error {
     args := m.Called(entity)
     return args.Error(0)
 }
