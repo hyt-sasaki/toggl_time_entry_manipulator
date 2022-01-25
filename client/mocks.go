@@ -20,6 +20,11 @@ func (m *MockedEstimationClient) Insert(id string, estimation domain.Estimation)
     return args.Error(0)
 }
 
+func (m *MockedEstimationClient) Update(id string, estimation domain.Estimation) (error) {
+    args := m.Called(id, estimation)
+    return args.Error(0)
+}
+
 func (m *MockedEstimationClient) Close() {
     m.Called()
 }

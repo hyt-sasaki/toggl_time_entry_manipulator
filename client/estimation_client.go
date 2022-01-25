@@ -1,6 +1,7 @@
 package client
 
 import (
+    "time"
 	"context"
 	"strconv"
 
@@ -20,6 +21,7 @@ type EstimationClient struct {
 type IEstimationClient interface {
     Fetch([]int64) ([]*domain.Estimation, error)
     Insert(string, domain.Estimation) error
+    Update(string, domain.Estimation) error
     Close()
 }
 
@@ -69,6 +71,13 @@ func (client *EstimationClient) Fetch(entryIds []int64) (estimations []*domain.E
 }
 
 func (client *EstimationClient) Insert(id string, estimation domain.Estimation) (err error){
+    _, err = client.firestoreClient.Collection(collectionName).Doc(id).Set(client.firestoreCtx, estimation)
+
+    return
+}
+
+func (client *EstimationClient) Update(id string, estimation domain.Estimation) (err error){
+    estimation.UpdatedTm = time.Now()
     _, err = client.firestoreClient.Collection(collectionName).Doc(id).Set(client.firestoreCtx, estimation)
 
     return
