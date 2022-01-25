@@ -17,6 +17,7 @@ import (
 	"toggl_time_entry_manipulator/command/list"
 	"toggl_time_entry_manipulator/command/get"
 	"toggl_time_entry_manipulator/command/stop"
+	"toggl_time_entry_manipulator/command/modify"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
 )
@@ -255,6 +256,10 @@ func (suite *GetEntryTestSuite) TestItems() {
     assert.Equal(t, "Start: 2022/01/24 13:50", items[2].Title)
     assert.Equal(t, "Stop: 2022/01/24 15:53", items[3].Title)
     assert.Equal(t, "Memo: memo test", items[4].Title)
+    for _, item := range items {
+        assert.Equal(t, command.ModifyEntryKeyword, item.Arg.Keyword)
+        assert.Equal(t, alfred.ModeTell, item.Arg.Mode)
+    }
 }
 
 func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
@@ -351,4 +356,53 @@ func (suite *StopEntryTestSuite) TestDo() {
     // then
     t := suite.T()
     assert.Equal(t, "Entry has stopped. Description: item42", out)     // TODO WIP
+}
+
+type ModifyEntryTestSuite struct {
+    suite.Suite
+    mockedRepo *repository.MockedCachedRepository
+    com *modify.ModifyEntryCommand
+}
+
+func TestModifyEntryTestSuite(t *testing.T) {
+    suite.Run(t, new(ModifyEntryTestSuite))
+}
+
+func (suite *ModifyEntryTestSuite) SetupTest() {
+    suite.mockedRepo = &repository.MockedCachedRepository{}
+    suite.com = &modify.ModifyEntryCommand{
+        Repo: suite.mockedRepo,
+    }
+}
+
+func (suite *ModifyEntryTestSuite) TestItems() {
+    // given
+    data := command.ModifyData{
+        Ref: command.DetailRefData{ID: 42},
+        Target: command.ModifyDescription,
+    }
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    arg := "new description"
+    start := time.Now().Add(-time.Hour)
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start},
+    }
+    suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, fmt.Sprintf("Description: %s", arg), items[0].Title)
+    assert.Equal(t, command.ModifyEntryKeyword, items[0].Arg.Keyword)
+    assert.Equal(t, alfred.ModeDo, items[0].Arg.Mode)
+}
+
+// TODO 
+func (suite *ModifyEntryTestSuite) TestDo() {
+    // given
+    // when
+    // then
 }

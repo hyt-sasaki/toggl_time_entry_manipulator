@@ -48,8 +48,12 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     descriptionItem := alfred.Item{
         Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
         Arg: &alfred.ItemArg{
-            Keyword: command.GetEntryKeyword,   // TODO ModifyTogglEntryを実装
+            Keyword: command.ModifyEntryKeyword,
             Mode: alfred.ModeTell,
+            Data: alfred.Stringify(command.ModifyData{
+                Ref: command.DetailRefData{ID: entity.Entry.ID},
+                Target: command.ModifyDescription,
+            }),
         },
     }
     items = append(items, descriptionItem)
@@ -58,8 +62,12 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         estimatedDurationItem := alfred.Item{
             Title: fmt.Sprintf("Estimated duration: %d [min]", entity.Estimation.Duration),
             Arg: &alfred.ItemArg{
-                Keyword: command.GetEntryKeyword,   // TODO ModifyEstimationを実装
+                Keyword: command.ModifyEntryKeyword,
                 Mode: alfred.ModeTell,
+                Data: alfred.Stringify(command.ModifyData{
+                    Ref: command.DetailRefData{ID: entity.Entry.ID},
+                    Target: command.ModifyDuration,
+                }),
             },
         }
         items = append(items, estimatedDurationItem)
@@ -70,8 +78,12 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     startTimeItem := alfred.Item{
         Title: fmt.Sprintf("Start: %s", entity.Entry.Start.In(loc).Format(timeLayout)),
         Arg: &alfred.ItemArg{
-            Keyword: command.GetEntryKeyword,   // TODO ModifyTogglEntryを実装
+            Keyword: command.ModifyEntryKeyword,
             Mode: alfred.ModeTell,
+            Data: alfred.Stringify(command.ModifyData{
+                Ref: command.DetailRefData{ID: entity.Entry.ID},
+                Target: command.ModifyStart,
+            }),
         },
     }
     items = append(items, startTimeItem)
@@ -80,8 +92,12 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         stopTimeItem := alfred.Item{
             Title: fmt.Sprintf("Stop: %s", entity.Entry.Stop.In(loc).Format(timeLayout)),
             Arg: &alfred.ItemArg{
-                Keyword: command.GetEntryKeyword,   // TODO ModifyTogglEntryを実装
+                Keyword: command.ModifyEntryKeyword,
                 Mode: alfred.ModeTell,
+                Data: alfred.Stringify(command.ModifyData{
+                    Ref: command.DetailRefData{ID: entity.Entry.ID},
+                    Target: command.ModifyStop,
+                }),
             },
         }
         items = append(items, stopTimeItem)
@@ -91,8 +107,12 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         memoItem := alfred.Item{
             Title: fmt.Sprintf("Memo: %s", entity.Estimation.Memo),
             Arg: &alfred.ItemArg{
-                Keyword: command.GetEntryKeyword,   // TODO ModifyEstimationを実装
+                Keyword: command.ModifyEntryKeyword,
                 Mode: alfred.ModeTell,
+                Data: alfred.Stringify(command.ModifyData{
+                    Ref: command.DetailRefData{ID: entity.Entry.ID},
+                    Target: command.ModifyMemo,
+                }),
             },
         }
         items = append(items, memoItem)
