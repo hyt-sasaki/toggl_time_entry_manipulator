@@ -1,15 +1,16 @@
 package get
 
-
 import (
 	"encoding/json"
-    "time"
-    "fmt"
+	"fmt"
 	"log"
 	"os"
-	"toggl_time_entry_manipulator/repository"
+	"time"
 	"toggl_time_entry_manipulator/command"
+	"toggl_time_entry_manipulator/repository"
+
 	"github.com/jason0x43/go-alfred"
+	"github.com/jason0x43/go-toggl"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.get]", log.LstdFlags)
@@ -44,6 +45,22 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         items = append(items, item)
         return
     }
+    projects, err := c.Repo.GetProjects()
+    if err != nil {
+        item := alfred.Item{
+            Title: "Something went wrong",
+        }
+        items = append(items, item)
+        return
+    }
+    tags, err := c.Repo.GetTags()
+    if err != nil {
+        item := alfred.Item{
+            Title: "Something went wrong",
+        }
+        items = append(items, item)
+        return
+    }
 
     descriptionItem := alfred.Item{
         Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
@@ -57,6 +74,32 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         },
     }
     items = append(items, descriptionItem)
+
+    projectItem := alfred.Item{
+        Title: fmt.Sprintf("Project: %s", getProject(entity.Entry.Pid, projects).Name),
+        Arg: &alfred.ItemArg{
+            Keyword: command.ModifyEntryKeyword,
+            Mode: alfred.ModeTell,
+            Data: alfred.Stringify(command.ModifyData{
+                Ref: command.DetailRefData{ID: entity.Entry.ID},
+                Target: command.ModifyProject,
+            }),
+        },
+    }
+    items = append(items, projectItem)
+
+    tagItem := alfred.Item{
+        Title: fmt.Sprintf("Tag: %s", getTag(entity.Entry.Tid, tags).Name),
+        Arg: &alfred.ItemArg{
+            Keyword: command.ModifyEntryKeyword,
+            Mode: alfred.ModeTell,
+            Data: alfred.Stringify(command.ModifyData{
+                Ref: command.DetailRefData{ID: entity.Entry.ID},
+                Target: command.ModifyTag,
+            }),
+        },
+    }
+    items = append(items, tagItem)
 
     if entity.HasEstimation() {
         estimatedDurationItem := alfred.Item{
@@ -87,7 +130,7 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     }
     items = append(items, startTimeItem)
 
-    if !entity.IsRunning() {
+    if entity.Entry.Stop != nil {
         stopTimeItem := alfred.Item{
             Title: fmt.Sprintf("Stop: %s", entity.Entry.Stop.In(time.Local).Format(timeLayout)),
             Arg: &alfred.ItemArg{
@@ -129,5 +172,25 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         items = append(items, stopItem)
     }
 
+    return
+}
+
+func getProject(pid int, projects []toggl.Project) (project toggl.Project) {
+    for _, p := range projects {
+        if p.ID == pid {
+            project = p
+            return
+        }
+    }
+    return
+}
+
+func getTag(tid int, tags []toggl.Tag) (tag toggl.Tag) {
+    for _, t := range tags {
+        if t.ID == tid {
+            tag = t
+            return
+        }
+    }
     return
 }

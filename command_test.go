@@ -237,11 +237,29 @@ func (suite *GetEntryTestSuite) TestItems() {
     stop, _ := time.ParseInLocation(timeLayout, "2022-01-24 15:53:01", loc)
     duration := int64(stop.Sub(start).Seconds())
     suite.mockedRepo.On("FindOneById", 42).Return(domain.TimeEntryEntity{
-        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start, Stop: &stop, Duration: duration},
+        Entry: toggl.TimeEntry{
+            ID: 42,
+            Pid: 3,
+            Tid: 2,
+            Description: "item42",
+            Start: &start,
+            Stop: &stop,
+            Duration: duration,
+        },
         Estimation: domain.Estimation{
             Duration: 66,
             Memo: "memo test",
         },
+    }, nil).Once()
+    suite.mockedRepo.On("GetProjects").Return([]toggl.Project{
+        { ID: 1, Name: "project1", }, 
+        { ID: 2, Name: "project2", },
+        { ID: 3, Name: "project3", },
+    }, nil).Once()
+    suite.mockedRepo.On("GetTags").Return([]toggl.Tag{
+        { ID: 1, Name: "tag1", }, 
+        { ID: 2, Name: "tag2", },
+        { ID: 3, Name: "tag3", },
     }, nil).Once()
 
 
@@ -250,12 +268,14 @@ func (suite *GetEntryTestSuite) TestItems() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 5, len(items))
+    assert.Equal(t, 7, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
-    assert.Equal(t, "Estimated duration: 66 [min]", items[1].Title)
-    assert.Equal(t, "Start: 2022/01/24 13:50", items[2].Title)
-    assert.Equal(t, "Stop: 2022/01/24 15:53", items[3].Title)
-    assert.Equal(t, "Memo: memo test", items[4].Title)
+    assert.Equal(t, "Project: project3", items[1].Title)
+    assert.Equal(t, "Tag: tag2", items[2].Title)
+    assert.Equal(t, "Estimated duration: 66 [min]", items[3].Title)
+    assert.Equal(t, "Start: 22/01/24 13:50", items[4].Title)
+    assert.Equal(t, "Stop: 22/01/24 15:53", items[5].Title)
+    assert.Equal(t, "Memo: memo test", items[6].Title)
     for _, item := range items {
         assert.Equal(t, command.ModifyEntryKeyword, item.Arg.Keyword)
         assert.Equal(t, alfred.ModeTell, item.Arg.Mode)
@@ -272,11 +292,28 @@ func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
     timeLayout := "2006-01-02 15:04:05"
     start, _ := time.ParseInLocation(timeLayout, "2022-01-24 13:50:31", loc)
     suite.mockedRepo.On("FindOneById", 42).Return(domain.TimeEntryEntity{
-        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start, Duration: -1},
+        Entry: toggl.TimeEntry{
+            ID: 42,
+            Pid: 3,
+            Tid: 2,
+            Description: "item42",
+            Start: &start,
+            Duration: -1,
+        },
         Estimation: domain.Estimation{
             Duration: 66,
             Memo: "memo test",
         },
+    }, nil).Once()
+    suite.mockedRepo.On("GetProjects").Return([]toggl.Project{
+        { ID: 1, Name: "project1", }, 
+        { ID: 2, Name: "project2", },
+        { ID: 3, Name: "project3", },
+    }, nil).Once()
+    suite.mockedRepo.On("GetTags").Return([]toggl.Tag{
+        { ID: 1, Name: "tag1", }, 
+        { ID: 2, Name: "tag2", },
+        { ID: 3, Name: "tag3", },
     }, nil).Once()
 
 
@@ -285,12 +322,14 @@ func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 5, len(items))
+    assert.Equal(t, 7, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
-    assert.Equal(t, "Estimated duration: 66 [min]", items[1].Title)
-    assert.Equal(t, "Start: 2022/01/24 13:50", items[2].Title)
-    assert.Equal(t, "Memo: memo test", items[3].Title)
-    assert.Equal(t, "Stop this entry", items[4].Title)
+    assert.Equal(t, "Project: project3", items[1].Title)
+    assert.Equal(t, "Tag: tag2", items[2].Title)
+    assert.Equal(t, "Estimated duration: 66 [min]", items[3].Title)
+    assert.Equal(t, "Start: 22/01/24 13:50", items[4].Title)
+    assert.Equal(t, "Memo: memo test", items[5].Title)
+    assert.Equal(t, "Stop this entry", items[6].Title)
 }
 
 func (suite *GetEntryTestSuite) TestItems_whenNoEstimation() {
@@ -305,7 +344,26 @@ func (suite *GetEntryTestSuite) TestItems_whenNoEstimation() {
     stop, _ := time.ParseInLocation(timeLayout, "2022-01-24 15:53:01", loc)
     duration := int64(stop.Sub(start).Seconds())
     suite.mockedRepo.On("FindOneById", 42).Return(domain.TimeEntryEntity{
-        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start, Stop: &stop, Duration: duration},
+        Entry: toggl.TimeEntry{
+            ID: 42,
+            Pid: 3,
+            Tid: 2,
+            Description: "item42",
+            Start: &start,
+            Stop: &stop,
+            Duration: duration,
+        },
+
+    }, nil).Once()
+    suite.mockedRepo.On("GetProjects").Return([]toggl.Project{
+        { ID: 1, Name: "project1", }, 
+        { ID: 2, Name: "project2", },
+        { ID: 3, Name: "project3", },
+    }, nil).Once()
+    suite.mockedRepo.On("GetTags").Return([]toggl.Tag{
+        { ID: 1, Name: "tag1", }, 
+        { ID: 2, Name: "tag2", },
+        { ID: 3, Name: "tag3", },
     }, nil).Once()
 
 
@@ -314,10 +372,12 @@ func (suite *GetEntryTestSuite) TestItems_whenNoEstimation() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 3, len(items))
+    assert.Equal(t, 5, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
-    assert.Equal(t, "Start: 2022/01/24 13:50", items[1].Title)
-    assert.Equal(t, "Stop: 2022/01/24 15:53", items[2].Title)
+    assert.Equal(t, "Project: project3", items[1].Title)
+    assert.Equal(t, "Tag: tag2", items[2].Title)
+    assert.Equal(t, "Start: 22/01/24 13:50", items[3].Title)
+    assert.Equal(t, "Stop: 22/01/24 15:53", items[4].Title)
 }
 
 type StopEntryTestSuite struct {
@@ -635,7 +695,6 @@ func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStopAndInvalidFormat() 
     assert.Equal(t, "Modify stop time (21/01/27 13:45)", items[0].Subtitle)
     assert.Nil(t, items[0].Arg)
 }
-
 
 func (suite *ModifyEntryTestSuite) TestDo() {
     // given

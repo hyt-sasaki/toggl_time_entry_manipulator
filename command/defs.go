@@ -19,6 +19,8 @@ type modifyTarget int
 const (
     ModifyDescription modifyTarget = iota
     ModifyDuration
+    ModifyProject
+    ModifyTag
     ModifyStart 
     ModifyStop
     ModifyMemo
