@@ -57,19 +57,23 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
             })
         case command.ModifyDuration:
             estimatedDuration, err := strconv.Atoi(arg)
+            var itemArg *alfred.ItemArg
             if err != nil {
                 estimatedDuration = entity.Estimation.Duration
                 dlog.Printf("Integer must be entered")
+                itemArg = nil
+            } else {
+                itemArg = &alfred.ItemArg{
+                    Keyword: command.ModifyEntryKeyword,
+                    Mode: alfred.ModeDo,
+                    Data: alfred.Stringify(entity),
+                }
             }
             entity.Estimation.Duration = estimatedDuration
             items = append(items, alfred.Item{
                 Title: fmt.Sprintf("Duration: %d", estimatedDuration),
                 Subtitle: "Enter estimated duration",
-                Arg: &alfred.ItemArg{
-                    Keyword: command.ModifyEntryKeyword,
-                    Mode: alfred.ModeDo,
-                    Data: alfred.Stringify(entity),
-                },
+                Arg: itemArg,
             })
         case command.ModifyMemo:
             entity.Estimation.Memo = arg
