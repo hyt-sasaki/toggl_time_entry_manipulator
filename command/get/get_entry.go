@@ -53,14 +53,6 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         items = append(items, item)
         return
     }
-    tags, err := c.Repo.GetTags()
-    if err != nil {
-        item := alfred.Item{
-            Title: "Something went wrong",
-        }
-        items = append(items, item)
-        return
-    }
 
     descriptionItem := alfred.Item{
         Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
@@ -89,7 +81,7 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     items = append(items, projectItem)
 
     tagItem := alfred.Item{
-        Title: fmt.Sprintf("Tag: %s", getTag(entity.Entry.Tid, tags).Name),
+        Title: fmt.Sprintf("Tag: %s", entity.Entry.Tags),
         Arg: &alfred.ItemArg{
             Keyword: command.ModifyEntryKeyword,
             Mode: alfred.ModeTell,
@@ -179,16 +171,6 @@ func getProject(pid int, projects []toggl.Project) (project toggl.Project) {
     for _, p := range projects {
         if p.ID == pid {
             project = p
-            return
-        }
-    }
-    return
-}
-
-func getTag(tid int, tags []toggl.Tag) (tag toggl.Tag) {
-    for _, t := range tags {
-        if t.ID == tid {
-            tag = t
             return
         }
     }
