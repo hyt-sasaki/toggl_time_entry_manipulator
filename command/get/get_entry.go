@@ -73,10 +73,9 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         items = append(items, estimatedDurationItem)
     }
 
-    timeLayout := "2006/01/02 15:04"
-    loc, _ := time.LoadLocation("Asia/Tokyo")
+    timeLayout := "06/01/02 15:04"
     startTimeItem := alfred.Item{
-        Title: fmt.Sprintf("Start: %s", entity.Entry.Start.In(loc).Format(timeLayout)),
+        Title: fmt.Sprintf("Start: %s", entity.Entry.Start.In(time.Local).Format(timeLayout)),
         Arg: &alfred.ItemArg{
             Keyword: command.ModifyEntryKeyword,
             Mode: alfred.ModeTell,
@@ -90,7 +89,7 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
 
     if !entity.IsRunning() {
         stopTimeItem := alfred.Item{
-            Title: fmt.Sprintf("Stop: %s", entity.Entry.Stop.In(loc).Format(timeLayout)),
+            Title: fmt.Sprintf("Stop: %s", entity.Entry.Stop.In(time.Local).Format(timeLayout)),
             Arg: &alfred.ItemArg{
                 Keyword: command.ModifyEntryKeyword,
                 Mode: alfred.ModeTell,

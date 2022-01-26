@@ -476,6 +476,167 @@ func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsMemo() {
     assert.Equal(t, alfred.ModeDo, items[0].Arg.Mode)
 }
 
+func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStartAndHMFormat() {
+    // given
+    data := command.ModifyData{
+        Ref: command.DetailRefData{ID: 42},
+        Target: command.ModifyStart,
+    }
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    arg := "20:31"
+    start, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start},
+        Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
+    }
+    suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, "Start: 21/01/27 20:31", items[0].Title)
+    assert.Equal(t, "Modify start time (21/01/27 13:45)", items[0].Subtitle)
+    assert.Equal(t, command.ModifyEntryKeyword, items[0].Arg.Keyword)
+    assert.Equal(t, alfred.ModeDo, items[0].Arg.Mode)
+}
+
+func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStartAndFullFormat() {
+    // given
+    data := command.ModifyData{
+        Ref: command.DetailRefData{ID: 42},
+        Target: command.ModifyStart,
+    }
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    arg := "21/01/28 20:31"
+    start, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start},
+        Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
+    }
+    suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, "Start: 21/01/28 20:31", items[0].Title)
+    assert.Equal(t, "Modify start time (21/01/27 13:45)", items[0].Subtitle)
+    assert.Equal(t, command.ModifyEntryKeyword, items[0].Arg.Keyword)
+    assert.Equal(t, alfred.ModeDo, items[0].Arg.Mode)
+}
+
+func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStartAndInvalidFormat() {
+    // given
+    data := command.ModifyData{
+        Ref: command.DetailRefData{ID: 42},
+        Target: command.ModifyStart,
+    }
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    arg := "21/01/282031"
+    start, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start},
+        Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
+    }
+    suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, "Start: -", items[0].Title)
+    assert.Equal(t, "Modify start time (21/01/27 13:45)", items[0].Subtitle)
+    assert.Nil(t, items[0].Arg)
+}
+
+func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStopAndHMFormat() {
+    // given
+    data := command.ModifyData{
+        Ref: command.DetailRefData{ID: 42},
+        Target: command.ModifyStop,
+    }
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    arg := "20:31"
+    stop, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Stop: &stop},
+        Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
+    }
+    suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, "Stop: 21/01/27 20:31", items[0].Title)
+    assert.Equal(t, "Modify stop time (21/01/27 13:45)", items[0].Subtitle)
+    assert.Equal(t, command.ModifyEntryKeyword, items[0].Arg.Keyword)
+    assert.Equal(t, alfred.ModeDo, items[0].Arg.Mode)
+}
+
+func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStopAndFullFormat() {
+    // given
+    data := command.ModifyData{
+        Ref: command.DetailRefData{ID: 42},
+        Target: command.ModifyStop,
+    }
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    arg := "21/01/28 20:31"
+    stop, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Stop: &stop},
+        Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
+    }
+    suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, "Stop: 21/01/28 20:31", items[0].Title)
+    assert.Equal(t, "Modify stop time (21/01/27 13:45)", items[0].Subtitle)
+    assert.Equal(t, command.ModifyEntryKeyword, items[0].Arg.Keyword)
+    assert.Equal(t, alfred.ModeDo, items[0].Arg.Mode)
+}
+
+func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStopAndInvalidFormat() {
+    // given
+    data := command.ModifyData{
+        Ref: command.DetailRefData{ID: 42},
+        Target: command.ModifyStop,
+    }
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    arg := "21/01/282031"
+    stop, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Stop: &stop},
+        Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
+    }
+    suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, "Stop: -", items[0].Title)
+    assert.Equal(t, "Modify stop time (21/01/27 13:45)", items[0].Subtitle)
+    assert.Nil(t, items[0].Arg)
+}
+
+
 func (suite *ModifyEntryTestSuite) TestDo() {
     // given
     start := time.Now().Add(-time.Hour)

@@ -3,6 +3,7 @@ package modify
 import (
 	"encoding/json"
     "fmt"
+    "time"
 	"log"
 	"os"
     "strconv"
@@ -75,6 +76,52 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
                 Subtitle: "Enter estimated duration",
                 Arg: itemArg,
             })
+        case command.ModifyStart:
+            start, err := convertToTime(arg, entity.Entry.Start)
+            var itemArg *alfred.ItemArg
+            var title string
+            beforeUpdated := *entity.Entry.Start
+            if err == nil {
+                entity.Entry.Start = &start
+                itemArg = &alfred.ItemArg{
+                    Keyword: command.ModifyEntryKeyword,
+                    Mode: alfred.ModeDo,
+                    Data: alfred.Stringify(entity),
+                }
+                title = fmt.Sprintf("Start: %s", start.Format("06/01/02 15:04"))
+            } else {
+                itemArg = nil
+                title = "Start: -"
+            }
+
+            items = append(items, alfred.Item{
+                Title: title,
+                Subtitle: fmt.Sprintf("Modify start time (%s)", beforeUpdated.In(time.Local).Format("06/01/02 15:04")),
+                Arg: itemArg,
+            })
+        case command.ModifyStop:
+            stop, err := convertToTime(arg, entity.Entry.Stop)
+            var itemArg *alfred.ItemArg
+            var title string
+            beforeUpdated := *entity.Entry.Stop
+            if err == nil {
+                entity.Entry.Stop = &stop
+                itemArg = &alfred.ItemArg{
+                    Keyword: command.ModifyEntryKeyword,
+                    Mode: alfred.ModeDo,
+                    Data: alfred.Stringify(entity),
+                }
+                title = fmt.Sprintf("Stop: %s", stop.Format("06/01/02 15:04"))
+            } else {
+                itemArg = nil
+                title = "Stop: -"
+            }
+
+            items = append(items, alfred.Item{
+                Title: title,
+                Subtitle: fmt.Sprintf("Modify stop time (%s)", beforeUpdated.In(time.Local).Format("06/01/02 15:04")),
+                Arg: itemArg,
+            })
         case command.ModifyMemo:
             entity.Estimation.Memo = arg
             items = append(items, alfred.Item{
@@ -107,5 +154,20 @@ func (c ModifyEntryCommand) Do(data string) (out string, err error) {
     }
 
     out = "Time entry has been updated successfully"
+    return
+}
+
+func convertToTime(dateStr string, base *time.Time) (result time.Time, err error) {
+    layout := "06/01/02 15:04"
+    date := base.In(time.Local).Format("06/01/02")
+    fullDateStr := fmt.Sprintf("%s %s", date, dateStr)
+    result, fail := time.ParseInLocation(layout, fullDateStr, time.Local)
+
+    if fail == nil {
+        return
+    }
+
+    result, err = time.ParseInLocation(layout, dateStr, time.Local)
+
     return
 }
