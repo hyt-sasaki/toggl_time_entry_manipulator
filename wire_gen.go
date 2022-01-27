@@ -28,7 +28,8 @@ func initializeRepository(workflow alfred.Workflow) (*repository.CachedRepositor
 	togglConfig := config.TogglConfig
 	togglClient := client.NewTogglClient(togglConfig)
 	clientOption := NewServiceAccount()
-	estimationClient, err := client.NewEstimationClient(clientOption)
+	firestoreConfig := config.FirestoreConfig
+	estimationClient, err := client.NewEstimationClient(clientOption, firestoreConfig)
 	if err != nil {
 		return nil, err
 	}

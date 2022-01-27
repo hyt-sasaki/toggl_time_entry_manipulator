@@ -23,6 +23,7 @@ func initializeRepository(workflow alfred.Workflow) (repo *repository.CachedRepo
         repository.NewTimeEntryRepository,
         repository.NewCachedRepository,
         wire.FieldsOf(new(*config.Config), "TogglConfig"),
+        wire.FieldsOf(new(*config.Config), "FirestoreConfig"),
         wire.Bind(new(client.ITogglClient), new(*client.TogglClient)),
         wire.Bind(new(client.IEstimationClient), new(*client.EstimationClient)),
         wire.Bind(new(repository.ITimeEntryRepository), new(*repository.TimeEntryRepository)),

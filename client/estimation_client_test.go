@@ -1,15 +1,16 @@
 package client
 
-
 import (
-    "testing"
-    "time"
-    "fmt"
-    "os"
-    "context"
+	"context"
+	"fmt"
+	"os"
+	"testing"
+	"time"
+	"toggl_time_entry_manipulator/config"
+	"toggl_time_entry_manipulator/domain"
+
 	"cloud.google.com/go/firestore"
-    "github.com/stretchr/testify/assert"
-    "toggl_time_entry_manipulator/domain"
+	"github.com/stretchr/testify/assert"
 )
 
 var estimationClient *EstimationClient
@@ -108,6 +109,9 @@ func initTestClient() (client *EstimationClient) {
     client = &EstimationClient{
         firestoreClient: fc,
         firestoreCtx: ctx,
+        config: config.FirestoreConfig{
+            CollectionName: "time_entry_estimations",
+        },
     }
     return
 }

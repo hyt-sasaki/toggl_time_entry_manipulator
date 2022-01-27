@@ -28,8 +28,13 @@ func NewConfig(configFile config.ConfigFile) (config *config.Config, err error) 
         return
 	}
     if config.TogglConfig.APIKey == "" {
-        dlog.Printf("APIKey is empty. Please write TOGGL_API_KEY to %s", configFile)
-        err = fmt.Errorf("APIKey is empty. Please write TOGGL_API_KEY to %s", configFile)
+        dlog.Printf("APIKey is empty. Please write TogglConfig.APIKey to %s", configFile)
+        err = fmt.Errorf("APIKey is empty. Please write TogglConfig.APIKey to %s", configFile)
+        return
+    }
+    if config.FirestoreConfig.CollectionName == "" {
+        dlog.Printf("Firestore collection name is empty. Please write Firestore.CollectionName to %s", configFile)
+        err = fmt.Errorf("CollectionName is empty. Please write Firestore.CollectionName to %s", configFile)
         return
     }
 
