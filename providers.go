@@ -2,7 +2,9 @@ package main
 
 import (
     "fmt"
+    "os"
 	"path"
+    "errors"
 	"google.golang.org/api/option"
 	"github.com/jason0x43/go-alfred"
     "toggl_time_entry_manipulator/config"
@@ -12,8 +14,13 @@ import (
 const configFileName = "config.json"
 const cacheFileName = "cache.json"
 
-func NewServiceAccount() (serviceAccount option.ClientOption) {
-    serviceAccount = option.WithCredentialsFile("credential/secret.json")
+func NewServiceAccount(workflow alfred.Workflow) (serviceAccount option.ClientOption, err error) {
+    filePath := path.Join(workflow.DataDir(), "secret.json")
+    if !exists(filePath) {
+        err = fmt.Errorf("%s does not exist.", filePath)
+        return
+    }
+    serviceAccount = option.WithCredentialsFile(filePath)
     return
 }
 
@@ -60,4 +67,10 @@ func NewCache(cacheFile myCache.CacheFile) (cache *myCache.Cache, err error) {
     dlog.Println(cache)
 
     return
+}
+
+
+func exists(path string) bool {
+    _, err := os.Stat(path)
+    return !errors.Is(err, os.ErrNotExist)
 }

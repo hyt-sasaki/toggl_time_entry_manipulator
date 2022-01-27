@@ -33,22 +33,37 @@ func main() {
         os.Exit(1)
     }
 
-    workflow.Run([]alfred.Command{
-        add.AddEntryCommand{
-            Repo: repo,
-        },
-        list.ListEntryCommand{
-            Repo: repo,
-        },
-        get.GetEntryCommand{
-            Repo: repo,
-        },
-        stop.StopEntryCommand{
-            Repo: repo,
-        },
-        modify.ModifyEntryCommand{
-            Repo: repo,
-        },
-    })
+    var commands []alfred.Command
+
+    if os.Args[2] == "" {   // コマンド一覧(初回呼び出し)
+        commands = []alfred.Command{
+            add.AddEntryCommand{
+                Repo: repo,
+            },
+            list.ListEntryCommand{
+                Repo: repo,
+            },
+        }
+    } else {
+        commands = []alfred.Command{
+            add.AddEntryCommand{
+                Repo: repo,
+            },
+            list.ListEntryCommand{
+                Repo: repo,
+            },
+            get.GetEntryCommand{
+                Repo: repo,
+            },
+            stop.StopEntryCommand{
+                Repo: repo,
+            },
+            modify.ModifyEntryCommand{
+                Repo: repo,
+            },
+        }
+    }
+
+    workflow.Run(commands)
 }
 
