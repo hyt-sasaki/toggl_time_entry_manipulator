@@ -3,14 +3,14 @@ package add
 import (
 	"encoding/json"
 	"fmt"
-    "log"
-    "os"
+	"log"
+	"os"
 	"strconv"
 	"strings"
 
+	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
-	"toggl_time_entry_manipulator/command"
 
 	"github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
@@ -22,9 +22,9 @@ type AddEntryCommand struct {
     Repo repository.ICachedRepository
 }
 
-type stateData struct {
+type StateData struct {
     Current  state
-    Args entryArgs
+    Args EntryArgs
 }
 type state int
 const (
@@ -34,7 +34,8 @@ const (
     TimeEstimationEdit
     EndEdit
 )
-type entryArgs struct {
+const initialState = ProjectEdit
+type EntryArgs struct {
     Description string
     Project int
     Tag string
@@ -44,22 +45,22 @@ type entryArgs struct {
 func (c AddEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{
         Keyword: command.AddEntryKeyword,
-        Description: "add entry: description -> project -> tag",
+        Description: "add entry: project -> tag -> description -> estimation",
         IsEnabled: true,
     }
 }
 
 func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
     // load from alfred variable
-    var sd stateData
+    var sd StateData
 
 	if data != "" {
 		if err := json.Unmarshal([]byte(data), &sd); err != nil {
 			dlog.Printf("Invalid data")
 		}
 	} else {
-        sd = stateData{
-            Current: DescriptionEdit,
+        sd = StateData{
+            Current: initialState,
         }
     }
 
@@ -67,23 +68,23 @@ func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     // generate items
     switch sd.Current {
         case DescriptionEdit:
-            items = append(items, generateDescriptionItems(sd.Args, arg)...)
+            items = append(items, c.generateDescriptionItems(sd, arg)...)
         case ProjectEdit:
             var projects []toggl.Project
             projects, err = c.Repo.GetProjects()
             if err != nil {
                 return
             }
-            items = append(items, generateProjectItems(sd.Args, arg, projects)...)
+            items = append(items, c.generateProjectItems(sd, arg, projects)...)
         case TagEdit:
             var tags []toggl.Tag
             tags, err = c.Repo.GetTags()
             if err != nil {
                 return
             }
-            items = append(items, generateTagItems(sd.Args, arg, tags)...)
+            items = append(items, c.generateTagItems(sd, arg, tags)...)
         case TimeEstimationEdit:
-            items = append(items, generateTimeEstimationItems(sd.Args, arg)...)
+            items = append(items, c.generateTimeEstimationItems(sd, arg)...)
     }
 
     return 
@@ -92,7 +93,7 @@ func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error
 
 
 func (c AddEntryCommand) Do(data string) (out string, err error) {
-    var sd stateData
+    var sd StateData
 	if data != "" {
 		if err := json.Unmarshal([]byte(data), &sd); err != nil {
 			dlog.Printf("Invalid data")
@@ -111,14 +112,16 @@ func (c AddEntryCommand) Do(data string) (out string, err error) {
 }
 
 // descrption
-func generateDescriptionItems(args entryArgs, enteredDescription string) (items []alfred.Item) {
+func (c AddEntryCommand) generateDescriptionItems(sd StateData, enteredDescription string) (items []alfred.Item) {
+    args := sd.Args
+    args.Description = enteredDescription
     item := alfred.Item{
         Title: fmt.Sprintf("New description: %s", enteredDescription),
-        Subtitle: "Create new description for your time entry",
+        Subtitle: c.subtitle(sd),
         Arg: &alfred.ItemArg{
             Keyword: command.AddEntryKeyword,
             Mode: alfred.ModeTell,
-            Data: alfred.Stringify(stateData{Current: ProjectEdit, Args: entryArgs{Description: enteredDescription}}),
+            Data: alfred.Stringify(StateData{Current: next(sd.Current), Args: args}),
         },
     }
     items = append(items, item)
@@ -126,23 +129,25 @@ func generateDescriptionItems(args entryArgs, enteredDescription string) (items 
 }
 
 // project
-func generateProjectItems(args entryArgs, enteredArg string, projects []toggl.Project) (items []alfred.Item) {
+func (c AddEntryCommand) generateProjectItems(sd StateData, enteredArg string, projects []toggl.Project) (items []alfred.Item) {
+    args := sd.Args
     for _, project := range projects {
         if enteredArg != "" {
             if !strings.Contains(project.Name, enteredArg) {
                 continue
             }
         }
+        args.Project = project.ID
         item := alfred.Item{
             Title: fmt.Sprintf("Project: %s", project.Name),
-            Subtitle: "Select the project for your time entry",
+            Subtitle: c.subtitle(sd),
             Autocomplete: fmt.Sprintf("Project: %s", project.Name),
             Arg: &alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
                 Mode: alfred.ModeTell,
-                Data: alfred.Stringify(stateData{
-                    Current: TagEdit,
-                    Args: generateArgsOfProjectItem(args, project),
+                Data: alfred.Stringify(StateData{
+                    Current: next(sd.Current),
+                    Args: args,
                 }),
             },
         }
@@ -151,17 +156,9 @@ func generateProjectItems(args entryArgs, enteredArg string, projects []toggl.Pr
     return
 }
 
-func generateArgsOfProjectItem(args entryArgs, project toggl.Project) (out entryArgs) {
-    out = entryArgs{
-        Description: args.Description,
-        Project: project.ID,
-        Tag: args.Tag,
-    }
-    return
-}
-
 // tag
-func generateTagItems(args entryArgs, enteredArg string, tags []toggl.Tag) (items []alfred.Item) {
+func (c AddEntryCommand) generateTagItems(sd StateData, enteredArg string, tags []toggl.Tag) (items []alfred.Item) {
+    args := sd.Args
 
     if enteredArg == "" {
         noTagItem := alfred.Item{
@@ -169,9 +166,9 @@ func generateTagItems(args entryArgs, enteredArg string, tags []toggl.Tag) (item
             Arg: &alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
                 Mode: alfred.ModeDo,
-                Data: alfred.Stringify(stateData{
-                    Current: TimeEstimationEdit,
-                    Args: generateArgsOfTagItem(args, toggl.Tag{}),
+                Data: alfred.Stringify(StateData{
+                    Current: next(sd.Current),
+                    Args: args,
                 }),
             },
         }
@@ -184,16 +181,17 @@ func generateTagItems(args entryArgs, enteredArg string, tags []toggl.Tag) (item
                 continue
             }
         }
+        args.Tag = tag.Name
         item := alfred.Item{
             Title: fmt.Sprintf("Tag: %s", tag.Name),
-            Subtitle: "Select the tag for your time entry",
+            Subtitle: c.subtitle(sd),
             Autocomplete: fmt.Sprintf("Tag: %s", tag.Name),
             Arg: &alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
                 Mode: alfred.ModeTell,
-                Data: alfred.Stringify(stateData{
-                    Current: TimeEstimationEdit,
-                    Args: generateArgsOfTagItem(args, tag),
+                Data: alfred.Stringify(StateData{
+                    Current: next(sd.Current),
+                    Args: args,
                 }),
             },
         }
@@ -202,17 +200,9 @@ func generateTagItems(args entryArgs, enteredArg string, tags []toggl.Tag) (item
     return
 }
 
-func generateArgsOfTagItem(args entryArgs, tag toggl.Tag) (out entryArgs) {
-    out = entryArgs{
-        Description: args.Description,
-        Project: args.Project,
-        Tag: tag.Name,
-    }
-    return
-}
-
 // time estimation
-func generateTimeEstimationItems(args entryArgs, enteredEstimationStr string) (items []alfred.Item) {
+func (c AddEntryCommand) generateTimeEstimationItems(sd StateData, enteredEstimationStr string) (items []alfred.Item) {
+    args := sd.Args
     var estimationTime int
     var err error
     estimationTime, err = strconv.Atoi(enteredEstimationStr)
@@ -221,15 +211,16 @@ func generateTimeEstimationItems(args entryArgs, enteredEstimationStr string) (i
         dlog.Printf("Integer must be entered")
     }
 
+    args.TimeEstimation = estimationTime
     item := alfred.Item{
         Title: fmt.Sprintf("Time estimation [min]: %d", estimationTime),
-        Subtitle: "Enter time estimation for your time entry (default: 30 min)",
+        Subtitle: c.subtitle(sd),
         Arg: &alfred.ItemArg{
             Keyword: command.AddEntryKeyword,
             Mode: alfred.ModeDo,
-            Data: alfred.Stringify(stateData{
-                Current: EndEdit,
-                Args: generateArgsOfTimeEstimationItem(args, estimationTime),
+            Data: alfred.Stringify(StateData{
+                Current: next(sd.Current),
+                Args: args,
             }),
         },
     }
@@ -237,12 +228,29 @@ func generateTimeEstimationItems(args entryArgs, enteredEstimationStr string) (i
     return
 }
 
-func generateArgsOfTimeEstimationItem(args entryArgs, estimationTime int) (out entryArgs) {
-    out = entryArgs{
-        Description: args.Description,
-        Project: args.Project,
-        Tag: args.Tag,
-        TimeEstimation: estimationTime,
+func next(c state) state {
+    switch c {
+        case DescriptionEdit:
+            return TimeEstimationEdit
+        case ProjectEdit:
+            return TagEdit
+        case TagEdit:
+            return DescriptionEdit
+        case TimeEstimationEdit:
+            return EndEdit
     }
-    return
+    return EndEdit
+}
+
+func (c AddEntryCommand) subtitle(sd StateData) string {
+    args := sd.Args
+    projects, _ := c.Repo.GetProjects()
+    projectName := "-"
+    for _, p := range projects {
+        if p.ID == args.Project {
+            projectName = p.Name
+        }
+    }
+
+    return fmt.Sprintf("Project: %s, Tag: %s, Desc: %s, Estimation: %d", projectName, args.Tag, args.Description, args.TimeEstimation)
 }
