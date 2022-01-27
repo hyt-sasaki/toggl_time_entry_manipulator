@@ -25,6 +25,8 @@ import (
 type AddEntryTestSuite struct {
     suite.Suite
     mockedRepo *repository.MockedCachedRepository
+    projects []toggl.Project
+    tags []toggl.Tag
     com *add.AddEntryCommand
 }
 
@@ -37,17 +39,96 @@ func (suite *AddEntryTestSuite) SetupTest() {
     suite.com = &add.AddEntryCommand{
         Repo: suite.mockedRepo,
     }
+
+    suite.projects = []toggl.Project{
+        { ID: 1, Name: "hoge", }, 
+        { ID: 2, Name: "fuga", },
+        { ID: 3, Name: "hoo", },
+    }
+    suite.tags = []toggl.Tag{
+        { ID: 1, Name: "hoge", }, 
+        { ID: 2, Name: "fuga", },
+        { ID: 3, Name: "hoo", },
+    }
+    suite.mockedRepo.On("GetProjects").Return(suite.projects, nil)
+    suite.mockedRepo.On("GetTags").Return(suite.tags, nil)
 }
 
-func (suite *AddEntryTestSuite) TestItems1() {
+func (suite *AddEntryTestSuite) TestItems_ProjectEdit() {
     // given
-    type Data struct {
+    dataStr := ""
+
+    // arg := "this is description"
+    arg := "ho"
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, 2, len(items))
+    assert.Equal(t, fmt.Sprintf("Project: %s", suite.projects[0].Name), items[0].Title)
+    assert.Equal(t, fmt.Sprintf("Project: %s", suite.projects[2].Name), items[1].Title)
+    // assert.Equal(t, 1, len(items))
+    item := items[0]
+    // assert.Equal(t, fmt.Sprintf("New description: %s", arg), item.Title)
+    itemArg := item.Arg
+    assert.Equal(t, alfred.ModeTell, itemArg.Mode)
+    var itemData add.StateData
+    json.Unmarshal([]byte(itemArg.Data), &itemData)
+    assert.Equal(t, add.StateData{
+        Current: add.TagEdit,
+        Args: add.EntryArgs{
+            Project: 1,
+        },
+    }, itemData)
+}
+
+func (suite *AddEntryTestSuite) TestItems_TagEdit() {
+    // given
+    data := add.StateData{
+        Current: add.TagEdit,
+        Args: add.EntryArgs{
+            Project: 1,
+        },
     }
-    data := Data{}
     dataBytes, _ := json.Marshal(data)
     dataStr := string(dataBytes)
+    arg := "ho"
 
-    arg := "this is description"
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, 2, len(items))
+    assert.Equal(t, fmt.Sprintf("Tag: %s", suite.tags[0].Name), items[0].Title)
+    assert.Equal(t, fmt.Sprintf("Tag: %s", suite.tags[2].Name), items[1].Title)
+    itemArg := items[0].Arg
+    assert.Equal(t, alfred.ModeTell, itemArg.Mode)
+    var itemData add.StateData
+    json.Unmarshal([]byte(itemArg.Data), &itemData)
+    assert.Equal(t, add.StateData{
+        Current: add.DescriptionEdit,
+        Args: add.EntryArgs{
+            Project: 1,
+            Tag: "hoge",
+        },
+    }, itemData)
+}
+
+func (suite *AddEntryTestSuite) TestItems_DescriptionEdit() {
+    // given
+    data := add.StateData{
+        Current: add.DescriptionEdit,
+        Args: add.EntryArgs{
+            Project: 1,
+            Tag: "hoge",
+        },
+    }
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    arg := "new description"
 
     // when
     items, _ := suite.com.Items(arg, dataStr)
@@ -55,62 +136,34 @@ func (suite *AddEntryTestSuite) TestItems1() {
     // then
     t := suite.T()
     assert.Equal(t, 1, len(items))
-    item := items[0]
-    assert.Equal(t, fmt.Sprintf("New description: %s", arg), item.Title)
-    itemArg := item.Arg
+    assert.Equal(t, fmt.Sprintf("New description: %s", arg), items[0].Title)
+    assert.Equal(t, alfred.ModeTell, items[0].Arg.Mode)
+    itemArg := items[0].Arg
     assert.Equal(t, alfred.ModeTell, itemArg.Mode)
-    assert.Equal(t, fmt.Sprintf("{\"Current\":1,\"Args\":{\"Description\":\"%s\",\"Project\":0,\"Tag\":\"\",\"TimeEstimation\":0}}", arg), itemArg.Data)
-}
-
-func (suite *AddEntryTestSuite) TestItems2() {
-    // given
-    dataStr := `{"Current":1,"Args":{"Description":"arg","Project":0,"Tag":"","TimeEstimation":0}}`
-    arg := "ho"
-    projects := []toggl.Project{
-        { ID: 1, Name: "hoge", }, 
-        { ID: 2, Name: "fuga", },
-        { ID: 3, Name: "hoo", },
-    }
-    suite.mockedRepo.On("GetProjects").Return(projects, nil)
-
-    // when
-    items, _ := suite.com.Items(arg, dataStr)
-
-    // then
-    t := suite.T()
-    assert.Equal(t, 2, len(items))
-    assert.Equal(t, fmt.Sprintf("Project: %s", projects[0].Name), items[0].Title)
-    assert.Equal(t, fmt.Sprintf("Project: %s", projects[2].Name), items[1].Title)
-    assert.Equal(t, alfred.ModeTell, items[0].Arg.Mode)
-    assert.Equal(t, fmt.Sprintf("{\"Current\":2,\"Args\":{\"Description\":\"arg\",\"Project\":%d,\"Tag\":\"\",\"TimeEstimation\":0}}", projects[0].ID), items[0].Arg.Data)
-}
-
-func (suite *AddEntryTestSuite) TestItems3() {
-    // given
-    dataStr := `{"Current":2,"Args":{"Description":"arg","Project":1,"Tag":"","TimeEstimation":0}}`
-    arg := "ho"
-    tags := []toggl.Tag{
-        { ID: 1, Name: "hoge", }, 
-        { ID: 2, Name: "fuga", },
-        { ID: 3, Name: "hoo", },
-    }
-    suite.mockedRepo.On("GetTags").Return(tags, nil)
-
-    // when
-    items, _ := suite.com.Items(arg, dataStr)
-
-    // then
-    t := suite.T()
-    assert.Equal(t, 2, len(items))
-    assert.Equal(t, fmt.Sprintf("Tag: %s", tags[0].Name), items[0].Title)
-    assert.Equal(t, fmt.Sprintf("Tag: %s", tags[2].Name), items[1].Title)
-    assert.Equal(t, alfred.ModeTell, items[0].Arg.Mode)
-    assert.Equal(t, fmt.Sprintf("{\"Current\":3,\"Args\":{\"Description\":\"arg\",\"Project\":1,\"Tag\":\"%s\",\"TimeEstimation\":0}}", tags[0].Name), items[0].Arg.Data)
+    var itemData add.StateData
+    json.Unmarshal([]byte(itemArg.Data), &itemData)
+    assert.Equal(t, add.StateData{
+        Current: add.TimeEstimationEdit,
+        Args: add.EntryArgs{
+            Project: 1,
+            Tag: "hoge",
+            Description: arg,
+        },
+    }, itemData)
 }
 
 func (suite *AddEntryTestSuite) TestItems4_Normal() {
     // given
-    dataStr := `{"Current":3,"Args":{"Description":"arg","Project":1,"Tag":"hoge","TimeEstimation":0}}`
+    data := add.StateData{
+        Current: add.TimeEstimationEdit,
+        Args: add.EntryArgs{
+            Project: 1,
+            Tag: "hoge",
+            Description: "new description",
+        },
+    }
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
 
     arg := "31"
 
@@ -124,12 +177,31 @@ func (suite *AddEntryTestSuite) TestItems4_Normal() {
     assert.Equal(t, fmt.Sprintf("Time estimation [min]: %s", arg), item.Title)
     itemArg := item.Arg
     assert.Equal(t, alfred.ModeDo, itemArg.Mode)
-    assert.Equal(t, fmt.Sprintf("{\"Current\":4,\"Args\":{\"Description\":\"arg\",\"Project\":1,\"Tag\":\"hoge\",\"TimeEstimation\":%s}}", arg), item.Arg.Data)
+    var itemData add.StateData
+    json.Unmarshal([]byte(itemArg.Data), &itemData)
+    assert.Equal(t, add.StateData{
+        Current: add.EndEdit,
+        Args: add.EntryArgs{
+            Project: 1,
+            Tag: "hoge",
+            Description: "new description",
+            TimeEstimation: 31,
+        },
+    }, itemData)
 }
 
 func (suite *AddEntryTestSuite) TestItems4_Invalid() {
     // given
-    dataStr := `{"Current":3,"Args":{"Description":"arg","Project":1,"Tag":"hoge","TimeEstimation":0}}`
+    data := add.StateData{
+        Current: add.TimeEstimationEdit,
+        Args: add.EntryArgs{
+            Project: 1,
+            Tag: "hoge",
+            Description: "new description",
+        },
+    }
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
 
     arg := "aa"
 
@@ -143,7 +215,17 @@ func (suite *AddEntryTestSuite) TestItems4_Invalid() {
     assert.Equal(t, "Time estimation [min]: 30", item.Title)
     itemArg := item.Arg
     assert.Equal(t, alfred.ModeDo, itemArg.Mode)
-    assert.Equal(t, "{\"Current\":4,\"Args\":{\"Description\":\"arg\",\"Project\":1,\"Tag\":\"hoge\",\"TimeEstimation\":30}}", item.Arg.Data)
+    var itemData add.StateData
+    json.Unmarshal([]byte(itemArg.Data), &itemData)
+    assert.Equal(t, add.StateData{
+        Current: add.EndEdit,
+        Args: add.EntryArgs{
+            Project: 1,
+            Tag: "hoge",
+            Description: "new description",
+            TimeEstimation: 30,
+        },
+    }, itemData)
 }
 
 func (suite *AddEntryTestSuite) TestDo() {
@@ -156,7 +238,6 @@ func (suite *AddEntryTestSuite) TestDo() {
 
     // then
     t := suite.T()
-    suite.mockedRepo.AssertExpectations(t)
     entity := suite.mockedRepo.Calls[0].Arguments[0].(*domain.TimeEntryEntity)
     assert.Equal(t, 1, entity.Entry.Pid)
     assert.Equal(t, "arg", entity.Entry.Description)
