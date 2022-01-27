@@ -24,6 +24,7 @@ func initializeRepository(workflow alfred.Workflow) (repo *repository.CachedRepo
         wire.FieldsOf(new(*repository.Config), "TogglAPIKey"),
         wire.Bind(new(client.ITogglClient), new(*client.TogglClient)),
         wire.Bind(new(client.IEstimationClient), new(*client.EstimationClient)),
+        wire.Bind(new(repository.ITimeEntryRepository), new(*repository.TimeEntryRepository)),
         wire.Bind(new(myCache.ICache), new(*myCache.Cache)),
     )
     return &repository.CachedRepository{}, nil

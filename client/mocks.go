@@ -20,6 +20,11 @@ func (m *MockedEstimationClient) Insert(id string, estimation domain.Estimation)
     return args.Error(0)
 }
 
+func (m *MockedEstimationClient) Update(id string, estimation domain.Estimation) (error) {
+    args := m.Called(id, estimation)
+    return args.Error(0)
+}
+
 func (m *MockedEstimationClient) Close() {
     m.Called()
 }
@@ -39,6 +44,11 @@ func (m *MockedToggleClient) StartTimeEntry(description string, pid int, tags []
 }
 
 func (m *MockedToggleClient) StopTimeEntry(entry toggl.TimeEntry) (toggl.TimeEntry, error) {
+    args := m.Called(entry)
+    return args.Get(0).(toggl.TimeEntry), args.Error(1)
+}
+
+func (m *MockedToggleClient) UpdateTimeEntry(entry toggl.TimeEntry) (toggl.TimeEntry, error) {
     args := m.Called(entry)
     return args.Get(0).(toggl.TimeEntry), args.Error(1)
 }

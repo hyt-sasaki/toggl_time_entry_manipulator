@@ -3,6 +3,7 @@ package client
 
 import (
     "testing"
+    "time"
     "fmt"
     "os"
     "context"
@@ -22,6 +23,8 @@ func TestMain(m *testing.M) {
     estimationClient.Insert("1", domain.Estimation{
         Duration: 30,
         Memo: "memo",
+        CreatedTm: time.Now(),
+        UpdatedTm: time.Now(),
     })
 
     m.Run()
@@ -78,6 +81,25 @@ func TestFetchWhenEntryIdsIncorrect2(t * testing.T) {
     assert.Equal(t, 2, len(estimations))
     assert.NotNil(t, estimations[0])
     assert.Nil(t, estimations[1])
+}
+
+func TestUpdate(t *testing.T) {
+    // given
+    id := "1"
+    beforeUpdate, _ := estimationClient.Fetch([]int64{1})
+    estimation := beforeUpdate[0]
+    estimation.Duration = 10
+    estimation.Memo = "updated memo"
+    // when
+    estimationClient.Update(id, *estimation)
+
+    // then
+    afterUpdate, _ := estimationClient.Fetch([]int64{1})
+    assert.Equal(t, 1, len(afterUpdate))
+    assert.Equal(t, estimation.Duration, afterUpdate[0].Duration)
+    assert.Equal(t, estimation.Memo, afterUpdate[0].Memo)
+    assert.Equal(t, estimation.CreatedTm, afterUpdate[0].CreatedTm)
+    assert.NotEqual(t, estimation.UpdatedTm, afterUpdate[0].UpdatedTm)
 }
 
 func initTestClient() (client *EstimationClient) {

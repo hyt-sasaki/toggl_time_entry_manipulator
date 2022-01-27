@@ -151,6 +151,30 @@ func (suite *RepositoryTestSuite) TestInsert() {
     assert.Equal(t, entity.Entry, timeEntry)
 }
 
+func (suite *RepositoryTestSuite) TestUpdate() {
+    // given
+    description := "description"
+    pid := 1
+    tag := "tag"
+    duration := 33
+    entity := domain.Create(description, pid, tag, duration)
+    suite.mockedToggleClient.On("UpdateTimeEntry", entity.Entry).Return(toggl.TimeEntry{
+        ID: 10,
+        Pid: pid,
+        Tags: []string{tag},
+        Duration: -1,
+    }, nil).Once()
+    suite.mockedEstimationClient.On("Update", "10", entity.Estimation).Return(nil).Once()
+
+    // when
+    suite.repo.Update(&entity)
+
+    // then
+    t := suite.T()
+    suite.mockedToggleClient.AssertExpectations(t)
+    suite.mockedEstimationClient.AssertExpectations(t)
+}
+
 func (suite *RepositoryTestSuite) TestStop() {
     // given
     start := time.Now().Add(-time.Hour)

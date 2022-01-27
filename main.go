@@ -10,6 +10,7 @@ import (
     "toggl_time_entry_manipulator/command/list"
     "toggl_time_entry_manipulator/command/get"
     "toggl_time_entry_manipulator/command/stop"
+    "toggl_time_entry_manipulator/command/modify"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator]", log.LstdFlags)
@@ -43,6 +44,9 @@ func main() {
             Repo: repo,
         },
         stop.StopEntryCommand{
+            Repo: repo,
+        },
+        modify.ModifyEntryCommand{
             Repo: repo,
         },
     })
