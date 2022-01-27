@@ -1,12 +1,13 @@
 package client
 
 import (
+	"toggl_time_entry_manipulator/config"
+
 	"github.com/jason0x43/go-toggl"
 )
 
-type TogglApiKey string
 type TogglClient struct {
-    apiKey TogglApiKey
+    config config.TogglConfig
 }
 type ITogglClient interface {
     GetAccount() (toggl.Account, error)
@@ -15,9 +16,9 @@ type ITogglClient interface {
     UpdateTimeEntry(toggl.TimeEntry) (toggl.TimeEntry, error)
 }
 
-func NewTogglClient(apiKey TogglApiKey) (*TogglClient) {
+func NewTogglClient(config config.TogglConfig) (*TogglClient) {
     return &TogglClient{
-        apiKey: apiKey,
+        config: config,
     }
 }
 
@@ -65,5 +66,5 @@ func (c *TogglClient) UpdateTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.
 }
 
 func (c *TogglClient) getSession() (toggl.Session) {
-    return toggl.OpenSession(string(c.apiKey))
+    return toggl.OpenSession(string(c.config.APIKey))
 }

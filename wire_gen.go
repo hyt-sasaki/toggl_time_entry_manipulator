@@ -25,14 +25,14 @@ func initializeRepository(workflow alfred.Workflow) (*repository.CachedRepositor
 	if err != nil {
 		return nil, err
 	}
-	togglApiKey := config.TogglAPIKey
-	togglClient := client.NewTogglClient(togglApiKey)
+	togglConfig := config.TogglConfig
+	togglClient := client.NewTogglClient(togglConfig)
 	clientOption := NewServiceAccount()
 	estimationClient, err := client.NewEstimationClient(clientOption)
 	if err != nil {
 		return nil, err
 	}
-	timeEntryRepository := repository.NewTimeEntryRepository(config, togglClient, estimationClient)
+	timeEntryRepository := repository.NewTimeEntryRepository(togglClient, estimationClient)
 	cachedRepository := repository.NewCachedRepository(cache, timeEntryRepository)
 	return cachedRepository, nil
 }

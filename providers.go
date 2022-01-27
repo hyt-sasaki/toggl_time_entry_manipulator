@@ -5,7 +5,7 @@ import (
 	"path"
 	"google.golang.org/api/option"
 	"github.com/jason0x43/go-alfred"
-    "toggl_time_entry_manipulator/repository"
+    "toggl_time_entry_manipulator/config"
     "toggl_time_entry_manipulator/repository/myCache"
 )
 
@@ -17,17 +17,17 @@ func NewServiceAccount() (serviceAccount option.ClientOption) {
     return
 }
 
-func NewConfigFile(workflow alfred.Workflow) repository.ConfigFile {
+func NewConfigFile(workflow alfred.Workflow) config.ConfigFile {
     configFile := path.Join(workflow.DataDir(), configFileName)
-    return repository.ConfigFile(configFile)
+    return config.ConfigFile(configFile)
 }
 
-func NewConfig(configFile repository.ConfigFile) (config *repository.Config, err error) {
+func NewConfig(configFile config.ConfigFile) (config *config.Config, err error) {
 	if err = alfred.LoadJSON(string(configFile), &config); err != nil {
 		dlog.Println("Error loading config:", err)
         return
 	}
-    if config.TogglAPIKey == "" {
+    if config.TogglConfig.APIKey == "" {
         dlog.Printf("APIKey is empty. Please write TOGGL_API_KEY to %s", configFile)
         err = fmt.Errorf("APIKey is empty. Please write TOGGL_API_KEY to %s", configFile)
         return

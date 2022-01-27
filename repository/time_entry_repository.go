@@ -12,11 +12,6 @@ import (
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.repository]", log.LstdFlags)
 
-type Config struct {
-	TogglAPIKey client.TogglApiKey `desc:"Toggl API key"`
-}
-type ConfigFile string
-
 
 type ITimeEntryRepository interface {
     Fetch(toggl.Account) ([]domain.TimeEntryEntity, error)
@@ -27,17 +22,14 @@ type ITimeEntryRepository interface {
 }
 
 type TimeEntryRepository struct {
-    config *Config
     togglClient client.ITogglClient
     estimationClient client.IEstimationClient
 }
 
 func NewTimeEntryRepository(
-    config *Config,
     togglClient client.ITogglClient,
     estimationClient client.IEstimationClient) (repo *TimeEntryRepository) {
     repo = &TimeEntryRepository{
-        config: config,
         togglClient: togglClient,
         estimationClient: estimationClient,
     }
