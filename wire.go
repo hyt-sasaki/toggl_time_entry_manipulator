@@ -6,6 +6,7 @@ import (
 	"github.com/jason0x43/go-alfred"
     "github.com/google/wire"
     "toggl_time_entry_manipulator/client"
+    "toggl_time_entry_manipulator/config"
     "toggl_time_entry_manipulator/repository"
     "toggl_time_entry_manipulator/repository/myCache"
 )
@@ -21,7 +22,8 @@ func initializeRepository(workflow alfred.Workflow) (repo *repository.CachedRepo
         client.NewTogglClient,
         repository.NewTimeEntryRepository,
         repository.NewCachedRepository,
-        wire.FieldsOf(new(*repository.Config), "TogglAPIKey"),
+        wire.FieldsOf(new(*config.Config), "TogglConfig"),
+        wire.FieldsOf(new(*config.Config), "FirestoreConfig"),
         wire.Bind(new(client.ITogglClient), new(*client.TogglClient)),
         wire.Bind(new(client.IEstimationClient), new(*client.EstimationClient)),
         wire.Bind(new(repository.ITimeEntryRepository), new(*repository.TimeEntryRepository)),

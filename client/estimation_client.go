@@ -1,21 +1,22 @@
 package client
 
 import (
-    "time"
 	"context"
 	"strconv"
+	"time"
+
+	"toggl_time_entry_manipulator/config"
+	"toggl_time_entry_manipulator/domain"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
 	"google.golang.org/api/option"
-    "toggl_time_entry_manipulator/domain"
 )
-
-const collectionName = "time_entry_estimations"
 
 type EstimationClient struct {
     firestoreClient *firestore.Client
     firestoreCtx context.Context
+    config config.FirestoreConfig
 }
 
 type IEstimationClient interface {
@@ -25,7 +26,7 @@ type IEstimationClient interface {
     Close()
 }
 
-func NewEstimationClient(serviceAccount option.ClientOption) (client *EstimationClient, err error) {
+func NewEstimationClient(serviceAccount option.ClientOption, config config.FirestoreConfig) (client *EstimationClient, err error) {
     var firestoreClient *firestore.Client
     var firestoreCtx = context.Background()
 
@@ -43,13 +44,14 @@ func NewEstimationClient(serviceAccount option.ClientOption) (client *Estimation
     client = &EstimationClient{
         firestoreClient: firestoreClient,
         firestoreCtx: firestoreCtx,
+        config: config,
     }
     return 
 }
 
 func (client *EstimationClient) Fetch(entryIds []int64) (estimations []*domain.Estimation, err error) {
     // https://qiita.com/miyukiaizawa/items/88c174c00e9e99d3871b
-    collectionRef := client.firestoreClient.Collection(collectionName)
+    collectionRef := client.firestoreClient.Collection(client.config.CollectionName)
 
     tmpDocs := make([]*firestore.DocumentRef, len(entryIds))
     for idx, id := range entryIds {
@@ -71,14 +73,14 @@ func (client *EstimationClient) Fetch(entryIds []int64) (estimations []*domain.E
 }
 
 func (client *EstimationClient) Insert(id string, estimation domain.Estimation) (err error){
-    _, err = client.firestoreClient.Collection(collectionName).Doc(id).Set(client.firestoreCtx, estimation)
+    _, err = client.firestoreClient.Collection(client.config.CollectionName).Doc(id).Set(client.firestoreCtx, estimation)
 
     return
 }
 
 func (client *EstimationClient) Update(id string, estimation domain.Estimation) (err error){
     estimation.UpdatedTm = time.Now()
-    _, err = client.firestoreClient.Collection(collectionName).Doc(id).Set(client.firestoreCtx, estimation)
+    _, err = client.firestoreClient.Collection(client.config.CollectionName).Doc(id).Set(client.firestoreCtx, estimation)
 
     return
 }

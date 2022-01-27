@@ -26,9 +26,6 @@ func (suite *RepositoryTestSuite) SetupTest() {
     suite.mockedEstimationClient = &client.MockedEstimationClient{}
     suite.mockedToggleClient = &client.MockedToggleClient{}
     suite.repo = &TimeEntryRepository{
-        config: &Config{
-            TogglAPIKey: "test",
-        },
         estimationClient: suite.mockedEstimationClient,
         togglClient: suite.mockedToggleClient,
     }

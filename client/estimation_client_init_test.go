@@ -1,16 +1,21 @@
 package client
 
 import (
-    "testing"
+	"testing"
+	"toggl_time_entry_manipulator/config"
+
+	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/option"
-    "github.com/stretchr/testify/assert"
 )
 
 func TestInit(t *testing.T) {
     // given
     serviceAccount := option.WithCredentialsFile("../credential/secret.json")
+    config := config.FirestoreConfig{
+        CollectionName: "test",
+    }
     // when
-    estimationClient, _ := NewEstimationClient(serviceAccount)
+    estimationClient, _ := NewEstimationClient(serviceAccount, config)
     // then
     assert.NotNil(t, estimationClient.firestoreClient)
     assert.NotNil(t, estimationClient.firestoreCtx)
