@@ -96,6 +96,19 @@
 				<false/>
 			</dict>
 		</array>
+		<key>F349D35A-1040-4B5E-A5CD-E775FAB19272</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>767741CA-20A3-494F-A730-2900E00301DE</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 	</dict>
 	<key>createdby</key>
 	<string>hytssk</string>
@@ -177,8 +190,6 @@
 				<integer>1</integer>
 				<key>escaping</key>
 				<integer>102</integer>
-				<key>keyword</key>
-				<string>tm</string>
 				<key>queuedelaycustom</key>
 				<integer>3</integer>
 				<key>queuedelayimmediatelyinitially</key>
@@ -299,7 +310,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>keyword</key>
-				<string>tmt</string>
+				<string>tadd</string>
 				<key>queuedelaycustom</key>
 				<integer>3</integer>
 				<key>queuedelayimmediatelyinitially</key>
@@ -319,7 +330,7 @@
 				<key>subtext</key>
 				<string></string>
 				<key>title</key>
-				<string>toggle manipulation of time entry</string>
+				<string>Add toggl time entry</string>
 				<key>type</key>
 				<integer>0</integer>
 				<key>withspace</key>
@@ -329,6 +340,55 @@
 			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
 			<string>A47E1955-3996-4A82-A125-36125FD58618</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>tlist</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>please wait...</string>
+				<key>script</key>
+				<string>./toggl_time_entry_manipulator "$1" "{\"keyword\":\"list_entries\"}"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string></string>
+				<key>title</key>
+				<string>List toggl time entries</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>F349D35A-1040-4B5E-A5CD-E775FAB19272</string>
 			<key>version</key>
 			<integer>3</integer>
 		</dict>
@@ -392,6 +452,13 @@
 			<integer>755</integer>
 			<key>ypos</key>
 			<integer>350</integer>
+		</dict>
+		<key>F349D35A-1040-4B5E-A5CD-E775FAB19272</key>
+		<dict>
+			<key>xpos</key>
+			<integer>270</integer>
+			<key>ypos</key>
+			<integer>475</integer>
 		</dict>
 	</dict>
 	<key>variablesdontexport</key>
