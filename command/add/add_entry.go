@@ -165,7 +165,7 @@ func (c AddEntryCommand) generateTagItems(sd StateData, enteredArg string, tags 
             Title: "No tag",
             Arg: &alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
-                Mode: alfred.ModeDo,
+                Mode: alfred.ModeTell,
                 Data: alfred.Stringify(StateData{
                     Current: next(sd.Current),
                     Args: args,

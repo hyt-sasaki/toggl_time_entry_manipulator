@@ -117,6 +117,38 @@ func (suite *AddEntryTestSuite) TestItems_TagEdit() {
     }, itemData)
 }
 
+func (suite *AddEntryTestSuite) TestItems_TagEditNoEdit() {
+    // given
+    data := add.StateData{
+        Current: add.TagEdit,
+        Args: add.EntryArgs{
+            Project: 1,
+        },
+    }
+    dataBytes, _ := json.Marshal(data)
+    dataStr := string(dataBytes)
+    arg := ""
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, 4, len(items))
+    assert.Equal(t, "No tag", items[0].Title)
+    itemArg := items[0].Arg
+    assert.Equal(t, alfred.ModeTell, itemArg.Mode)
+    var itemData add.StateData
+    json.Unmarshal([]byte(itemArg.Data), &itemData)
+    assert.Equal(t, add.StateData{
+        Current: add.DescriptionEdit,
+        Args: add.EntryArgs{
+            Project: 1,
+            Tag: "",
+        },
+    }, itemData)
+}
+
 func (suite *AddEntryTestSuite) TestItems_DescriptionEdit() {
     // given
     data := add.StateData{
