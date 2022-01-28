@@ -44,9 +44,14 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
         if !filterByArg(arg, title) {
             continue
         }
+        icon := "power_off.png"
+        if entity.IsRunning() {
+            icon = "power_on.png"
+        }
         item := alfred.Item{
             Title: getTitle(entity, projects),
             Subtitle: getSubtitle(entity),
+            Icon: icon,
             Arg: &alfred.ItemArg{
                 Keyword: command.GetEntryKeyword,
                 Mode: alfred.ModeTell,
