@@ -118,6 +118,7 @@ func (c AddEntryCommand) generateDescriptionItems(sd StateData, enteredDescripti
     item := alfred.Item{
         Title: fmt.Sprintf("New description: %s", enteredDescription),
         Subtitle: c.subtitle(sd),
+        Autocomplete: sd.Args.Tag,
         Arg: &alfred.ItemArg{
             Keyword: command.AddEntryKeyword,
             Mode: alfred.ModeTell,
