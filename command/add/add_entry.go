@@ -118,11 +118,14 @@ func (c AddEntryCommand) generateDescriptionItems(sd StateData, enteredDescripti
     entity := sd.Entity
     entity.Entry.Description = enteredDescription
     tag := ""
+    subtitle := ""
     if len(entity.Entry.Tags) > 0 {
         tag = entity.Entry.Tags[0]
+        subtitle = fmt.Sprintf("autocomplete: %s", tag)
     }
     item := alfred.Item{
         Title: fmt.Sprintf("New description: %s", enteredDescription),
+        Subtitle: subtitle,
         Autocomplete: tag,
         Arg: &alfred.ItemArg{
             Keyword: command.AddEntryKeyword,
