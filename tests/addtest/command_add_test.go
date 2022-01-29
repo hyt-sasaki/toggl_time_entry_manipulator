@@ -177,7 +177,7 @@ func (suite *AddEntryTestSuite) TestDo() {
     suite.mockedRepo.On("Insert", mock.Anything).Return(nil).Once()
 
     // when
-    suite.com.Do(dataStr)
+    out, _ := suite.com.Do(dataStr)
 
     // then
     t := suite.T()
@@ -186,4 +186,5 @@ func (suite *AddEntryTestSuite) TestDo() {
     assert.Equal(t, "new description", entity.Entry.Description)
     assert.Equal(t, []string{"hoge"}, entity.Entry.Tags)
     assert.Equal(t, 31, entity.Estimation.Duration)
+    assert.Equal(t, "Time entry [new description] has started", out)
 }
