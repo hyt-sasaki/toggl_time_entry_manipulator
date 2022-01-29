@@ -2,7 +2,6 @@ package gettest
 
 import (
     _ "toggl_time_entry_manipulator/supports"
-	"encoding/json"
     "time"
 	"testing"
 
@@ -15,6 +14,7 @@ import (
 	"toggl_time_entry_manipulator/command/get"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
+	"toggl_time_entry_manipulator/tests"
 )
 
 type GetEntryTestSuite struct {
@@ -37,9 +37,7 @@ func (suite *GetEntryTestSuite) SetupTest() {
 func (suite *GetEntryTestSuite) TestItems() {
     // given
     arg := ""
-    data := command.DetailRefData{ID: 42}
-    dataBytes, _ := json.Marshal(data)
-    dataStr := string(dataBytes)
+    dataStr := tests.StringifyDetailRefData(command.DetailRefData{ID: 42})
     loc, _ := time.LoadLocation("Asia/Tokyo")
     timeLayout := "2006-01-02 15:04:05"
     start, _ := time.ParseInLocation(timeLayout, "2022-01-24 13:50:31", loc)
@@ -89,9 +87,7 @@ func (suite *GetEntryTestSuite) TestItems() {
 func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
     // given
     arg := ""
-    data := command.DetailRefData{ID: 42}
-    dataBytes, _ := json.Marshal(data)
-    dataStr := string(dataBytes)
+    dataStr := tests.StringifyDetailRefData(command.DetailRefData{ID: 42})
     loc, _ := time.LoadLocation("Asia/Tokyo")
     timeLayout := "2006-01-02 15:04:05"
     start, _ := time.ParseInLocation(timeLayout, "2022-01-24 13:50:31", loc)
@@ -134,9 +130,7 @@ func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
 func (suite *GetEntryTestSuite) TestItems_whenNoEstimation() {
     // given
     arg := ""
-    data := command.DetailRefData{ID: 42}
-    dataBytes, _ := json.Marshal(data)
-    dataStr := string(dataBytes)
+    dataStr := tests.StringifyDetailRefData(command.DetailRefData{ID: 42})
     loc, _ := time.LoadLocation("Asia/Tokyo")
     timeLayout := "2006-01-02 15:04:05"
     start, _ := time.ParseInLocation(timeLayout, "2022-01-24 13:50:31", loc)

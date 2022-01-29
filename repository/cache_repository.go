@@ -23,6 +23,7 @@ type ICachedRepository interface {
     Insert(*domain.TimeEntryEntity) (error)
     Update(*domain.TimeEntryEntity) (error)
     Stop(*domain.TimeEntryEntity) (error)
+    Delete(*domain.TimeEntryEntity) (error)
 }
 
 func NewCachedRepository(
@@ -115,6 +116,11 @@ func (c *CachedRepository) Stop(entity *domain.TimeEntryEntity) (err error) {
 	if err = c.refresh(); err != nil {
 		return
 	}
+    return
+}
+
+func (c *CachedRepository) Delete(entity *domain.TimeEntryEntity) (err error) {
+    // TODO implement
     return
 }
 

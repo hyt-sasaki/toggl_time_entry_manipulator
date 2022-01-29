@@ -46,6 +46,11 @@ func (m *MockedCachedRepository) Stop(entity *domain.TimeEntryEntity) error {
     return args.Error(0)
 }
 
+func (m *MockedCachedRepository) Delete(entity *domain.TimeEntryEntity) error {
+    args := m.Called(entity)
+    return args.Error(0)
+}
+
 type MockedTimeEntryRepository struct {
     mock.Mock
 }
@@ -71,6 +76,11 @@ func (m *MockedTimeEntryRepository) Update(entity *domain.TimeEntryEntity) error
 }
 
 func (m *MockedTimeEntryRepository) Stop(entity *domain.TimeEntryEntity) error {
+    args := m.Called(entity)
+    return args.Error(0)
+}
+
+func (m *MockedTimeEntryRepository) Delete(entity *domain.TimeEntryEntity) error {
     args := m.Called(entity)
     return args.Error(0)
 }
