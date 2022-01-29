@@ -50,4 +50,5 @@ func (suite *DeleteEntryTestSuite) TestDo() {
     // then
     t := suite.T()
     assert.Equal(t, "Entry has been deleted. Description: item42", out)
+    suite.mockedRepo.AssertExpectations(t)
 }

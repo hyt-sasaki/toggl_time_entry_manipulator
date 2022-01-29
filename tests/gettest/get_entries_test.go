@@ -70,7 +70,7 @@ func (suite *GetEntryTestSuite) TestItems() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 7, len(items))
+    assert.Equal(t, 8, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
     assert.Equal(t, "Project: project3", items[1].Title)
     assert.Equal(t, "Tag: [tag2]", items[2].Title)
@@ -78,10 +78,14 @@ func (suite *GetEntryTestSuite) TestItems() {
     assert.Equal(t, "Start: 22/01/24 13:50", items[4].Title)
     assert.Equal(t, "Stop: 22/01/24 15:53", items[5].Title)
     assert.Equal(t, "Memo: memo test", items[6].Title)
-    for _, item := range items {
+    assert.Equal(t, "Delete this entry", items[7].Title)
+    for i := 0; i < 7; i++ {
+        item := items[i]
         assert.Equal(t, command.ModifyEntryKeyword, item.Arg.Keyword)
         assert.Equal(t, alfred.ModeTell, item.Arg.Mode)
     }
+    assert.Equal(t, command.DeleteEntryKeyword, items[7].Arg.Keyword)
+    assert.Equal(t, alfred.ModeDo, items[7].Arg.Mode)
 }
 
 func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
@@ -117,7 +121,7 @@ func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 7, len(items))
+    assert.Equal(t, 8, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
     assert.Equal(t, "Project: project3", items[1].Title)
     assert.Equal(t, "Tag: [tag2]", items[2].Title)
@@ -125,6 +129,7 @@ func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
     assert.Equal(t, "Start: 22/01/24 13:50", items[4].Title)
     assert.Equal(t, "Memo: memo test", items[5].Title)
     assert.Equal(t, "Stop this entry", items[6].Title)
+    assert.Equal(t, "Delete this entry", items[7].Title)
 }
 
 func (suite *GetEntryTestSuite) TestItems_whenNoEstimation() {
@@ -160,10 +165,11 @@ func (suite *GetEntryTestSuite) TestItems_whenNoEstimation() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 5, len(items))
+    assert.Equal(t, 6, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
     assert.Equal(t, "Project: project3", items[1].Title)
     assert.Equal(t, "Tag: [tag2]", items[2].Title)
     assert.Equal(t, "Start: 22/01/24 13:50", items[3].Title)
     assert.Equal(t, "Stop: 22/01/24 15:53", items[4].Title)
+    assert.Equal(t, "Delete this entry", items[5].Title)
 }

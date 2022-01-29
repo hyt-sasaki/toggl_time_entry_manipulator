@@ -39,7 +39,7 @@ func (c DeleteEntryCommand) Do(data string) (out string, err error) {
         return
     }
 
-    // err = c.Repo.Delete(&entity)
+    err = c.Repo.Delete(&entity)
     if err != nil {
         return
     }
