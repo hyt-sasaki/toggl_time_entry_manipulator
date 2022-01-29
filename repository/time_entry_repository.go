@@ -1,6 +1,7 @@
 package repository
 
 import (
+    "time"
 	"log"
 	"os"
 	"sort"
@@ -73,6 +74,8 @@ func (repo *TimeEntryRepository) Insert(entity *domain.TimeEntryEntity) (err err
     entry, err := repo.togglClient.StartTimeEntry(entity.Entry.Description, entity.Entry.Pid, entity.Entry.Tags)
     entity.UpdateTimeEntry(entry)
 
+    entity.Estimation.CreatedTm = time.Now()
+    entity.Estimation.UpdatedTm = time.Now()
     if err = repo.estimationClient.Insert(entity.GetId(), entity.Estimation); err != nil {
         return
     }
