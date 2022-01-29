@@ -108,6 +108,8 @@ func (c AddEntryCommand) Do(data string) (out string, err error) {
         return
     }
 
+    out = fmt.Sprintf("Time entry [%s] has started", entity.Entry.Description)
+
     return
 }
 
