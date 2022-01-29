@@ -103,6 +103,23 @@ func TestUpdate(t *testing.T) {
     assert.NotEqual(t, estimation.UpdatedTm, afterUpdate[0].UpdatedTm)
 }
 
+func TestDelete(t *testing.T) {
+    // given
+    id := "1"
+    beforeDelete, _ := estimationClient.Fetch([]int64{1})
+    assert.Equal(t, 1, len(beforeDelete))
+    assert.NotNil(t, beforeDelete[0])
+
+    // when
+    err := estimationClient.Delete(id)
+
+    // then
+    assert.Nil(t, err)
+    afterDelete, _ := estimationClient.Fetch([]int64{1})
+    assert.Equal(t, 1, len(afterDelete))
+    assert.Nil(t, afterDelete[0])
+}
+
 func initTestClient() (client *EstimationClient) {
     ctx := context.Background()
     fc, _ := firestore.NewClient(ctx, "test")
