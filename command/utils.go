@@ -66,5 +66,10 @@ func GenerateItemsForTag(
 }
 
 func Match(target, query string) (bool) {
-    return strings.Contains(target, query)
+    for _, word := range strings.Split(query, " ") {
+        if (!strings.Contains(target, word)) {
+            return false
+        }
+    }
+    return true
 }
