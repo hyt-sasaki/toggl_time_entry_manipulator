@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/domain"
@@ -61,6 +60,7 @@ func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error
 	} else {
         sd = StateData{
             Current: initialState,
+            Entity: domain.TimeEntryEntity{},
         }
     }
 
@@ -137,27 +137,20 @@ func (c AddEntryCommand) generateDescriptionItems(sd StateData, enteredDescripti
 // project
 func (c AddEntryCommand) generateProjectItems(sd StateData, enteredArg string, projects []toggl.Project) (items []alfred.Item) {
     entity := sd.Entity
-    for _, project := range projects {
-        if enteredArg != "" {
-            if !strings.Contains(project.Name, enteredArg) {
-                continue
-            }
-        }
-        entity.Entry.Pid = project.ID
-        item := alfred.Item{
-            Title: fmt.Sprintf("Project: %s", project.Name),
-            Autocomplete: fmt.Sprintf("Project: %s", project.Name),
-            Arg: &alfred.ItemArg{
+    items = command.GenerateItemsForProject(
+        projects,
+        enteredArg,
+        entity,
+        func(e domain.TimeEntryEntity) (alfred.ItemArg) {
+            return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
                 Mode: alfred.ModeTell,
                 Data: alfred.Stringify(StateData{
                     Current: next(sd.Current),
-                    Entity: entity,
-                }),
-            },
-        }
-        items = append(items, item)
-    }
+                    Entity: e,
+                })}
+        },
+    )
     return
 }
 
@@ -165,42 +158,18 @@ func (c AddEntryCommand) generateProjectItems(sd StateData, enteredArg string, p
 func (c AddEntryCommand) generateTagItems(sd StateData, enteredArg string, tags []toggl.Tag) (items []alfred.Item) {
     entity := sd.Entity
 
-    if enteredArg == "" {
-        noTagItem := alfred.Item{
-            Title: "No tag",
-            Arg: &alfred.ItemArg{
+    items = command.GenerateItemsForTag(
+        tags,
+        enteredArg,
+        entity,
+        func(e domain.TimeEntryEntity) (alfred.ItemArg) {
+            return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
                 Mode: alfred.ModeTell,
                 Data: alfred.Stringify(StateData{
                     Current: next(sd.Current),
-                    Entity: entity,
-                }),
-            },
-        }
-        items = append(items, noTagItem)
-    }
-
-    for _, tag := range tags {
-        if enteredArg != "" {
-            if !strings.Contains(tag.Name, enteredArg) {
-                continue
-            }
-        }
-        entity.Entry.Tags = []string{tag.Name}
-        item := alfred.Item{
-            Title: fmt.Sprintf("Tag: %s", tag.Name),
-            Autocomplete: fmt.Sprintf("Tag: %s", tag.Name),
-            Arg: &alfred.ItemArg{
-                Keyword: command.AddEntryKeyword,
-                Mode: alfred.ModeTell,
-                Data: alfred.Stringify(StateData{
-                    Current: next(sd.Current),
-                    Entity: entity,
-                }),
-            },
-        }
-        items = append(items, item)
-    }
+                    Entity: e,
+                })}})
     return
 }
 
