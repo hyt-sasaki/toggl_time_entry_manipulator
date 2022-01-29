@@ -54,46 +54,52 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         return
     }
 
-    descriptionItem := alfred.Item{
-        Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
-        Arg: &alfred.ItemArg{
-            Keyword: command.ModifyEntryKeyword,
-            Mode: alfred.ModeTell,
-            Data: alfred.Stringify(command.ModifyData{
-                Ref: command.DetailRefData{ID: entity.Entry.ID},
-                Target: command.ModifyDescription,
-            }),
-        },
+    if alfred.FuzzyMatches("description", arg) {
+        descriptionItem := alfred.Item{
+            Title: fmt.Sprintf("Description: %s", entity.Entry.Description),
+            Arg: &alfred.ItemArg{
+                Keyword: command.ModifyEntryKeyword,
+                Mode: alfred.ModeTell,
+                Data: alfred.Stringify(command.ModifyData{
+                    Ref: command.DetailRefData{ID: entity.Entry.ID},
+                    Target: command.ModifyDescription,
+                }),
+            },
+        }
+        items = append(items, descriptionItem)
     }
-    items = append(items, descriptionItem)
 
-    projectItem := alfred.Item{
-        Title: fmt.Sprintf("Project: %s", getProject(entity.Entry.Pid, projects).Name),
-        Arg: &alfred.ItemArg{
-            Keyword: command.ModifyEntryKeyword,
-            Mode: alfred.ModeTell,
-            Data: alfred.Stringify(command.ModifyData{
-                Ref: command.DetailRefData{ID: entity.Entry.ID},
-                Target: command.ModifyProject,
-            }),
-        },
+    if alfred.FuzzyMatches("project", arg) {
+        projectItem := alfred.Item{
+            Title: fmt.Sprintf("Project: %s", getProject(entity.Entry.Pid, projects).Name),
+            Arg: &alfred.ItemArg{
+                Keyword: command.ModifyEntryKeyword,
+                Mode: alfred.ModeTell,
+                Data: alfred.Stringify(command.ModifyData{
+                    Ref: command.DetailRefData{ID: entity.Entry.ID},
+                    Target: command.ModifyProject,
+                }),
+            },
+        }
+        items = append(items, projectItem)
     }
-    items = append(items, projectItem)
 
-    tagItem := alfred.Item{
-        Title: fmt.Sprintf("Tag: %s", entity.Entry.Tags),
-        Arg: &alfred.ItemArg{
-            Keyword: command.ModifyEntryKeyword,
-            Mode: alfred.ModeTell,
-            Data: alfred.Stringify(command.ModifyData{
-                Ref: command.DetailRefData{ID: entity.Entry.ID},
-                Target: command.ModifyTag,
-            }),
-        },
+    if alfred.FuzzyMatches("tag", arg) {
+        tagItem := alfred.Item{
+            Title: fmt.Sprintf("Tag: %s", entity.Entry.Tags),
+            Arg: &alfred.ItemArg{
+                Keyword: command.ModifyEntryKeyword,
+                Mode: alfred.ModeTell,
+                Data: alfred.Stringify(command.ModifyData{
+                    Ref: command.DetailRefData{ID: entity.Entry.ID},
+                    Target: command.ModifyTag,
+                }),
+            },
+        }
+        items = append(items, tagItem)
     }
-    items = append(items, tagItem)
 
-    if entity.HasEstimation() {
+    if entity.HasEstimation() && alfred.FuzzyMatches("estimated duration", arg) {
         estimatedDurationItem := alfred.Item{
             Title: fmt.Sprintf("Estimated duration: %d [min]", entity.Estimation.Duration),
             Arg: &alfred.ItemArg{
@@ -109,20 +115,21 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     }
 
     timeLayout := "06/01/02 15:04"
-    startTimeItem := alfred.Item{
-        Title: fmt.Sprintf("Start: %s", entity.Entry.Start.In(time.Local).Format(timeLayout)),
-        Arg: &alfred.ItemArg{
-            Keyword: command.ModifyEntryKeyword,
-            Mode: alfred.ModeTell,
-            Data: alfred.Stringify(command.ModifyData{
-                Ref: command.DetailRefData{ID: entity.Entry.ID},
-                Target: command.ModifyStart,
-            }),
-        },
+    if alfred.FuzzyMatches("start", arg) {
+        startTimeItem := alfred.Item{
+            Title: fmt.Sprintf("Start: %s", entity.Entry.Start.In(time.Local).Format(timeLayout)),
+            Arg: &alfred.ItemArg{
+                Keyword: command.ModifyEntryKeyword,
+                Mode: alfred.ModeTell,
+                Data: alfred.Stringify(command.ModifyData{
+                    Ref: command.DetailRefData{ID: entity.Entry.ID},
+                    Target: command.ModifyStart,
+                }),
+            },
+        }
+        items = append(items, startTimeItem)
     }
-    items = append(items, startTimeItem)
-
-    if entity.Entry.Stop != nil {
+    if entity.Entry.Stop != nil && alfred.FuzzyMatches("stop", arg) {
         stopTimeItem := alfred.Item{
             Title: fmt.Sprintf("Stop: %s", entity.Entry.Stop.In(time.Local).Format(timeLayout)),
             Arg: &alfred.ItemArg{
@@ -137,7 +144,7 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         items = append(items, stopTimeItem)
     }
 
-    if entity.HasEstimation() {
+    if entity.HasEstimation() && alfred.FuzzyMatches("memo", arg) {
         memoItem := alfred.Item{
             Title: fmt.Sprintf("Memo: %s", entity.Estimation.Memo),
             Arg: &alfred.ItemArg{
@@ -152,7 +159,7 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         items = append(items, memoItem)
     }
 
-    if entity.IsRunning() {
+    if entity.IsRunning() && alfred.FuzzyMatches("stop this entry", arg) {
         stopItem := alfred.Item{
             Title: "Stop this entry",
             Arg: &alfred.ItemArg{
