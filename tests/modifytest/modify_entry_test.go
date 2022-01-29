@@ -1,6 +1,7 @@
-package main
+package modifytest
 
 import (
+	_ "toggl_time_entry_manipulator/supports"
 	"encoding/json"
 	"fmt"
     "time"
@@ -12,10 +13,10 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
-	"toggl_time_entry_manipulator/command"
-	"toggl_time_entry_manipulator/command/modify"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
+	"toggl_time_entry_manipulator/command"
+	"toggl_time_entry_manipulator/command/modify"
 )
 type ModifyEntryTestSuite struct {
     suite.Suite
@@ -313,3 +314,4 @@ func (suite *ModifyEntryTestSuite) TestDo() {
     t := suite.T()
     assert.Equal(t, "Time entry has been updated successfully", out)
 }
+
