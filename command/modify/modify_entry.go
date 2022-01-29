@@ -100,6 +100,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
 
         case command.ModifyStart:
             start, err := convertToTime(arg, entity.Entry.Start)
+            autocomplete := c.calcLatestStop(entity)
             var itemArg *alfred.ItemArg
             var title string
             beforeUpdated := *entity.Entry.Start
@@ -118,6 +119,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
 
             items = append(items, alfred.Item{
                 Title: title,
+                Autocomplete: autocomplete,
                 Subtitle: fmt.Sprintf("Modify start time (%s)", beforeUpdated.In(time.Local).Format("06/01/02 15:04")),
                 Arg: itemArg,
             })
@@ -191,5 +193,25 @@ func convertToTime(dateStr string, base *time.Time) (result time.Time, err error
 
     result, err = time.ParseInLocation(layout, dateStr, time.Local)
 
+    return
+}
+
+func (c ModifyEntryCommand) calcLatestStop(entity domain.TimeEntryEntity) (out string) {
+    // 修正対象のentityがstopしている場合は何もしない
+    if !entity.IsRunning() {
+        return
+    }
+
+    entities, _ := c.Repo.Fetch()   // sort済み
+    // entityが1個しかない場合は何もしない
+    if len(entities) < 2 {
+        return
+    }
+    // entityが最新のものではない場合は何もしない
+    if (entities[0].Entry.ID != entity.Entry.ID) {
+        return
+    }
+    latestStop := entities[1].Entry.Stop
+    out = latestStop.In(time.Local).Format("06/01/02 15:04")
     return
 }
