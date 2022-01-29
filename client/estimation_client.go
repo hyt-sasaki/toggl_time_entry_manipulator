@@ -23,6 +23,7 @@ type IEstimationClient interface {
     Fetch([]int64) ([]*domain.Estimation, error)
     Insert(string, domain.Estimation) error
     Update(string, domain.Estimation) error
+    Delete(string) error
     Close()
 }
 
@@ -82,6 +83,11 @@ func (client *EstimationClient) Update(id string, estimation domain.Estimation) 
     estimation.UpdatedTm = time.Now()
     _, err = client.firestoreClient.Collection(client.config.CollectionName).Doc(id).Set(client.firestoreCtx, estimation)
 
+    return
+}
+
+func (client *EstimationClient) Delete(id string) (err error){
+    _, err = client.firestoreClient.Collection(client.config.CollectionName).Doc(id).Delete(client.firestoreCtx)
     return
 }
 

@@ -2,6 +2,7 @@ package command
 
 const AddEntryKeyword = "add_entry"
 const StopEntryKeyword = "stop_entry"
+const DeleteEntryKeyword = "delete_entry"
 const GetEntryKeyword = "get_entry"
 const ModifyEntryKeyword = "modify_entry"
 const ListEntryKeyword = "list_entries"

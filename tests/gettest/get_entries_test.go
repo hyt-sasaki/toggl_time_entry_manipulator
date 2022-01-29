@@ -2,7 +2,6 @@ package gettest
 
 import (
     _ "toggl_time_entry_manipulator/supports"
-	"encoding/json"
     "time"
 	"testing"
 
@@ -15,6 +14,7 @@ import (
 	"toggl_time_entry_manipulator/command/get"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
+	"toggl_time_entry_manipulator/tests"
 )
 
 type GetEntryTestSuite struct {
@@ -37,9 +37,7 @@ func (suite *GetEntryTestSuite) SetupTest() {
 func (suite *GetEntryTestSuite) TestItems() {
     // given
     arg := ""
-    data := command.DetailRefData{ID: 42}
-    dataBytes, _ := json.Marshal(data)
-    dataStr := string(dataBytes)
+    dataStr := tests.StringifyDetailRefData(command.DetailRefData{ID: 42})
     loc, _ := time.LoadLocation("Asia/Tokyo")
     timeLayout := "2006-01-02 15:04:05"
     start, _ := time.ParseInLocation(timeLayout, "2022-01-24 13:50:31", loc)
@@ -72,7 +70,7 @@ func (suite *GetEntryTestSuite) TestItems() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 7, len(items))
+    assert.Equal(t, 8, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
     assert.Equal(t, "Project: project3", items[1].Title)
     assert.Equal(t, "Tag: [tag2]", items[2].Title)
@@ -80,18 +78,20 @@ func (suite *GetEntryTestSuite) TestItems() {
     assert.Equal(t, "Start: 22/01/24 13:50", items[4].Title)
     assert.Equal(t, "Stop: 22/01/24 15:53", items[5].Title)
     assert.Equal(t, "Memo: memo test", items[6].Title)
-    for _, item := range items {
+    assert.Equal(t, "Delete this entry", items[7].Title)
+    for i := 0; i < 7; i++ {
+        item := items[i]
         assert.Equal(t, command.ModifyEntryKeyword, item.Arg.Keyword)
         assert.Equal(t, alfred.ModeTell, item.Arg.Mode)
     }
+    assert.Equal(t, command.DeleteEntryKeyword, items[7].Arg.Keyword)
+    assert.Equal(t, alfred.ModeDo, items[7].Arg.Mode)
 }
 
 func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
     // given
     arg := ""
-    data := command.DetailRefData{ID: 42}
-    dataBytes, _ := json.Marshal(data)
-    dataStr := string(dataBytes)
+    dataStr := tests.StringifyDetailRefData(command.DetailRefData{ID: 42})
     loc, _ := time.LoadLocation("Asia/Tokyo")
     timeLayout := "2006-01-02 15:04:05"
     start, _ := time.ParseInLocation(timeLayout, "2022-01-24 13:50:31", loc)
@@ -121,7 +121,7 @@ func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 7, len(items))
+    assert.Equal(t, 8, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
     assert.Equal(t, "Project: project3", items[1].Title)
     assert.Equal(t, "Tag: [tag2]", items[2].Title)
@@ -129,14 +129,13 @@ func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
     assert.Equal(t, "Start: 22/01/24 13:50", items[4].Title)
     assert.Equal(t, "Memo: memo test", items[5].Title)
     assert.Equal(t, "Stop this entry", items[6].Title)
+    assert.Equal(t, "Delete this entry", items[7].Title)
 }
 
 func (suite *GetEntryTestSuite) TestItems_whenNoEstimation() {
     // given
     arg := ""
-    data := command.DetailRefData{ID: 42}
-    dataBytes, _ := json.Marshal(data)
-    dataStr := string(dataBytes)
+    dataStr := tests.StringifyDetailRefData(command.DetailRefData{ID: 42})
     loc, _ := time.LoadLocation("Asia/Tokyo")
     timeLayout := "2006-01-02 15:04:05"
     start, _ := time.ParseInLocation(timeLayout, "2022-01-24 13:50:31", loc)
@@ -166,10 +165,11 @@ func (suite *GetEntryTestSuite) TestItems_whenNoEstimation() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 5, len(items))
+    assert.Equal(t, 6, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
     assert.Equal(t, "Project: project3", items[1].Title)
     assert.Equal(t, "Tag: [tag2]", items[2].Title)
     assert.Equal(t, "Start: 22/01/24 13:50", items[3].Title)
     assert.Equal(t, "Stop: 22/01/24 15:53", items[4].Title)
+    assert.Equal(t, "Delete this entry", items[5].Title)
 }

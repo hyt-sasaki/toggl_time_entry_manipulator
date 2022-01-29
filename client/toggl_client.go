@@ -13,6 +13,7 @@ type ITogglClient interface {
     GetAccount() (toggl.Account, error)
     StartTimeEntry(string, int, []string) (toggl.TimeEntry, error)
     StopTimeEntry(toggl.TimeEntry) (toggl.TimeEntry, error)
+    DeleteTimeEntry(toggl.TimeEntry) (error)
     UpdateTimeEntry(toggl.TimeEntry) (toggl.TimeEntry, error)
 }
 
@@ -61,6 +62,14 @@ func (c *TogglClient) UpdateTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.
     s := c.getSession()
 
     resultEntry, err = s.UpdateTimeEntry(entry)
+
+    return
+}
+
+func (c *TogglClient) DeleteTimeEntry(entry toggl.TimeEntry) (err error) {
+    s := c.getSession()
+
+    _, err = s.DeleteTimeEntry(entry)
 
     return
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"encoding/json"
     "time"
 
 	"github.com/jason0x43/go-toggl"
@@ -16,6 +15,7 @@ import (
 	"toggl_time_entry_manipulator/repository"
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/command/stop"
+	"toggl_time_entry_manipulator/tests"
 )
 
 type StopEntryTestSuite struct {
@@ -37,9 +37,7 @@ func (suite *StopEntryTestSuite) SetupTest() {
 
 func (suite *StopEntryTestSuite) TestDo() {
     // given
-    data := command.DetailRefData{ID: 42}
-    dataBytes, _ := json.Marshal(data)
-    dataStr := string(dataBytes)
+    dataStr := tests.StringifyDetailRefData(command.DetailRefData{ID: 42})
     start := time.Now().Add(-time.Hour)
     runningEntity := domain.TimeEntryEntity{
         Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start},

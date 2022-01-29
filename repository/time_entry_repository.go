@@ -19,6 +19,7 @@ type ITimeEntryRepository interface {
     FetchTogglAccount() (toggl.Account, error)
     Insert(*domain.TimeEntryEntity) error
     Update(*domain.TimeEntryEntity) error
+    Delete(*domain.TimeEntryEntity) error
     Stop(*domain.TimeEntryEntity) error
 }
 
@@ -97,6 +98,23 @@ func (repo *TimeEntryRepository) Update(entity *domain.TimeEntryEntity) (err err
 func (repo *TimeEntryRepository) Stop(entity *domain.TimeEntryEntity) (err error) {
     entry, err := repo.togglClient.StopTimeEntry(entity.Entry)
     entity.UpdateTimeEntry(entry)
+
+    return
+}
+
+func (repo *TimeEntryRepository) Delete(entity *domain.TimeEntryEntity) (err error) {
+    err = repo.estimationClient.Delete(entity.GetId())
+    if err != nil {
+        return
+    }
+    err = repo.togglClient.DeleteTimeEntry(entity.Entry)
+    if err != nil {
+        rollbackFail := repo.estimationClient.Insert(entity.GetId(), entity.Estimation) // rollback
+        if rollbackFail != nil {
+            dlog.Printf("rollback failed for id = %d: %s", entity.Entry.ID, rollbackFail)
+        }
+        return
+    }
 
     return
 }

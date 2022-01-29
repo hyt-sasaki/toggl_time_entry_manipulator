@@ -171,6 +171,18 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         items = append(items, stopItem)
     }
 
+    if alfred.FuzzyMatches("delete this entry", arg) {
+        descriptionItem := alfred.Item{
+            Title: "Delete this entry",
+            Arg: &alfred.ItemArg{
+                Keyword: command.DeleteEntryKeyword,
+                Mode: alfred.ModeDo,
+                Data: data,
+            },
+        }
+        items = append(items, descriptionItem)
+    }
+
     return
 }
 

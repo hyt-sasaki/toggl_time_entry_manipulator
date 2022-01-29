@@ -2,6 +2,7 @@ package repository
 
 import (
 	"testing"
+    "errors"
 	"time"
 	"toggl_time_entry_manipulator/client"
 	"toggl_time_entry_manipulator/domain"
@@ -192,4 +193,55 @@ func (suite *RepositoryTestSuite) TestStop() {
     // then
     t := suite.T()
     assert.Equal(t, entity.Entry.Stop.After(*entity.Entry.Start), true)
+}
+
+func (suite *RepositoryTestSuite) TestDelete() {
+    // given
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ ID: 10 },
+    }
+    suite.mockedEstimationClient.On("Delete", "10").Return(nil).Once()
+    suite.mockedToggleClient.On("DeleteTimeEntry", entity.Entry).Return(nil).Once()
+    
+    // when
+    suite.repo.Delete(&entity)
+
+    // then
+    t := suite.T()
+    suite.mockedToggleClient.AssertExpectations(t)
+    suite.mockedEstimationClient.AssertExpectations(t)
+}
+
+func (suite *RepositoryTestSuite) TestDelete_estimationDeletionFailed() {
+    // given
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ ID: 10 },
+    }
+    suite.mockedEstimationClient.On("Delete", "10").Return(errors.New("deletion failed")).Once()
+    
+    // when
+    suite.repo.Delete(&entity)
+
+    // then
+    t := suite.T()
+    suite.mockedEstimationClient.AssertExpectations(t)
+    suite.mockedToggleClient.AssertNotCalled(t, "DeleteTimeEntry")
+}
+
+func (suite *RepositoryTestSuite) TestDelete_rollback() {
+    // given
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ ID: 10 },
+    }
+    suite.mockedEstimationClient.On("Delete", "10").Return(nil).Once()
+    suite.mockedToggleClient.On("DeleteTimeEntry", entity.Entry).Return(errors.New("deletion faield")).Once()
+    suite.mockedEstimationClient.On("Insert", "10", entity.Estimation).Return(nil).Once()
+    
+    // when
+    suite.repo.Delete(&entity)
+
+    // then
+    t := suite.T()
+    suite.mockedToggleClient.AssertExpectations(t)
+    suite.mockedEstimationClient.AssertExpectations(t)
 }

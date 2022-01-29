@@ -10,6 +10,7 @@ import (
     "toggl_time_entry_manipulator/command/list"
     "toggl_time_entry_manipulator/command/get"
     "toggl_time_entry_manipulator/command/stop"
+    "toggl_time_entry_manipulator/command/delete"
     "toggl_time_entry_manipulator/command/modify"
 )
 
@@ -56,6 +57,9 @@ func main() {
                 Repo: repo,
             },
             stop.StopEntryCommand{
+                Repo: repo,
+            },
+            delete.DeleteEntryCommand{
                 Repo: repo,
             },
             modify.ModifyEntryCommand{
