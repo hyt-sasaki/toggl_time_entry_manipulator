@@ -66,14 +66,14 @@ func (suite *AddEntryTestSuite) TestItems_ProjectEdit() {
     assert.Equal(t, fmt.Sprintf("Project: %s", suite.projects[0].Name), items[0].Title)
     assert.Equal(t, fmt.Sprintf("Project: %s", suite.projects[2].Name), items[1].Title)
     assertAddItemArg(t, items[0], add.StateData{
-        Current: add.TagEdit, Args: add.EntryArgs{Project: 1}}, alfred.ModeTell)
+        Current: add.TagEdit, Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1}}}, alfred.ModeTell)
 }
 
 func (suite *AddEntryTestSuite) TestItems_TagEdit() {
     // given
     dataStr := convertAddStateData(add.StateData{
             Current: add.TagEdit,
-            Args: add.EntryArgs{Project: 1}})
+            Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1}}})
     arg := "ho"
 
     // when
@@ -86,14 +86,14 @@ func (suite *AddEntryTestSuite) TestItems_TagEdit() {
     assert.Equal(t, fmt.Sprintf("Tag: %s", suite.tags[2].Name), items[1].Title)
     assertAddItemArg(t, items[0], add.StateData{
         Current: add.DescriptionEdit,
-        Args: add.EntryArgs{Project: 1, Tag: "hoge"}}, alfred.ModeTell)
+        Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}}}}, alfred.ModeTell)
 }
 
 func (suite *AddEntryTestSuite) TestItems_TagEditNoInput() {
     // given
     dataStr := convertAddStateData(add.StateData{
             Current: add.TagEdit,
-            Args: add.EntryArgs{Project: 1}})
+            Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1}}})
     arg := ""
 
     // when
@@ -105,14 +105,14 @@ func (suite *AddEntryTestSuite) TestItems_TagEditNoInput() {
     assert.Equal(t, "No tag", items[0].Title)
     assertAddItemArg(t, items[0], add.StateData{
         Current: add.DescriptionEdit,
-        Args: add.EntryArgs{Project: 1, Tag: ""}}, alfred.ModeTell)
+        Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1}}}, alfred.ModeTell)
 }
 
 func (suite *AddEntryTestSuite) TestItems_DescriptionEdit() {
     // given
     dataStr := convertAddStateData(add.StateData{
             Current: add.DescriptionEdit,
-            Args: add.EntryArgs{Project: 1, Tag: "hoge"}})
+            Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}}}})
     arg := "new description"
 
     // when
@@ -125,14 +125,14 @@ func (suite *AddEntryTestSuite) TestItems_DescriptionEdit() {
 
     assertAddItemArg(t, items[0], add.StateData{
         Current: add.TimeEstimationEdit,
-        Args: add.EntryArgs{Project: 1, Tag: "hoge", Description: arg}}, alfred.ModeTell)
+        Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}, Description: arg}}}, alfred.ModeTell)
 }
 
 func (suite *AddEntryTestSuite) TestItems_TimeEstimationEdit() {
     // given
     dataStr := convertAddStateData(add.StateData{
             Current: add.TimeEstimationEdit,
-            Args: add.EntryArgs{Project: 1, Tag: "hoge", Description: "new description"}})
+            Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}, Description: "new description"}}})
     arg := "31"
 
     // when
@@ -145,14 +145,16 @@ func (suite *AddEntryTestSuite) TestItems_TimeEstimationEdit() {
 
     assertAddItemArg(t, items[0], add.StateData{
         Current: add.EndEdit,
-        Args: add.EntryArgs{Project: 1, Tag: "hoge", Description: "new description", TimeEstimation: 31}}, alfred.ModeDo)
+        Entity: domain.TimeEntryEntity{
+            Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}, Description: "new description"},
+            Estimation: domain.Estimation{Duration: 31},}}, alfred.ModeDo)
 }
 
 func (suite *AddEntryTestSuite) TestItems_TimeEstimationEdit_Invalid() {
     // given
     dataStr := convertAddStateData(add.StateData{
             Current: add.TimeEstimationEdit,
-            Args: add.EntryArgs{Project: 1, Tag: "hoge", Description: "new description"}})
+            Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}, Description: "new description"}}})
     arg := "aa"
 
     // when
@@ -165,15 +167,19 @@ func (suite *AddEntryTestSuite) TestItems_TimeEstimationEdit_Invalid() {
 
     assertAddItemArg(t, items[0], add.StateData{
         Current: add.EndEdit,
-        Args: add.EntryArgs{Project: 1, Tag: "hoge", Description: "new description", TimeEstimation: 30}}, alfred.ModeDo)
+        Entity: domain.TimeEntryEntity{
+            Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}, Description: "new description"},
+            Estimation: domain.Estimation{Duration: 30},}}, alfred.ModeDo)
 }
 
 
 func (suite *AddEntryTestSuite) TestDo() {
     // given
     dataStr := convertAddStateData(add.StateData{
-            Current: add.TimeEstimationEdit,
-            Args: add.EntryArgs{Project: 1, Tag: "hoge", Description: "new description", TimeEstimation: 31}})
+        Current: add.EndEdit,
+        Entity: domain.TimeEntryEntity{
+            Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}, Description: "new description"},
+            Estimation: domain.Estimation{Duration: 31}}})
     suite.mockedRepo.On("Insert", mock.Anything).Return(nil).Once()
 
     // when

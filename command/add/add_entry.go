@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/domain"
@@ -24,7 +23,7 @@ type AddEntryCommand struct {
 
 type StateData struct {
     Current  state
-    Args EntryArgs
+    Entity domain.TimeEntryEntity
 }
 type state int
 const (
@@ -61,6 +60,7 @@ func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error
 	} else {
         sd = StateData{
             Current: initialState,
+            Entity: domain.TimeEntryEntity{},
         }
     }
 
@@ -102,7 +102,7 @@ func (c AddEntryCommand) Do(data string) (out string, err error) {
         dlog.Printf("data should not be empty")
     }
 
-    entity := domain.Create(sd.Args.Description, sd.Args.Project, sd.Args.Tag, sd.Args.TimeEstimation)
+    entity := sd.Entity
 
     if err = c.Repo.Insert(&entity); err != nil {
         return
@@ -115,16 +115,19 @@ func (c AddEntryCommand) Do(data string) (out string, err error) {
 
 // descrption
 func (c AddEntryCommand) generateDescriptionItems(sd StateData, enteredDescription string) (items []alfred.Item) {
-    args := sd.Args
-    args.Description = enteredDescription
+    entity := sd.Entity
+    entity.Entry.Description = enteredDescription
+    tag := ""
+    if len(entity.Entry.Tags) > 0 {
+        tag = entity.Entry.Tags[0]
+    }
     item := alfred.Item{
         Title: fmt.Sprintf("New description: %s", enteredDescription),
-        Subtitle: c.subtitle(sd),
-        Autocomplete: sd.Args.Tag,
+        Autocomplete: tag,
         Arg: &alfred.ItemArg{
             Keyword: command.AddEntryKeyword,
             Mode: alfred.ModeTell,
-            Data: alfred.Stringify(StateData{Current: next(sd.Current), Args: args}),
+            Data: alfred.Stringify(StateData{Current: next(sd.Current), Entity: entity}),
         },
     }
     items = append(items, item)
@@ -133,79 +136,46 @@ func (c AddEntryCommand) generateDescriptionItems(sd StateData, enteredDescripti
 
 // project
 func (c AddEntryCommand) generateProjectItems(sd StateData, enteredArg string, projects []toggl.Project) (items []alfred.Item) {
-    args := sd.Args
-    for _, project := range projects {
-        if enteredArg != "" {
-            if !strings.Contains(project.Name, enteredArg) {
-                continue
-            }
-        }
-        args.Project = project.ID
-        item := alfred.Item{
-            Title: fmt.Sprintf("Project: %s", project.Name),
-            Subtitle: c.subtitle(sd),
-            Autocomplete: fmt.Sprintf("Project: %s", project.Name),
-            Arg: &alfred.ItemArg{
+    entity := sd.Entity
+    items = command.GenerateItemsForProject(
+        projects,
+        enteredArg,
+        entity,
+        func(e domain.TimeEntryEntity) (alfred.ItemArg) {
+            return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
                 Mode: alfred.ModeTell,
                 Data: alfred.Stringify(StateData{
                     Current: next(sd.Current),
-                    Args: args,
-                }),
-            },
-        }
-        items = append(items, item)
-    }
+                    Entity: e,
+                })}
+        },
+    )
     return
 }
 
 // tag
 func (c AddEntryCommand) generateTagItems(sd StateData, enteredArg string, tags []toggl.Tag) (items []alfred.Item) {
-    args := sd.Args
+    entity := sd.Entity
 
-    if enteredArg == "" {
-        noTagItem := alfred.Item{
-            Title: "No tag",
-            Arg: &alfred.ItemArg{
+    items = command.GenerateItemsForTag(
+        tags,
+        enteredArg,
+        entity,
+        func(e domain.TimeEntryEntity) (alfred.ItemArg) {
+            return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
                 Mode: alfred.ModeTell,
                 Data: alfred.Stringify(StateData{
                     Current: next(sd.Current),
-                    Args: args,
-                }),
-            },
-        }
-        items = append(items, noTagItem)
-    }
-
-    for _, tag := range tags {
-        if enteredArg != "" {
-            if !strings.Contains(tag.Name, enteredArg) {
-                continue
-            }
-        }
-        args.Tag = tag.Name
-        item := alfred.Item{
-            Title: fmt.Sprintf("Tag: %s", tag.Name),
-            Subtitle: c.subtitle(sd),
-            Autocomplete: fmt.Sprintf("Tag: %s", tag.Name),
-            Arg: &alfred.ItemArg{
-                Keyword: command.AddEntryKeyword,
-                Mode: alfred.ModeTell,
-                Data: alfred.Stringify(StateData{
-                    Current: next(sd.Current),
-                    Args: args,
-                }),
-            },
-        }
-        items = append(items, item)
-    }
+                    Entity: e,
+                })}})
     return
 }
 
 // time estimation
 func (c AddEntryCommand) generateTimeEstimationItems(sd StateData, enteredEstimationStr string) (items []alfred.Item) {
-    args := sd.Args
+    entity := sd.Entity
     var estimationTime int
     var err error
     estimationTime, err = strconv.Atoi(enteredEstimationStr)
@@ -214,16 +184,15 @@ func (c AddEntryCommand) generateTimeEstimationItems(sd StateData, enteredEstima
         dlog.Printf("Integer must be entered")
     }
 
-    args.TimeEstimation = estimationTime
+    entity.Estimation.Duration = estimationTime
     item := alfred.Item{
         Title: fmt.Sprintf("Time estimation [min]: %d", estimationTime),
-        Subtitle: c.subtitle(sd),
         Arg: &alfred.ItemArg{
             Keyword: command.AddEntryKeyword,
             Mode: alfred.ModeDo,
             Data: alfred.Stringify(StateData{
                 Current: next(sd.Current),
-                Args: args,
+                Entity: entity,
             }),
         },
     }
@@ -243,17 +212,4 @@ func next(c state) state {
             return EndEdit
     }
     return EndEdit
-}
-
-func (c AddEntryCommand) subtitle(sd StateData) string {
-    args := sd.Args
-    projects, _ := c.Repo.GetProjects()
-    projectName := "-"
-    for _, p := range projects {
-        if p.ID == args.Project {
-            projectName = p.Name
-        }
-    }
-
-    return fmt.Sprintf("Project: %s, Tag: %s, Desc: %s, Estimation: %d", projectName, args.Tag, args.Description, args.TimeEstimation)
 }

@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/domain"
@@ -81,47 +80,23 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
 
         case command.ModifyProject:
             projects, _ := c.Repo.GetProjects()     // TODO error handling
-            for _, project := range projects {
-                if arg != "" {
-                    if !strings.Contains(project.Name, arg) {
-                        continue
-                    }
-                }
-                entity.Entry.Pid = project.ID
-                item := alfred.Item{
-                    Title: fmt.Sprintf("Project: %s", project.Name),
-                    Subtitle: "Select the project for your time entry",
-                    Autocomplete: fmt.Sprintf("Project: %s", project.Name),
-                    Arg: &alfred.ItemArg{
+            items = command.GenerateItemsForProject(
+                projects, arg, entity,
+                func (e domain.TimeEntryEntity) (alfred.ItemArg) {
+                    return alfred.ItemArg{
                         Keyword: command.ModifyEntryKeyword,
                         Mode: alfred.ModeDo,
-                        Data: alfred.Stringify(entity),
-                    },
-                }
-                items = append(items, item)
-            }
+                        Data: alfred.Stringify(e)}})
 
         case command.ModifyTag:
             tags, _ := c.Repo.GetTags()     // TODO error handling
-            for _, tag := range tags {
-                if arg != "" {
-                    if !strings.Contains(tag.Name, arg) {
-                        continue
-                    }
-                }
-                entity.Entry.Tags = []string{tag.Name}
-                item := alfred.Item{
-                    Title: fmt.Sprintf("Tag: %s", tag.Name),
-                    Subtitle: "Select the tag for your time entry",
-                    Autocomplete: fmt.Sprintf("Tag: %s", tag.Name),
-                    Arg: &alfred.ItemArg{
-                        Keyword: command.ModifyEntryKeyword,
-                        Mode: alfred.ModeDo,
-                        Data: alfred.Stringify(entity),
-                    },
-                }
-                items = append(items, item)
-            }
+            items = command.GenerateItemsForTag(
+                tags, arg, entity,
+                func(e domain.TimeEntryEntity) (alfred.ItemArg) {
+                     return alfred.ItemArg{
+                         Keyword: command.ModifyEntryKeyword,
+                         Mode: alfred.ModeDo,
+                         Data: alfred.Stringify(e)}})
 
         case command.ModifyStart:
             start, err := convertToTime(arg, entity.Entry.Start)

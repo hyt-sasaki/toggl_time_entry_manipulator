@@ -2,12 +2,13 @@ package repository
 
 import (
 	"testing"
-    "time"
-	"toggl_time_entry_manipulator/domain"
+	"time"
 	"toggl_time_entry_manipulator/client"
+	"toggl_time_entry_manipulator/domain"
 
 	"github.com/jason0x43/go-toggl"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -136,7 +137,7 @@ func (suite *RepositoryTestSuite) TestInsert() {
         Duration: -1,
     }
     suite.mockedToggleClient.On("StartTimeEntry", description, pid, []string{tag}).Return(timeEntry, nil).Once()
-    suite.mockedEstimationClient.On("Insert", "10", entity.Estimation).Return(nil).Once()
+    suite.mockedEstimationClient.On("Insert", "10", mock.Anything).Return(nil).Once()
 
     // when
     suite.repo.Insert(&entity)
@@ -144,8 +145,10 @@ func (suite *RepositoryTestSuite) TestInsert() {
     // then
     t := suite.T()
     suite.mockedToggleClient.AssertExpectations(t)
-    suite.mockedEstimationClient.AssertExpectations(t)
-    assert.Equal(t, entity.Entry, timeEntry)
+    capturedId := suite.mockedEstimationClient.Calls[0].Arguments[0]
+    capturedEstimation := suite.mockedEstimationClient.Calls[0].Arguments[1].(domain.Estimation)
+    assert.Equal(t, "10", capturedId)
+    assert.Equal(t, 33, capturedEstimation.Duration)
 }
 
 func (suite *RepositoryTestSuite) TestUpdate() {
