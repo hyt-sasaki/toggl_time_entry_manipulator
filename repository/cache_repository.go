@@ -120,7 +120,15 @@ func (c *CachedRepository) Stop(entity *domain.TimeEntryEntity) (err error) {
 }
 
 func (c *CachedRepository) Delete(entity *domain.TimeEntryEntity) (err error) {
-    // TODO implement
+	if err = c.checkRefresh(); err != nil {
+		return
+	}
+    if err = c.timeEntryRepository.Delete(entity); err != nil {
+        return
+    }
+	if err = c.refresh(); err != nil {
+		return
+	}
     return
 }
 
