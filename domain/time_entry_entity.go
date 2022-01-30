@@ -49,3 +49,13 @@ func (entity *TimeEntryEntity) HasEstimation() bool {
 func (entity *TimeEntryEntity) IsRunning() bool {
     return entity.Entry.IsRunning();
 }
+
+func (entity *TimeEntryEntity) IsLate() bool {
+    if (entity.IsRunning()) {
+        return false
+    }
+    if (!entity.HasEstimation()) {
+        return false
+    }
+    return entity.Entry.Duration > (int64)(entity.Estimation.Duration * 60)
+}

@@ -44,14 +44,10 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
         if !filterByArg(arg, title) {
             continue
         }
-        icon := "power_off.png"
-        if entity.IsRunning() {
-            icon = "power_on.png"
-        }
         item := alfred.Item{
             Title: getTitle(entity, projects),
             Subtitle: getSubtitle(entity),
-            Icon: icon,
+            Icon: getIcon(entity),
             Arg: &alfred.ItemArg{
                 Keyword: command.GetEntryKeyword,
                 Mode: alfred.ModeTell,
@@ -100,6 +96,21 @@ func filterByArg(arg, title string) (res bool) {
     args := strings.Split(arg, " ")
     for _, a := range(args) {
         res = res && strings.Contains(title, a)
+    }
+    return
+}
+
+func getIcon(entity domain.TimeEntryEntity) (icon string) {
+    icon = "power_off.png"
+    if entity.IsRunning() {
+        icon = "power_on.png"
+    }
+    if entity.IsLate() {
+        if entity.Estimation.Memo == "" {
+            icon = "late.png"
+        } else {
+            icon = "late_checked.png"
+        }
     }
     return
 }
