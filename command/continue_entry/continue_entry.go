@@ -42,6 +42,7 @@ func (c ContinueEntryCommand) Items(arg, data string) (items []alfred.Item, err 
         itemArg = nil
     } else {
         entity.Estimation.Duration = estimatedDuration
+        entity.Estimation.Memo = ""
         itemArg = &alfred.ItemArg{
             Keyword: command.ContinueEntryKeyword,
             Mode: alfred.ModeDo,
