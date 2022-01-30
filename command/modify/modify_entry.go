@@ -122,7 +122,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
             icon := "power_off.png"
             beforeUpdated := *entity.Entry.Start
             if err == nil {
-                entity.Entry.Start = &start
+                entity.Entry.SetStartTime(start, false)
                 itemArg = &alfred.ItemArg{
                     Keyword: command.ModifyEntryKeyword,
                     Mode: alfred.ModeDo,
@@ -151,7 +151,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
             icon := "poewr_off.png"
             beforeUpdated := *entity.Entry.Stop
             if err == nil {
-                entity.Entry.Stop = &stop
+                entity.Entry.SetStopTime(stop)
                 itemArg = &alfred.ItemArg{
                     Keyword: command.ModifyEntryKeyword,
                     Mode: alfred.ModeDo,

@@ -33,6 +33,9 @@ func (suite *ModifyEntryTestSuite) SetupTest() {
     suite.com = &modify.ModifyEntryCommand{
         Repo: suite.mockedRepo,
     }
+    suite.mockedRepo.On("Fetch").Return([]domain.TimeEntryEntity{
+        {Entry: toggl.TimeEntry{ID: 1, Description: "item1"}},
+    }, nil)
 }
 
 func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsDescription() {
@@ -147,7 +150,7 @@ func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStartAndHMFormat() {
     arg := "20:31"
     start, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
     entity := domain.TimeEntryEntity{
-        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start},
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start, Duration: -1},
         Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
     }
     suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
@@ -174,7 +177,7 @@ func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStartAndFullFormat() {
     arg := "21/01/28 20:31"
     start, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
     entity := domain.TimeEntryEntity{
-        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start},
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start, Duration: -1},
         Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
     }
     suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
@@ -201,7 +204,7 @@ func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStartAndInvalidFormat()
     arg := "21/01/282031"
     start, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
     entity := domain.TimeEntryEntity{
-        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start},
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start, Duration: -1},
         Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
     }
     suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
@@ -225,9 +228,10 @@ func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStopAndHMFormat() {
     dataBytes, _ := json.Marshal(data)
     dataStr := string(dataBytes)
     arg := "20:31"
+    start, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:25", time.Local)
     stop, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
     entity := domain.TimeEntryEntity{
-        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Stop: &stop},
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start, Stop: &stop, Duration: 1200},
         Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
     }
     suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
@@ -252,9 +256,10 @@ func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStopAndFullFormat() {
     dataBytes, _ := json.Marshal(data)
     dataStr := string(dataBytes)
     arg := "21/01/28 20:31"
+    start, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:25", time.Local)
     stop, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
     entity := domain.TimeEntryEntity{
-        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Stop: &stop},
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start, Stop: &stop, Duration: 1200},
         Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
     }
     suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
@@ -279,9 +284,10 @@ func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsStopAndInvalidFormat() 
     dataBytes, _ := json.Marshal(data)
     dataStr := string(dataBytes)
     arg := "21/01/282031"
+    start, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:25", time.Local)
     stop, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
     entity := domain.TimeEntryEntity{
-        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Stop: &stop},
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Start: &start, Stop: &stop, Duration: 1200},
         Estimation: domain.Estimation{Duration: 100, Memo: "old memo"},
     }
     suite.mockedRepo.On("FindOneById", 42).Return(entity, nil).Once()
