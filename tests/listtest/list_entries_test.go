@@ -52,7 +52,6 @@ func (suite *ListEntryTestSuite) TestItems() {
     assert.Equal(t, 2, len(items))
     item := items[0]
     assert.Equal(t, "item2-1 (-)", item.Title)
-    assert.Equal(t, "actual duration: 0 [min], estimation: -", item.Subtitle)
     var itemData command.DetailRefData
     err := json.Unmarshal([]byte(item.Arg.Data), &itemData)
     assert.Nil(t, err)

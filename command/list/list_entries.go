@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
+	"time"
+    "strconv"
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/config"
 	"toggl_time_entry_manipulator/domain"
@@ -76,19 +77,37 @@ func getTitle(entity domain.TimeEntryEntity, projects []toggl.Project) (title st
     return
 }
 
+// TODO testを追加
 func getSubtitle(entity domain.TimeEntryEntity) (subtitle string) {
-    if entity.HasEstimation() {
-        subtitle = fmt.Sprintf("actual duration: %s [min], estimation: %d [min]", convertDuration(entity.Entry.Duration), entity.Estimation.Duration)
+    if entity.IsRunning() {
+        subtitle = fmt.Sprintf("%s ... (", convertTimeToString(entity.Entry.Start))
     } else {
-        subtitle = fmt.Sprintf("actual duration: %s [min], estimation: -", convertDuration(entity.Entry.Duration))
+        subtitle = fmt.Sprintf("%s - %s (actual: %s min, ", convertTimeToString(entity.Entry.Start), convertTimeToString(entity.Entry.Stop), convertDuration(entity.Entry.Duration))
+    }
+    if entity.HasEstimation() {
+        subtitle = fmt.Sprintf("%sestimation: %d min)", subtitle, entity.Estimation.Duration)
     }
 
     return
 }
 
+func convertTimeToString(t *time.Time) (dateStr string) {
+    if t == nil {
+        return
+    }
+    ny, nm, nd := time.Now().In(time.Local).Date()
+    ty, tm, td := t.In(time.Local).Date()
+    layout := "06/01/02 15:04"
+    if (ny == ty && nm == tm && nd  == td) {
+        layout = "15:04"
+    }
+    dateStr = t.In(time.Local).Format(layout)
+    return
+}
+
 func convertDuration(duration int64) string {
     if duration < 0 {
-        return "[stil running...]"
+        return "-"
     }
     min := int(duration / 60)
     return strconv.Itoa(min)
