@@ -71,10 +71,10 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
             var title string
             var itemArg *alfred.ItemArg
             if err != nil {
-                estimatedDuration = entity.Estimation.Duration
                 title = "Duration: -"
                 itemArg = nil
             } else {
+                entity.Estimation.Duration = estimatedDuration
                 itemArg = &alfred.ItemArg{
                     Keyword: command.ModifyEntryKeyword,
                     Mode: alfred.ModeDo,
@@ -83,7 +83,6 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
                 icon = "power_on.png"
                 title = fmt.Sprintf("Duration: %d", estimatedDuration)
             }
-            entity.Estimation.Duration = estimatedDuration
             items = append(items, alfred.Item{
                 Title: title,
                 Subtitle: "Enter estimated duration",
