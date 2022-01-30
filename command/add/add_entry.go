@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 
+	"toggl_time_entry_manipulator/config"
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
@@ -39,10 +40,11 @@ type EntryArgs struct {
 
 type AddEntryCommand struct {
     Repo repository.ICachedRepository
+    Config config.WorkflowConfig
 }
 
-func NewAddEntryCommand(repo repository.ICachedRepository) (AddEntryCommand) {
-    return AddEntryCommand{Repo: repo}
+func NewAddEntryCommand(repo repository.ICachedRepository, config config.WorkflowConfig) (AddEntryCommand) {
+    return AddEntryCommand{Repo: repo, Config: config}
 }
 
 func (c AddEntryCommand) About() alfred.CommandDef {
@@ -151,6 +153,7 @@ func (c AddEntryCommand) generateProjectItems(sd StateData, enteredArg string, p
         projects,
         enteredArg,
         entity,
+        c.Config,
         func(e domain.TimeEntryEntity) (alfred.ItemArg) {
             return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,

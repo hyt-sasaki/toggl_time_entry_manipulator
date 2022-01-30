@@ -39,6 +39,7 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) (commands []al
         continue_entry.NewContinueEntryCommand,
         wire.FieldsOf(new(*config.Config), "TogglConfig"),
         wire.FieldsOf(new(*config.Config), "FirestoreConfig"),
+        wire.FieldsOf(new(*config.Config), "WorkflowConfig"),
         wire.Bind(new(client.ITogglClient), new(*client.TogglClient)),
         wire.Bind(new(client.IEstimationClient), new(*client.EstimationClient)),
         wire.Bind(new(repository.ITimeEntryRepository), new(*repository.TimeEntryRepository)),

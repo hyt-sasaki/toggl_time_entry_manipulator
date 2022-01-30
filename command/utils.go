@@ -1,15 +1,17 @@
 package command
 
 import (
-    "fmt"
-	"os"
+	"fmt"
 	"log"
-    "strings"
-    "strconv"
-    "golang.org/x/text/unicode/norm"
+	"os"
+	"strconv"
+	"strings"
+	"toggl_time_entry_manipulator/config"
+	"toggl_time_entry_manipulator/domain"
+
 	"github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
-    "toggl_time_entry_manipulator/domain"
+	"golang.org/x/text/unicode/norm"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command]", log.LstdFlags)
@@ -18,8 +20,19 @@ func GenerateItemsForProject(
     projects []toggl.Project,
     arg string,
     entity domain.TimeEntryEntity,
+    config config.WorkflowConfig,
     itemArgGenerator func(domain.TimeEntryEntity) alfred.ItemArg,
 ) (items []alfred.Item) {
+    if arg == "" {
+        for _, ac := range config.ProjectAutocompleteItems {
+            item := alfred.Item{
+                Title: ac,
+                Subtitle: "For complete",
+                Autocomplete: ac,
+            }
+            items = append(items, item)
+        }
+    }
     for _, project := range projects {
         if arg != "" {
             if !Match(project.Name, arg) {

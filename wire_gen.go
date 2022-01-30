@@ -45,10 +45,11 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) ([]alfred.Comm
 	}
 	timeEntryRepository := repository.NewTimeEntryRepository(togglClient, estimationClient)
 	cachedRepository := repository.NewCachedRepository(cache, timeEntryRepository)
-	addEntryCommand := add.NewAddEntryCommand(cachedRepository)
+	workflowConfig := config.WorkflowConfig
+	addEntryCommand := add.NewAddEntryCommand(cachedRepository, workflowConfig)
 	listEntryCommand := list.NewListEntryCommand(cachedRepository)
 	getEntryCommand := get.NewGetEntryCommand(cachedRepository)
-	modifyEntryCommand := modify.NewModifyEntryCommand(cachedRepository)
+	modifyEntryCommand := modify.NewModifyEntryCommand(cachedRepository, workflowConfig)
 	stopEntryCommand := stop.NewStopEntryCommand(cachedRepository)
 	deleteEntryCommand := delete2.NewDeleteEntryCommand(cachedRepository)
 	continueEntryCommand := continue_entry.NewContinueEntryCommand(cachedRepository)
