@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-    "strconv"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
 	"toggl_time_entry_manipulator/command"
@@ -32,33 +31,14 @@ func (c ContinueEntryCommand) Items(arg, data string) (items []alfred.Item, err 
         return
     }
 
-    autocomplete := fmt.Sprintf("%d", entity.Estimation.Duration)
-    estimatedDuration, parseErr := strconv.Atoi(arg)
-    icon := "power_off.png"
-    var title string
-    var itemArg *alfred.ItemArg
-    if parseErr != nil {
-        title = "Duration: -"
-        itemArg = nil
-    } else {
-        entity.Estimation.Duration = estimatedDuration
-        entity.Estimation.Memo = ""
-        itemArg = &alfred.ItemArg{
+    items = command.GenerateItemsForEstimatedDuration(arg, entity, func(e domain.TimeEntryEntity) (alfred.ItemArg){
+        e.Estimation.Memo = ""
+        return alfred.ItemArg{
             Keyword: command.ContinueEntryKeyword,
             Mode: alfred.ModeDo,
-            Data: alfred.Stringify(entity),
+            Data: alfred.Stringify(e),
         }
-        icon = "power_on.png"
-        title = fmt.Sprintf("Duration: %d", estimatedDuration)
-    }
-    items = append(items, alfred.Item{
-        Title: title,
-        Subtitle: "Enter estimated duration",
-        Autocomplete: autocomplete,
-        Icon: icon,
-        Arg: itemArg,
     })
-
     items = append(items, generateBackItem(entity.Entry.ID))
 
     return
