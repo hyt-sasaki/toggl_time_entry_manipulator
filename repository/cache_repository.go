@@ -23,6 +23,7 @@ type ICachedRepository interface {
     Insert(*domain.TimeEntryEntity) (error)
     Update(*domain.TimeEntryEntity) (error)
     Stop(*domain.TimeEntryEntity) (error)
+    Continue(*domain.TimeEntryEntity) (domain.TimeEntryEntity, error)
     Delete(*domain.TimeEntryEntity) (error)
 }
 
@@ -124,6 +125,20 @@ func (c *CachedRepository) Delete(entity *domain.TimeEntryEntity) (err error) {
 		return
 	}
     if err = c.timeEntryRepository.Delete(entity); err != nil {
+        return
+    }
+	if err = c.refresh(); err != nil {
+		return
+	}
+    return
+}
+
+func (c *CachedRepository) Continue(entity *domain.TimeEntryEntity) (newEntity domain.TimeEntryEntity, err error) {
+	if err = c.checkRefresh(); err != nil {
+		return
+	}
+    newEntity, err = c.timeEntryRepository.Continue(entity); 
+    if err != nil {
         return
     }
 	if err = c.refresh(); err != nil {
