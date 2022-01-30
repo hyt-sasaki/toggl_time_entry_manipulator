@@ -53,6 +53,11 @@ func (m *MockedToggleClient) StopTimeEntry(entry toggl.TimeEntry) (toggl.TimeEnt
     return args.Get(0).(toggl.TimeEntry), args.Error(1)
 }
 
+func (m *MockedToggleClient) ContinueTimeEntry(entry toggl.TimeEntry) (toggl.TimeEntry, error) {
+    args := m.Called(entry)
+    return args.Get(0).(toggl.TimeEntry), args.Error(1)
+}
+
 func (m *MockedToggleClient) UpdateTimeEntry(entry toggl.TimeEntry) (toggl.TimeEntry, error) {
     args := m.Called(entry)
     return args.Get(0).(toggl.TimeEntry), args.Error(1)
