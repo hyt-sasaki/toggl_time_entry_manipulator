@@ -245,3 +245,32 @@ func (suite *RepositoryTestSuite) TestDelete_rollback() {
     suite.mockedToggleClient.AssertExpectations(t)
     suite.mockedEstimationClient.AssertExpectations(t)
 }
+
+func (suite *RepositoryTestSuite) TestContinue() {
+    // given
+    start, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:25", time.Local)
+    stop, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 13:45", time.Local)
+    now, _ := time.ParseInLocation("06-01-02 15:04", "21-01-27 18:00", time.Local)
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Pid: 1, Description: "item42", Start: &start, Stop: &stop, Duration: 1200},
+        Estimation: domain.Estimation{Duration: 100, Memo: "old memo", CreatedTm: start, UpdatedTm: stop},
+    }
+    suite.mockedToggleClient.On("ContinueTimeEntry", entity.Entry).Return(toggl.TimeEntry{
+        ID: 43, Pid: 1, Description: "item42", Start: &now, Duration: -1,
+    }, nil).Once()
+    suite.mockedEstimationClient.On("Insert", "43", entity.Estimation).Return(nil).Once()
+
+    // when
+    newEntity, _ := suite.repo.Continue(&entity)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, 43, newEntity.Entry.ID)
+    assert.Equal(t, 1, newEntity.Entry.Pid)
+    assert.Equal(t, "item42", newEntity.Entry.Description)
+    assert.Equal(t, &now, newEntity.Entry.Start)
+    assert.Nil(t, newEntity.Entry.Stop)
+    assert.True(t, newEntity.IsRunning())
+    assert.Equal(t, entity.Estimation.Duration, newEntity.Estimation.Duration)
+    assert.Equal(t, entity.Estimation.Memo, newEntity.Estimation.Memo)
+}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"log"
     "strings"
+    "strconv"
     "golang.org/x/text/unicode/norm"
 	"github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
@@ -68,6 +69,37 @@ func GenerateItemsForTag(
         items = append(items, item)
     }
     return 
+}
+
+func GenerateItemsForEstimatedDuration(
+    arg string,
+    entity domain.TimeEntryEntity,
+    itemArgGenerator func(domain.TimeEntryEntity) alfred.ItemArg,
+) (items []alfred.Item) {
+    autocomplete := fmt.Sprintf("%d", entity.Estimation.Duration)
+    estimatedDuration, parseErr := strconv.Atoi(arg)
+    icon := "power_off.png"
+    var title string
+    var itemArg *alfred.ItemArg
+    if parseErr != nil {
+        title = "Duration: -"
+        itemArg = nil
+    } else {
+        entity.Estimation.Duration = estimatedDuration
+        _itemArg := itemArgGenerator(entity)
+        itemArg = &_itemArg
+        icon = "power_on.png"
+        title = fmt.Sprintf("Duration: %d", estimatedDuration)
+    }
+    items = append(items, alfred.Item{
+        Title: title,
+        Subtitle: "Enter estimated duration",
+        Autocomplete: autocomplete,
+        Icon: icon,
+        Arg: itemArg,
+    })
+
+    return
 }
 
 func Match(target, query string) (bool) {

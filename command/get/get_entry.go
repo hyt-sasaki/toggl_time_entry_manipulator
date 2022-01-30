@@ -189,6 +189,19 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         }
         items = append(items, stopItem)
     }
+
+    if !entity.IsRunning() && alfred.FuzzyMatches("continue this entry", arg) {
+        continueItem := alfred.Item{
+            Title: "Continue this entry",
+            Arg: &alfred.ItemArg{
+                Keyword: command.ContinueEntryKeyword,
+                Mode: alfred.ModeTell,
+                Data: data,
+            },
+        }
+        items = append(items, continueItem)
+    }
+
     backItem := command.GenerateBackItem(command.ListEntryKeyword, "")
     items = append(items, backItem)
 

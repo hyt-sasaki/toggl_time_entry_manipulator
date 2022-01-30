@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"time"
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/domain"
@@ -66,29 +65,12 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
             items = append(items, generateBackItem(modifyData))
 
         case command.ModifyDuration:
-            estimatedDuration, err := strconv.Atoi(arg)
-            icon := "power_off.png"
-            var title string
-            var itemArg *alfred.ItemArg
-            if err != nil {
-                title = "Duration: -"
-                itemArg = nil
-            } else {
-                entity.Estimation.Duration = estimatedDuration
-                itemArg = &alfred.ItemArg{
+            items = command.GenerateItemsForEstimatedDuration(arg, entity, func(e domain.TimeEntryEntity) (alfred.ItemArg){
+                return alfred.ItemArg{
                     Keyword: command.ModifyEntryKeyword,
                     Mode: alfred.ModeDo,
-                    Data: alfred.Stringify(entity),
+                    Data: alfred.Stringify(e),
                 }
-                icon = "power_on.png"
-                title = fmt.Sprintf("Duration: %d", estimatedDuration)
-            }
-            items = append(items, alfred.Item{
-                Title: title,
-                Subtitle: "Enter estimated duration",
-                Autocomplete: fmt.Sprintf("%d", estimatedDuration),
-                Icon: icon,
-                Arg: itemArg,
             })
             items = append(items, generateBackItem(modifyData))
 

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"sort"
+    "strconv"
 	"toggl_time_entry_manipulator/client"
 	"toggl_time_entry_manipulator/domain"
 
@@ -21,6 +22,7 @@ type ITimeEntryRepository interface {
     Update(*domain.TimeEntryEntity) error
     Delete(*domain.TimeEntryEntity) error
     Stop(*domain.TimeEntryEntity) error
+    Continue(*domain.TimeEntryEntity) (domain.TimeEntryEntity, error)
 }
 
 type TimeEntryRepository struct {
@@ -99,6 +101,26 @@ func (repo *TimeEntryRepository) Stop(entity *domain.TimeEntryEntity) (err error
     entry, err := repo.togglClient.StopTimeEntry(entity.Entry)
     entity.UpdateTimeEntry(entry)
 
+    return
+}
+
+func (repo *TimeEntryRepository) Continue(entity *domain.TimeEntryEntity) (newEntity domain.TimeEntryEntity, err error) {
+    // TODO
+    newEntry, err := repo.togglClient.ContinueTimeEntry(entity.Entry)
+    if err != nil {
+        return
+    }
+    id := strconv.Itoa(newEntry.ID)
+    newEstimation := entity.Estimation.Copy()
+    err = repo.estimationClient.Insert(id, newEstimation)   // TODO CreatedTm, UpdatedTmもnewEstimationに反映できるようにする
+    if err != nil {
+        repo.togglClient.DeleteTimeEntry(newEntry)
+        return 
+    }
+    newEntity = domain.TimeEntryEntity{
+        Entry: newEntry,
+        Estimation: newEstimation,
+    }
     return
 }
 
