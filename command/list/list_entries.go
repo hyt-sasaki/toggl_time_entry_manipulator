@@ -5,9 +5,10 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"toggl_time_entry_manipulator/command"
+	"toggl_time_entry_manipulator/config"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
-    "toggl_time_entry_manipulator/command"
 
 	"github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
@@ -17,10 +18,11 @@ var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.list]", log
 
 type ListEntryCommand struct {
     Repo repository.ICachedRepository
+    Config config.WorkflowConfig
 }
 
-func NewListEntryCommand(repo repository.ICachedRepository) (ListEntryCommand) {
-    return ListEntryCommand{Repo: repo}
+func NewListEntryCommand(repo repository.ICachedRepository, workflowConfig config.WorkflowConfig) (ListEntryCommand) {
+    return ListEntryCommand{Repo: repo, Config: workflowConfig}
 }
 
 func (c ListEntryCommand) About() alfred.CommandDef {
@@ -43,7 +45,9 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
 
     for _, entity := range entities {
         title := getTitle(entity, projects)
-        if !command.Match(title, arg) {
+        projectAlias := config.GetAlias(c.Config.ProjectAliases, entity.Entry.Pid)
+        // TODO tagのalias
+        if !command.Match(title + projectAlias, arg) {
             continue
         }
         item := alfred.Item{

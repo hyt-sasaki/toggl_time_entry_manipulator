@@ -47,7 +47,7 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) ([]alfred.Comm
 	cachedRepository := repository.NewCachedRepository(cache, timeEntryRepository)
 	workflowConfig := config.WorkflowConfig
 	addEntryCommand := add.NewAddEntryCommand(cachedRepository, workflowConfig)
-	listEntryCommand := list.NewListEntryCommand(cachedRepository)
+	listEntryCommand := list.NewListEntryCommand(cachedRepository, workflowConfig)
 	getEntryCommand := get.NewGetEntryCommand(cachedRepository)
 	modifyEntryCommand := modify.NewModifyEntryCommand(cachedRepository, workflowConfig)
 	stopEntryCommand := stop.NewStopEntryCommand(cachedRepository)
