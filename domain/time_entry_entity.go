@@ -18,6 +18,11 @@ type Estimation struct {
     UpdatedTm time.Time `firestore:"updatedTm"`
 }
 
+func (estimation *Estimation) Copy() (Estimation) {
+    copied := *estimation
+    return copied
+}
+
 func (entity TimeEntryEntity) GetId() string {
     return strconv.Itoa(entity.Entry.ID)
 }
@@ -58,4 +63,11 @@ func (entity *TimeEntryEntity) IsLate() bool {
         return false
     }
     return entity.Entry.Duration > (int64)(entity.Estimation.Duration * 60)
+}
+
+func (entity *TimeEntryEntity) Copy() (TimeEntryEntity) {
+    copied := TimeEntryEntity{}
+    copied.Entry = entity.Entry.Copy()
+    copied.Estimation = entity.Estimation.Copy()
+    return copied
 }

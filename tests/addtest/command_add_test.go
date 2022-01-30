@@ -81,7 +81,7 @@ func (suite *AddEntryTestSuite) TestItems_TagEdit() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 2, len(items))
+    assert.Equal(t, 3, len(items))
     assert.Equal(t, fmt.Sprintf("Tag: %s", suite.tags[0].Name), items[0].Title)
     assert.Equal(t, fmt.Sprintf("Tag: %s", suite.tags[2].Name), items[1].Title)
     assertAddItemArg(t, items[0], add.StateData{
@@ -101,7 +101,7 @@ func (suite *AddEntryTestSuite) TestItems_TagEditNoInput() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 4, len(items))
+    assert.Equal(t, 5, len(items))
     assert.Equal(t, "No tag", items[0].Title)
     assertAddItemArg(t, items[0], add.StateData{
         Current: add.DescriptionEdit,
@@ -120,7 +120,7 @@ func (suite *AddEntryTestSuite) TestItems_DescriptionEdit() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 1, len(items))
+    assert.Equal(t, 2, len(items))
     assert.Equal(t, fmt.Sprintf("New description: %s", arg), items[0].Title)
 
     assertAddItemArg(t, items[0], add.StateData{
@@ -140,7 +140,7 @@ func (suite *AddEntryTestSuite) TestItems_TimeEstimationEdit() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 1, len(items))
+    assert.Equal(t, 2, len(items))
     assert.Equal(t, fmt.Sprintf("Time estimation [min]: %s", arg), items[0].Title)
 
     assertAddItemArg(t, items[0], add.StateData{
@@ -162,7 +162,7 @@ func (suite *AddEntryTestSuite) TestItems_TimeEstimationEdit_Invalid() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 1, len(items))
+    assert.Equal(t, 2, len(items))
     assert.Equal(t, "Time estimation [min]: 30", items[0].Title)
 
     assertAddItemArg(t, items[0], add.StateData{

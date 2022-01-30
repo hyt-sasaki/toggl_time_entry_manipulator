@@ -73,3 +73,15 @@ func Match(target, query string) (bool) {
     }
     return true
 }
+
+func GenerateBackItem(keyword, data string) (alfred.Item) {
+    return alfred.Item{
+        Title: "Back",
+        Icon: "back.png",
+        Arg: &alfred.ItemArg{
+            Keyword: keyword,
+            Mode: alfred.ModeTell,
+            Data: data,
+        },
+    }
+}

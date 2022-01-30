@@ -134,6 +134,9 @@ func (c AddEntryCommand) generateDescriptionItems(sd StateData, enteredDescripti
         },
     }
     items = append(items, item)
+    if hasPrevState(sd.Current) {
+        items = append(items, generateBackItem(sd))
+    }
     return
 }
 
@@ -154,6 +157,9 @@ func (c AddEntryCommand) generateProjectItems(sd StateData, enteredArg string, p
                 })}
         },
     )
+    if hasPrevState(sd.Current) {
+        items = append(items, generateBackItem(sd))
+    }
     return
 }
 
@@ -173,6 +179,9 @@ func (c AddEntryCommand) generateTagItems(sd StateData, enteredArg string, tags 
                     Current: next(sd.Current),
                     Entity: e,
                 })}})
+    if hasPrevState(sd.Current) {
+        items = append(items, generateBackItem(sd))
+    }
     return
 }
 
@@ -200,19 +209,60 @@ func (c AddEntryCommand) generateTimeEstimationItems(sd StateData, enteredEstima
         },
     }
     items = append(items, item)
+    if hasPrevState(sd.Current) {
+        items = append(items, generateBackItem(sd))
+    }
     return
 }
 
+var processOrders = []state{ProjectEdit, TagEdit, DescriptionEdit, TimeEstimationEdit, EndEdit}
 func next(c state) state {
-    switch c {
-        case DescriptionEdit:
-            return TimeEstimationEdit
-        case ProjectEdit:
-            return TagEdit
-        case TagEdit:
-            return DescriptionEdit
-        case TimeEstimationEdit:
-            return EndEdit
+    n := len(processOrders)
+
+    next_i := n - 1
+    for i, s := range processOrders[:n-1] {
+        if (s == c) {
+            next_i = i + 1
+            break
+        }
     }
-    return EndEdit
+    return processOrders[next_i]
+}
+
+func prev(c state) state {
+    prev_i := 0
+    for i, s := range processOrders[1:] {
+        if (s == c) {
+            prev_i = i
+            break
+        }
+    }
+    return processOrders[prev_i]
+}
+
+func getPrevEntity(entity domain.TimeEntryEntity, prevState state) (prevEntity domain.TimeEntryEntity) {
+    prevEntity = entity.Copy()
+    switch prevState {
+    case ProjectEdit:
+        prevEntity.Entry.Pid = 0
+    case TagEdit:
+        prevEntity.Entry.Tags = []string{}
+    case DescriptionEdit:
+        prevEntity.Entry.Description = ""
+    case TimeEstimationEdit:
+        prevEntity.Estimation.Duration = 0
+    }
+    return prevEntity
+}
+
+func hasPrevState(c state) bool {
+    return processOrders[0] != c
+}
+
+func generateBackItem(stateData StateData) (alfred.Item) {
+    prevState := prev(stateData.Current)
+    return command.GenerateBackItem(command.AddEntryKeyword, alfred.Stringify(StateData{
+        Current: prevState,
+        Entity: getPrevEntity(stateData.Entity, prevState),
+    }))
 }

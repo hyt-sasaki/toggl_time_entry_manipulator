@@ -57,6 +57,8 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
                     Data: alfred.Stringify(entity),
                 },
             })
+            items = append(items, generateBackItem(modifyData))
+
         case command.ModifyDuration:
             estimatedDuration, err := strconv.Atoi(arg)
             var itemArg *alfred.ItemArg
@@ -77,6 +79,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
                 Subtitle: "Enter estimated duration",
                 Arg: itemArg,
             })
+            items = append(items, generateBackItem(modifyData))
 
         case command.ModifyProject:
             projects, _ := c.Repo.GetProjects()     // TODO error handling
@@ -87,6 +90,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
                         Keyword: command.ModifyEntryKeyword,
                         Mode: alfred.ModeDo,
                         Data: alfred.Stringify(e)}})
+            items = append(items, generateBackItem(modifyData))
 
         case command.ModifyTag:
             tags, _ := c.Repo.GetTags()     // TODO error handling
@@ -97,6 +101,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
                          Keyword: command.ModifyEntryKeyword,
                          Mode: alfred.ModeDo,
                          Data: alfred.Stringify(e)}})
+            items = append(items, generateBackItem(modifyData))
 
         case command.ModifyStart:
             start, err := convertToTime(arg, entity.Entry.Start)
@@ -123,6 +128,8 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
                 Subtitle: fmt.Sprintf("Modify start time (%s)", beforeUpdated.In(time.Local).Format("06/01/02 15:04")),
                 Arg: itemArg,
             })
+            items = append(items, generateBackItem(modifyData))
+
         case command.ModifyStop:
             stop, err := convertToTime(arg, entity.Entry.Stop)
             var itemArg *alfred.ItemArg
@@ -146,6 +153,8 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
                 Subtitle: fmt.Sprintf("Modify stop time (%s)", beforeUpdated.In(time.Local).Format("06/01/02 15:04")),
                 Arg: itemArg,
             })
+            items = append(items, generateBackItem(modifyData))
+
         case command.ModifyMemo:
             entity.Estimation.Memo = arg
             items = append(items, alfred.Item{
@@ -157,6 +166,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
                     Data: alfred.Stringify(entity),
                 },
             })
+            items = append(items, generateBackItem(modifyData))
     }
 
     return
@@ -214,4 +224,10 @@ func (c ModifyEntryCommand) calcLatestStop(entity domain.TimeEntryEntity) (out s
     latestStop := entities[1].Entry.Stop
     out = latestStop.In(time.Local).Format("06/01/02 15:04")
     return
+}
+
+func generateBackItem(modifyData command.ModifyData) (alfred.Item) {
+    return command.GenerateBackItem(command.GetEntryKeyword, alfred.Stringify(command.DetailRefData{
+        ID: modifyData.Ref.ID,
+    }))
 }
