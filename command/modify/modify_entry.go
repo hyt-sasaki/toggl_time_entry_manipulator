@@ -66,11 +66,11 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
             items = append(items, generateBackItem(modifyData))
 
         case command.ModifyDuration:
-            estimatedDuration, err := strconv.Atoi(arg)
+            estimatedDuration, parseErr := strconv.Atoi(arg)
             icon := "power_off.png"
             var title string
             var itemArg *alfred.ItemArg
-            if err != nil {
+            if parseErr != nil {
                 title = "Duration: -"
                 itemArg = nil
             } else {

@@ -89,7 +89,7 @@ func (suite *GetEntryTestSuite) TestItems() {
     }
     assert.Nil(t, items[7].Arg)
     assert.Equal(t, command.ContinueEntryKeyword, items[8].Arg.Keyword)
-    assert.Equal(t, alfred.ModeDo, items[8].Arg.Mode)
+    assert.Equal(t, alfred.ModeTell, items[8].Arg.Mode)
     assert.Equal(t, command.ListEntryKeyword, items[9].Arg.Keyword)
     assert.Equal(t, alfred.ModeTell, items[9].Arg.Mode)
 }
