@@ -106,7 +106,7 @@ func (suite *ModifyEntryTestSuite) TestItems_whenTargetIsDurationAndArgIsNotNumb
 
     // then
     t := suite.T()
-    assert.Equal(t, "Duration: 100", items[0].Title)
+    assert.Equal(t, "Duration: -", items[0].Title)
     assert.Nil(t, items[0].Arg)
 }
 
