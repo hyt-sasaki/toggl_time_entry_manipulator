@@ -5,6 +5,8 @@ Toggl trackで時間を記録するためのalfred workflow。
 Togglで時間を記録するのに加えて、見積もりを記録することができる。  
 見積もりはtogglで記録できないので、別途Firestoreを利用している。
 
+https://user-images.githubusercontent.com/11168945/151706717-6aea3f00-f713-42e4-987e-919ba7ac5043.mp4
+
 ## 設定
 ### configファイル
 configは以下のファイルを編集する。
