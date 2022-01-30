@@ -14,4 +14,20 @@ type FirestoreConfig struct {
 }
 type WorkflowConfig struct {
     ProjectAutocompleteItems []string `desc:"autocomplete items"`
+    ProjectAliases []AliasMap `desc:"Project aliases"`
+    TagAliases []AliasMap `desc:"Tag aliases"`
+}
+
+type AliasMap struct {
+    ID int
+    Alias string
+}
+
+func GetAlias(maps []AliasMap, id int) (string) {
+    for _, m := range maps {
+        if m.ID == id {
+            return m.Alias
+        }
+    }
+    return ""
 }

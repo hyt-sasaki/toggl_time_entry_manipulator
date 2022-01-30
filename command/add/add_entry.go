@@ -178,6 +178,7 @@ func (c AddEntryCommand) generateTagItems(sd StateData, enteredArg string, tags 
         tags,
         enteredArg,
         entity,
+        c.Config,
         func(e domain.TimeEntryEntity) (alfred.ItemArg) {
             return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,

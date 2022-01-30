@@ -20,11 +20,11 @@ func GenerateItemsForProject(
     projects []toggl.Project,
     arg string,
     entity domain.TimeEntryEntity,
-    config config.WorkflowConfig,
+    workflowConfig config.WorkflowConfig,
     itemArgGenerator func(domain.TimeEntryEntity) alfred.ItemArg,
 ) (items []alfred.Item) {
     if arg == "" {
-        for _, ac := range config.ProjectAutocompleteItems {
+        for _, ac := range workflowConfig.ProjectAutocompleteItems {
             item := alfred.Item{
                 Title: ac,
                 Subtitle: "For complete",
@@ -35,7 +35,8 @@ func GenerateItemsForProject(
     }
     for _, project := range projects {
         if arg != "" {
-            if !Match(project.Name, arg) {
+            alias := config.GetAlias(workflowConfig.ProjectAliases, project.ID)
+            if !Match(project.Name + alias, arg) {
                 continue
             }
         }
@@ -55,6 +56,7 @@ func GenerateItemsForTag(
     tags []toggl.Tag,
     arg string,
     entity domain.TimeEntryEntity,
+    workflowConfig config.WorkflowConfig,
     itemArgGenerator func(domain.TimeEntryEntity) alfred.ItemArg,
 ) (items []alfred.Item) {
     if arg == "" {
@@ -68,7 +70,8 @@ func GenerateItemsForTag(
     }
     for _, tag := range tags {
         if arg != "" {
-            if !Match(tag.Name, arg) {
+            alias := config.GetAlias(workflowConfig.TagAliases, tag.ID)
+            if !Match(tag.Name + alias, arg) {
                 continue
             }
         }

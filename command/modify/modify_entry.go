@@ -94,7 +94,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
         case command.ModifyTag:
             tags, _ := c.Repo.GetTags()     // TODO error handling
             items = command.GenerateItemsForTag(
-                tags, arg, entity,
+                tags, arg, entity, c.Config,
                 func(e domain.TimeEntryEntity) (alfred.ItemArg) {
                      return alfred.ItemArg{
                          Keyword: command.ModifyEntryKeyword,
