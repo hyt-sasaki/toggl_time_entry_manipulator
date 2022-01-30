@@ -20,6 +20,10 @@ type GetEntryCommand struct {
     Repo repository.ICachedRepository
 }
 
+func NewGetEntryCommand(repo repository.ICachedRepository) (GetEntryCommand) {
+    return GetEntryCommand{Repo: repo}
+}
+
 func (c GetEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{
         Keyword: command.GetEntryKeyword,

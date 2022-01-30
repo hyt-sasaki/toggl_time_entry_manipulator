@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"time"
+	"toggl_time_entry_manipulator/config"
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
@@ -17,6 +18,11 @@ var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.get]", log.
 
 type ModifyEntryCommand struct {
     Repo repository.ICachedRepository
+    Config config.WorkflowConfig
+}
+
+func NewModifyEntryCommand(repo repository.ICachedRepository, config config.WorkflowConfig) (ModifyEntryCommand) {
+    return ModifyEntryCommand{Repo: repo, Config: config}
 }
 
 func (c ModifyEntryCommand) About() alfred.CommandDef {
@@ -77,7 +83,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
         case command.ModifyProject:
             projects, _ := c.Repo.GetProjects()     // TODO error handling
             items = command.GenerateItemsForProject(
-                projects, arg, entity,
+                projects, arg, entity, c.Config,
                 func (e domain.TimeEntryEntity) (alfred.ItemArg) {
                     return alfred.ItemArg{
                         Keyword: command.ModifyEntryKeyword,

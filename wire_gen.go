@@ -9,12 +9,19 @@ package main
 import (
 	"github.com/jason0x43/go-alfred"
 	"toggl_time_entry_manipulator/client"
+	"toggl_time_entry_manipulator/command/add"
+	"toggl_time_entry_manipulator/command/continue_entry"
+	delete2 "toggl_time_entry_manipulator/command/delete"
+	"toggl_time_entry_manipulator/command/get"
+	"toggl_time_entry_manipulator/command/list"
+	"toggl_time_entry_manipulator/command/modify"
+	"toggl_time_entry_manipulator/command/stop"
 	"toggl_time_entry_manipulator/repository"
 )
 
 // Injectors from wire.go:
 
-func initializeRepository(workflow alfred.Workflow) (*repository.CachedRepository, error) {
+func initializeCommands(workflow alfred.Workflow, firstCall bool) ([]alfred.Command, error) {
 	cacheFile := NewCacheFile(workflow)
 	cache, err := NewCache(cacheFile)
 	if err != nil {
@@ -38,5 +45,14 @@ func initializeRepository(workflow alfred.Workflow) (*repository.CachedRepositor
 	}
 	timeEntryRepository := repository.NewTimeEntryRepository(togglClient, estimationClient)
 	cachedRepository := repository.NewCachedRepository(cache, timeEntryRepository)
-	return cachedRepository, nil
+	workflowConfig := config.WorkflowConfig
+	addEntryCommand := add.NewAddEntryCommand(cachedRepository, workflowConfig)
+	listEntryCommand := list.NewListEntryCommand(cachedRepository)
+	getEntryCommand := get.NewGetEntryCommand(cachedRepository)
+	modifyEntryCommand := modify.NewModifyEntryCommand(cachedRepository, workflowConfig)
+	stopEntryCommand := stop.NewStopEntryCommand(cachedRepository)
+	deleteEntryCommand := delete2.NewDeleteEntryCommand(cachedRepository)
+	continueEntryCommand := continue_entry.NewContinueEntryCommand(cachedRepository)
+	v := NewCommands(firstCall, addEntryCommand, listEntryCommand, getEntryCommand, modifyEntryCommand, stopEntryCommand, deleteEntryCommand, continueEntryCommand)
+	return v, nil
 }
