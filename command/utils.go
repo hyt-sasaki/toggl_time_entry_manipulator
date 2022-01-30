@@ -2,11 +2,16 @@ package command
 
 import (
     "fmt"
+	"os"
+	"log"
     "strings"
+    "golang.org/x/text/unicode/norm"
 	"github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
     "toggl_time_entry_manipulator/domain"
 )
+
+var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command]", log.LstdFlags)
 
 func GenerateItemsForProject(
     projects []toggl.Project,
@@ -66,8 +71,10 @@ func GenerateItemsForTag(
 }
 
 func Match(target, query string) (bool) {
-    for _, word := range strings.Split(query, " ") {
-        if (!strings.Contains(target, word)) {
+    normedQuery := norm.NFKC.String(query)
+    normedTarget := norm.NFKC.String(target)
+    for _, word := range strings.Split(normedQuery, " ") {
+        if (!strings.Contains(normedTarget, word)) {
             return false
         }
     }

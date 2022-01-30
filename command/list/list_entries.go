@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	"toggl_time_entry_manipulator/domain"
 	"toggl_time_entry_manipulator/repository"
     "toggl_time_entry_manipulator/command"
@@ -41,7 +40,7 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
 
     for _, entity := range entities {
         title := getTitle(entity, projects)
-        if !filterByArg(arg, title) {
+        if !command.Match(title, arg) {
             continue
         }
         item := alfred.Item{
@@ -86,18 +85,6 @@ func convertDuration(duration int64) string {
     }
     min := int(duration / 60)
     return strconv.Itoa(min)
-}
-
-func filterByArg(arg, title string) (res bool) {
-    res = true
-    if arg == "" {
-        return
-    }
-    args := strings.Split(arg, " ")
-    for _, a := range(args) {
-        res = res && strings.Contains(title, a)
-    }
-    return
 }
 
 func getIcon(entity domain.TimeEntryEntity) (icon string) {
