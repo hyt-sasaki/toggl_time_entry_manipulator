@@ -159,6 +159,24 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         items = append(items, memoItem)
     }
 
+    if alfred.FuzzyMatches("delete this entry", arg) {
+        descriptionItem := alfred.Item{
+            Title: "Delete this entry (Press Cmd+Enter)",
+        }
+        descriptionItem.AddMod(
+            alfred.ModCmd,
+            alfred.ItemMod{
+                Subtitle: "This operation cannot be undone",
+                Arg: &alfred.ItemArg{
+                    Keyword: command.DeleteEntryKeyword,
+                    Mode: alfred.ModeDo,
+                    Data: data,
+                },
+            },
+        )
+        items = append(items, descriptionItem)
+    }
+
     if entity.IsRunning() && alfred.FuzzyMatches("stop this entry", arg) {
         stopItem := alfred.Item{
             Title: "Stop this entry",
@@ -169,18 +187,6 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
             },
         }
         items = append(items, stopItem)
-    }
-
-    if alfred.FuzzyMatches("delete this entry", arg) {
-        descriptionItem := alfred.Item{
-            Title: "Delete this entry",
-            Arg: &alfred.ItemArg{
-                Keyword: command.DeleteEntryKeyword,
-                Mode: alfred.ModeDo,
-                Data: data,
-            },
-        }
-        items = append(items, descriptionItem)
     }
 
     return

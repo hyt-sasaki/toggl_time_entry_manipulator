@@ -78,14 +78,14 @@ func (suite *GetEntryTestSuite) TestItems() {
     assert.Equal(t, "Start: 22/01/24 13:50", items[4].Title)
     assert.Equal(t, "Stop: 22/01/24 15:53", items[5].Title)
     assert.Equal(t, "Memo: memo test", items[6].Title)
-    assert.Equal(t, "Delete this entry", items[7].Title)
-    for i := 0; i < 7; i++ {
+    assert.Equal(t, "Delete this entry (Press Cmd+Enter)", items[7].Title)
+    normalItemIds := []int{0, 1, 2, 3, 4, 5, 6}
+    for _, i := range normalItemIds {
         item := items[i]
         assert.Equal(t, command.ModifyEntryKeyword, item.Arg.Keyword)
         assert.Equal(t, alfred.ModeTell, item.Arg.Mode)
     }
-    assert.Equal(t, command.DeleteEntryKeyword, items[7].Arg.Keyword)
-    assert.Equal(t, alfred.ModeDo, items[7].Arg.Mode)
+    assert.Nil(t, items[7].Arg)
 }
 
 func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
@@ -128,8 +128,17 @@ func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
     assert.Equal(t, "Estimated duration: 66 [min]", items[3].Title)
     assert.Equal(t, "Start: 22/01/24 13:50", items[4].Title)
     assert.Equal(t, "Memo: memo test", items[5].Title)
-    assert.Equal(t, "Stop this entry", items[6].Title)
-    assert.Equal(t, "Delete this entry", items[7].Title)
+    assert.Equal(t, "Delete this entry (Press Cmd+Enter)", items[6].Title)
+    assert.Equal(t, "Stop this entry", items[7].Title)
+    normalItemIds := []int{0, 1, 2, 3, 4, 5}
+    for _, i := range normalItemIds {
+        item := items[i]
+        assert.Equal(t, command.ModifyEntryKeyword, item.Arg.Keyword)
+        assert.Equal(t, alfred.ModeTell, item.Arg.Mode)
+    }
+    assert.Nil(t, items[6].Arg)
+    assert.Equal(t, command.StopEntryKeyword, items[7].Arg.Keyword)
+    assert.Equal(t, alfred.ModeDo, items[7].Arg.Mode)
 }
 
 func (suite *GetEntryTestSuite) TestItems_whenNoEstimation() {
@@ -171,5 +180,5 @@ func (suite *GetEntryTestSuite) TestItems_whenNoEstimation() {
     assert.Equal(t, "Tag: [tag2]", items[2].Title)
     assert.Equal(t, "Start: 22/01/24 13:50", items[3].Title)
     assert.Equal(t, "Stop: 22/01/24 15:53", items[4].Title)
-    assert.Equal(t, "Delete this entry", items[5].Title)
+    assert.Equal(t, "Delete this entry (Press Cmd+Enter)", items[5].Title)
 }
