@@ -70,7 +70,7 @@ func (suite *GetEntryTestSuite) TestItems() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 9, len(items))
+    assert.Equal(t, 10, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
     assert.Equal(t, "Project: project3", items[1].Title)
     assert.Equal(t, "Tag: [tag2]", items[2].Title)
@@ -79,7 +79,8 @@ func (suite *GetEntryTestSuite) TestItems() {
     assert.Equal(t, "Stop: 22/01/24 15:53", items[5].Title)
     assert.Equal(t, "Memo: memo test", items[6].Title)
     assert.Equal(t, "Delete this entry (Press Cmd+Enter)", items[7].Title)
-    assert.Equal(t, "Back", items[8].Title)
+    assert.Equal(t, "Continue this entry", items[8].Title)
+    assert.Equal(t, "Back", items[9].Title)
     normalItemIds := []int{0, 1, 2, 3, 4, 5, 6}
     for _, i := range normalItemIds {
         item := items[i]
@@ -87,8 +88,10 @@ func (suite *GetEntryTestSuite) TestItems() {
         assert.Equal(t, alfred.ModeTell, item.Arg.Mode)
     }
     assert.Nil(t, items[7].Arg)
-    assert.Equal(t, command.ListEntryKeyword, items[8].Arg.Keyword)
-    assert.Equal(t, alfred.ModeTell, items[8].Arg.Mode)
+    assert.Equal(t, command.ContinueEntryKeyword, items[8].Arg.Keyword)
+    assert.Equal(t, alfred.ModeDo, items[8].Arg.Mode)
+    assert.Equal(t, command.ListEntryKeyword, items[9].Arg.Keyword)
+    assert.Equal(t, alfred.ModeTell, items[9].Arg.Mode)
 }
 
 func (suite *GetEntryTestSuite) TestItems_whenEntryIsRunning() {
@@ -180,12 +183,13 @@ func (suite *GetEntryTestSuite) TestItems_whenNoEstimation() {
 
     // then
     t := suite.T()
-    assert.Equal(t, 7, len(items))
+    assert.Equal(t, 8, len(items))
     assert.Equal(t, "Description: item42", items[0].Title)
     assert.Equal(t, "Project: project3", items[1].Title)
     assert.Equal(t, "Tag: [tag2]", items[2].Title)
     assert.Equal(t, "Start: 22/01/24 13:50", items[3].Title)
     assert.Equal(t, "Stop: 22/01/24 15:53", items[4].Title)
     assert.Equal(t, "Delete this entry (Press Cmd+Enter)", items[5].Title)
-    assert.Equal(t, "Back", items[6].Title)
+    assert.Equal(t, "Continue this entry", items[6].Title)
+    assert.Equal(t, "Back", items[7].Title)
 }
