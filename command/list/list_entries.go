@@ -19,6 +19,9 @@ type ListEntryCommand struct {
     Repo repository.ICachedRepository
 }
 
+func NewListEntryCommand(repo repository.ICachedRepository) (ListEntryCommand) {
+    return ListEntryCommand{Repo: repo}
+}
 
 func (c ListEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{

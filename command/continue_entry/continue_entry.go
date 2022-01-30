@@ -17,6 +17,10 @@ type ContinueEntryCommand struct {
     Repo repository.ICachedRepository
 }
 
+func NewContinueEntryCommand(repo repository.ICachedRepository) (ContinueEntryCommand) {
+    return ContinueEntryCommand{Repo: repo}
+}
+
 func (c ContinueEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{
         Keyword: command.ContinueEntryKeyword,

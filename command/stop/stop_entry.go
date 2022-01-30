@@ -16,6 +16,10 @@ type StopEntryCommand struct {
     Repo repository.ICachedRepository
 }
 
+func NewStopEntryCommand(repo repository.ICachedRepository) (StopEntryCommand) {
+    return StopEntryCommand{Repo: repo}
+}
+
 func (c StopEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{
         Keyword: command.StopEntryKeyword,

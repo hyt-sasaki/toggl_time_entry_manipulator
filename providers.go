@@ -9,6 +9,13 @@ import (
 	"github.com/jason0x43/go-alfred"
     "toggl_time_entry_manipulator/config"
     "toggl_time_entry_manipulator/repository/myCache"
+    "toggl_time_entry_manipulator/command/add"
+    "toggl_time_entry_manipulator/command/list"
+    "toggl_time_entry_manipulator/command/get"
+    "toggl_time_entry_manipulator/command/modify"
+    "toggl_time_entry_manipulator/command/stop"
+    "toggl_time_entry_manipulator/command/delete"
+    "toggl_time_entry_manipulator/command/continue_entry"
 )
 
 const configFileName = "config.json"
@@ -67,6 +74,34 @@ func NewCache(cacheFile myCache.CacheFile) (cache *myCache.Cache, err error) {
     dlog.Println(cache)
 
     return
+}
+
+func NewCommands(
+    firstCall bool,
+    addCommand add.AddEntryCommand,
+    listCommand list.ListEntryCommand,
+    getCommand get.GetEntryCommand,
+    modifyComamnd modify.ModifyEntryCommand,
+    stopCommand stop.StopEntryCommand,
+    deleteCommand delete.DeleteEntryCommand,
+    continueCommand continue_entry.ContinueEntryCommand,
+) []alfred.Command {
+    if firstCall {
+        return []alfred.Command{
+            addCommand,
+            listCommand,
+        }
+    } else {
+        return []alfred.Command{
+            addCommand,
+            listCommand,
+            getCommand,
+            modifyComamnd,
+            stopCommand,
+            deleteCommand,
+            continueCommand,
+        }
+    }
 }
 
 

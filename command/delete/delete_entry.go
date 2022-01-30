@@ -17,6 +17,10 @@ type DeleteEntryCommand struct {
     Repo repository.ICachedRepository
 }
 
+func NewDeleteEntryCommand(repo repository.ICachedRepository) (DeleteEntryCommand) {
+    return DeleteEntryCommand{Repo: repo}
+}
+
 func (c DeleteEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{
         Keyword: command.DeleteEntryKeyword,

@@ -17,10 +17,6 @@ import (
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.add]", log.LstdFlags)
 
-type AddEntryCommand struct {
-    Repo repository.ICachedRepository
-}
-
 type StateData struct {
     Current  state
     Entity domain.TimeEntryEntity
@@ -39,6 +35,14 @@ type EntryArgs struct {
     Project int
     Tag string
     TimeEstimation int  // minutes
+}
+
+type AddEntryCommand struct {
+    Repo repository.ICachedRepository
+}
+
+func NewAddEntryCommand(repo repository.ICachedRepository) (AddEntryCommand) {
+    return AddEntryCommand{Repo: repo}
 }
 
 func (c AddEntryCommand) About() alfred.CommandDef {

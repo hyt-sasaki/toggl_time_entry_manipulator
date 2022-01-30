@@ -19,6 +19,10 @@ type ModifyEntryCommand struct {
     Repo repository.ICachedRepository
 }
 
+func NewModifyEntryCommand(repo repository.ICachedRepository) (ModifyEntryCommand) {
+    return ModifyEntryCommand{Repo: repo}
+}
+
 func (c ModifyEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{
         Keyword: command.ModifyEntryKeyword,
