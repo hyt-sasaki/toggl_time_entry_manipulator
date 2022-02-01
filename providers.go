@@ -63,8 +63,9 @@ func NewCacheFile(workflow alfred.Workflow) myCache.CacheFile {
 func NewCache(cacheFile myCache.CacheFile) (cache *myCache.Cache, err error) {
     var data *myCache.Data
 	if err = alfred.LoadJSON(string(cacheFile), &data); err != nil {
-		dlog.Println("Error loading cache:", err)
-        return
+		dlog.Println("No cache file found:", err)
+        data = &myCache.Data{}
+        alfred.SaveJSON(string(cacheFile), *data)
 	}
     cache = &myCache.Cache{
         Data: data,
