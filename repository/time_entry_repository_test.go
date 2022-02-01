@@ -17,6 +17,7 @@ type RepositoryTestSuite struct {
     suite.Suite
     mockedToggleClient *client.MockedToggleClient
     mockedEstimationClient *client.MockedEstimationClient
+    mockedAccount toggl.Account
     repo *TimeEntryRepository
 }
 
@@ -27,6 +28,19 @@ func TestRepositoryTestSuite(t *testing.T) {
 func (suite *RepositoryTestSuite) SetupTest() {
     suite.mockedEstimationClient = &client.MockedEstimationClient{}
     suite.mockedToggleClient = &client.MockedToggleClient{}
+    suite.mockedAccount = toggl.Account{}
+    suite.mockedAccount.Data.TimeEntries = []toggl.TimeEntry{
+        { ID: 1, }, 
+        { ID: 2, },
+    }
+    suite.mockedAccount.Data.Projects = []toggl.Project{
+        { ID: 3, }, 
+        { ID: 4, },
+    }
+    suite.mockedAccount.Data.Tags = []toggl.Tag{
+        { ID: 5, Name: "tag1", }, 
+        { ID: 6, Name: "tag2", },
+    }
     suite.repo = &TimeEntryRepository{
         estimationClient: suite.mockedEstimationClient,
         togglClient: suite.mockedToggleClient,
@@ -34,27 +48,14 @@ func (suite *RepositoryTestSuite) SetupTest() {
 }
 func (suite *RepositoryTestSuite) TestFetchAccount() {
     // given
-    mockedAccount := toggl.Account{}
-    mockedAccount.Data.TimeEntries = []toggl.TimeEntry{
-        { ID: 1, }, 
-        { ID: 2, },
-    }
-    mockedAccount.Data.Projects = []toggl.Project{
-        { ID: 3, }, 
-        { ID: 4, },
-    }
-    mockedAccount.Data.Tags = []toggl.Tag{
-        { ID: 5, Name: "tag1", }, 
-        { ID: 6, Name: "tag2", },
-    }
-    suite.mockedToggleClient.On("GetAccount").Return(mockedAccount, nil).Once()
+    suite.mockedToggleClient.On("GetAccount").Return(suite.mockedAccount, nil).Once()
 
     // when
     account, _ := suite.repo.FetchTogglAccount()
 
     // then
     t := suite.T()
-    assert.Equal(t, mockedAccount, account)
+    assert.Equal(t, suite.mockedAccount, account)
     suite.mockedToggleClient.AssertExpectations(t)
 }
 
@@ -63,11 +64,6 @@ func (suite *RepositoryTestSuite) TestFetch() {
     entryIds := []int64{1, 2}
 
     // mock
-    account := toggl.Account{}
-    account.Data.TimeEntries = []toggl.TimeEntry{
-        { ID: 1, }, 
-        { ID: 2, },
-    }
     mockedEstimations := []*domain.Estimation{
         { Duration: 30, Memo: "memo1", },
         { Duration: 40, Memo: "memo2", },
@@ -76,17 +72,17 @@ func (suite *RepositoryTestSuite) TestFetch() {
 
 
     // when
-    entities, _ := suite.repo.Fetch(account)
+    entities, _ := suite.repo.Fetch(suite.mockedAccount)
 
     // then
     t := suite.T()
     assert.Equal(t, []domain.TimeEntryEntity{
         {
-            Entry: account.Data.TimeEntries[0],
+            Entry: suite.mockedAccount.Data.TimeEntries[0],
             Estimation: *mockedEstimations[0],
         },
         {
-            Entry: account.Data.TimeEntries[1],
+            Entry: suite.mockedAccount.Data.TimeEntries[1],
             Estimation: *mockedEstimations[1],
         },
     }, entities)
@@ -128,7 +124,7 @@ func (suite *RepositoryTestSuite) TestInsert() {
     // given
     description := "description"
     pid := 1
-    tag := "tag"
+    tag := "tag2"
     duration := 33
     entity := domain.Create(description, pid, tag, duration)
     timeEntry := toggl.TimeEntry{
@@ -141,7 +137,7 @@ func (suite *RepositoryTestSuite) TestInsert() {
     suite.mockedEstimationClient.On("Insert", "10", mock.Anything).Return(nil).Once()
 
     // when
-    suite.repo.Insert(&entity)
+    suite.repo.Insert(&entity, suite.mockedAccount.Data.Tags)
 
     // then
     t := suite.T()
@@ -156,7 +152,7 @@ func (suite *RepositoryTestSuite) TestUpdate() {
     // given
     description := "description"
     pid := 1
-    tag := "tag"
+    tag := "tag2"
     duration := 33
     entity := domain.Create(description, pid, tag, duration)
     suite.mockedToggleClient.On("UpdateTimeEntry", entity.Entry).Return(toggl.TimeEntry{
@@ -168,7 +164,7 @@ func (suite *RepositoryTestSuite) TestUpdate() {
     suite.mockedEstimationClient.On("Update", "10", entity.Estimation).Return(nil).Once()
 
     // when
-    suite.repo.Update(&entity)
+    suite.repo.Update(&entity, suite.mockedAccount.Data.Tags)
 
     // then
     t := suite.T()

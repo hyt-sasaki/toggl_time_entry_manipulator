@@ -10,6 +10,7 @@ import (
 	"toggl_time_entry_manipulator/domain"
 
 	"github.com/jason0x43/go-toggl"
+	"golang.org/x/text/unicode/norm"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.repository]", log.LstdFlags)
@@ -18,8 +19,8 @@ var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.repository]", log.L
 type ITimeEntryRepository interface {
     Fetch(toggl.Account) ([]domain.TimeEntryEntity, error)
     FetchTogglAccount() (toggl.Account, error)
-    Insert(*domain.TimeEntryEntity) error
-    Update(*domain.TimeEntryEntity) error
+    Insert(*domain.TimeEntryEntity, []toggl.Tag) error
+    Update(*domain.TimeEntryEntity, []toggl.Tag) error
     Delete(*domain.TimeEntryEntity) error
     Stop(*domain.TimeEntryEntity) error
     Continue(*domain.TimeEntryEntity) (domain.TimeEntryEntity, error)
@@ -73,7 +74,8 @@ func (repo *TimeEntryRepository) Fetch(account toggl.Account) (entities []domain
     return
 }
 
-func (repo *TimeEntryRepository) Insert(entity *domain.TimeEntryEntity) (err error) {
+func (repo *TimeEntryRepository) Insert(entity *domain.TimeEntryEntity, tags []toggl.Tag) (err error) {
+    setProperTags(&entity.Entry, tags)
     entry, err := repo.togglClient.StartTimeEntry(entity.Entry.Description, entity.Entry.Pid, entity.Entry.Tags)
     entity.UpdateTimeEntry(entry)
 
@@ -86,7 +88,8 @@ func (repo *TimeEntryRepository) Insert(entity *domain.TimeEntryEntity) (err err
     return
 }
 
-func (repo *TimeEntryRepository) Update(entity *domain.TimeEntryEntity) (err error) {
+func (repo *TimeEntryRepository) Update(entity *domain.TimeEntryEntity, tags []toggl.Tag) (err error) {
+    setProperTags(&entity.Entry, tags)
     entry, err := repo.togglClient.UpdateTimeEntry(entity.Entry)
     entity.UpdateTimeEntry(entry)
 
@@ -139,4 +142,17 @@ func (repo *TimeEntryRepository) Delete(entity *domain.TimeEntryEntity) (err err
     }
 
     return
+}
+
+func setProperTags(entry *toggl.TimeEntry, tags []toggl.Tag) {
+    correctTags := make([]string, len(entry.Tags))
+    for i, originalTag := range entry.Tags {
+        for _, tag := range tags {
+            if norm.NFKC.String(originalTag) == norm.NFKC.String(tag.Name) {
+                correctTags[i] = tag.Name
+                break
+            }
+        }
+    }
+    entry.Tags = correctTags
 }

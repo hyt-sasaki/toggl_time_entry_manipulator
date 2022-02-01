@@ -60,8 +60,8 @@ func GenerateItemsForTag(
     itemArgGenerator func(domain.TimeEntryEntity) alfred.ItemArg,
 ) (items []alfred.Item) {
     if arg == "" {
-        itemArg := itemArgGenerator(entity)
         entity.Entry.Tags = []string{}
+        itemArg := itemArgGenerator(entity)
         noTagItem := alfred.Item{
             Title: "No tag",
             Arg: &itemArg,

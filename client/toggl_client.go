@@ -6,7 +6,6 @@ import (
 	"toggl_time_entry_manipulator/config"
 
 	"github.com/jason0x43/go-toggl"
-	"golang.org/x/text/unicode/norm"
 )
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.client]", log.LstdFlags)
@@ -47,12 +46,13 @@ func (c *TogglClient) StartTimeEntry(description string, pid int, tags []string)
     }
 
     if len(tags) > 0 {
-        entry.Tags = cleanseTags(tags)
+        entry.Tags = tags
         _, err = s.UpdateTimeEntry(entry)
         if err != nil {
             return
         }
     }
+
     return
 }
 
@@ -67,7 +67,6 @@ func (c *TogglClient) StopTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.Ti
 func (c *TogglClient) ContinueTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.TimeEntry, err error) {
     s := c.getSession()
 
-    entry.Tags = cleanseTags(entry.Tags)
     resultEntry, err = s.ContinueTimeEntry(entry, false)
 
     return
@@ -76,7 +75,6 @@ func (c *TogglClient) ContinueTimeEntry(entry toggl.TimeEntry) (resultEntry togg
 func (c *TogglClient) UpdateTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.TimeEntry, err error) {
     s := c.getSession()
 
-    entry.Tags = cleanseTags(entry.Tags)
     resultEntry, err = s.UpdateTimeEntry(entry)
 
     return
@@ -92,16 +90,4 @@ func (c *TogglClient) DeleteTimeEntry(entry toggl.TimeEntry) (err error) {
 
 func (c *TogglClient) getSession() (toggl.Session) {
     return toggl.OpenSession(string(c.config.APIKey))
-}
-
-func cleanseTag(tag string) string {
-    return norm.NFKC.String(tag)
-}
-
-func cleanseTags(tags []string) []string {
-    convertedTags := make([]string, len(tags))
-    for _, tag := range tags {
-        convertedTags = append(convertedTags, cleanseTag(tag))
-    }
-    return convertedTags
 }

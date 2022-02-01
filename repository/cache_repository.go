@@ -85,7 +85,8 @@ func (c *CachedRepository) Insert(entity *domain.TimeEntryEntity) (err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
 	}
-    if err = c.timeEntryRepository.Insert(entity); err != nil {
+    tags, _ := c.GetTags()
+    if err = c.timeEntryRepository.Insert(entity, tags); err != nil {
         return
     }
 	if err = c.refresh(); err != nil {
@@ -98,7 +99,8 @@ func (c *CachedRepository) Update(entity *domain.TimeEntryEntity) (err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
 	}
-    if err = c.timeEntryRepository.Update(entity); err != nil {
+    tags, _ := c.GetTags()
+    if err = c.timeEntryRepository.Update(entity, tags); err != nil {
         return
     }
 	if err = c.refresh(); err != nil {

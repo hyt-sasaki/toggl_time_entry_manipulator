@@ -105,7 +105,7 @@ func (suite *AddEntryTestSuite) TestItems_TagEditNoInput() {
     assert.Equal(t, "No tag", items[0].Title)
     assertAddItemArg(t, items[0], add.StateData{
         Current: add.DescriptionEdit,
-        Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1}}}, alfred.ModeTell)
+        Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1, Tags: []string{}}}}, alfred.ModeTell)
 }
 
 func (suite *AddEntryTestSuite) TestItems_DescriptionEdit() {

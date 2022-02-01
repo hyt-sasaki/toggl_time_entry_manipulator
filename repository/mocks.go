@@ -70,13 +70,13 @@ func (m *MockedTimeEntryRepository) FetchTogglAccount() (toggl.Account, error) {
     return args.Get(0).(toggl.Account), args.Error(1)
 }
 
-func (m *MockedTimeEntryRepository) Insert(entity *domain.TimeEntryEntity) error {
-    args := m.Called(entity)
+func (m *MockedTimeEntryRepository) Insert(entity *domain.TimeEntryEntity, tags []toggl.Tag) error {
+    args := m.Called(entity, tags)
     return args.Error(0)
 }
 
-func (m *MockedTimeEntryRepository) Update(entity *domain.TimeEntryEntity) error {
-    args := m.Called(entity)
+func (m *MockedTimeEntryRepository) Update(entity *domain.TimeEntryEntity, tags []toggl.Tag) error {
+    args := m.Called(entity, tags)
     return args.Error(0)
 }
 
