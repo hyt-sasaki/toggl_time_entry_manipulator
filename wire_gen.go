@@ -45,11 +45,12 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) ([]alfred.Comm
 	}
 	iTimeEntryRepository := repository.NewTimeEntryRepository(iTogglClient, iEstimationClient)
 	iCachedRepository := repository.NewCachedRepository(iCache, iTimeEntryRepository)
-	workflowConfig := config.WorkflowConfig
+	workflowConfig := &config.WorkflowConfig
 	addEntryCommand := add.NewAddEntryCommand(iCachedRepository, workflowConfig)
-	listEntryCommand := list.NewListEntryCommand(iCachedRepository, workflowConfig)
-	getEntryCommand := get.NewGetEntryCommand(iCachedRepository)
-	modifyEntryCommand := modify.NewModifyEntryCommand(iCachedRepository, workflowConfig)
+	configWorkflowConfig := config.WorkflowConfig
+	listEntryCommand := list.NewListEntryCommand(iCachedRepository, configWorkflowConfig)
+	getEntryCommand := get.NewGetEntryCommand(iCachedRepository, workflowConfig)
+	modifyEntryCommand := modify.NewModifyEntryCommand(iCachedRepository, configWorkflowConfig)
 	stopEntryCommand := stop.NewStopEntryCommand(iCachedRepository)
 	deleteEntryCommand := delete2.NewDeleteEntryCommand(iCachedRepository)
 	continueEntryCommand := continue_entry.NewContinueEntryCommand(iCachedRepository)
