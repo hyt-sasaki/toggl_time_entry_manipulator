@@ -7,6 +7,7 @@ const GetEntryKeyword = "get_entry"
 const ModifyEntryKeyword = "modify_entry"
 const ListEntryKeyword = "list_entries"
 const ContinueEntryKeyword = "continue_entry"
+const OptionKeyword = "option"
 
 type DetailRefData struct {
     ID int

@@ -1,13 +1,12 @@
 package main
 
 import (
-    "fmt"
     "os"
 	"path"
     "errors"
 	"google.golang.org/api/option"
 	"github.com/jason0x43/go-alfred"
-    "toggl_time_entry_manipulator/config"
+    workflowConfig "toggl_time_entry_manipulator/config"
     "toggl_time_entry_manipulator/repository/myCache"
     "toggl_time_entry_manipulator/command/add"
     "toggl_time_entry_manipulator/command/list"
@@ -16,6 +15,7 @@ import (
     "toggl_time_entry_manipulator/command/stop"
     "toggl_time_entry_manipulator/command/delete"
     "toggl_time_entry_manipulator/command/continue_entry"
+    optionCom "toggl_time_entry_manipulator/command/option"
 )
 
 const configFileName = "config.json"
@@ -31,24 +31,23 @@ func NewServiceAccount(workflow alfred.Workflow) (serviceAccount option.ClientOp
     return
 }
 
-func NewConfigFile(workflow alfred.Workflow) config.ConfigFile {
+func NewConfigFile(workflow alfred.Workflow) workflowConfig.ConfigFile {
     configFile := path.Join(workflow.DataDir(), configFileName)
-    return config.ConfigFile(configFile)
+    return workflowConfig.ConfigFile(configFile)
 }
 
-func NewConfig(configFile config.ConfigFile) (config *config.Config, err error) {
+func NewConfig(configFile workflowConfig.ConfigFile) (config *workflowConfig.Config, err error) {
 	if err = alfred.LoadJSON(string(configFile), &config); err != nil {
-		dlog.Println("Error loading config:", err)
-        return
+		dlog.Println("No cache file found:", err)
+        config = &workflowConfig.Config{}
+        config.WorkflowConfig.RecordEstimate = false
+        alfred.SaveJSON(string(configFile), *config)
 	}
     if config.TogglConfig.APIKey == "" {
         dlog.Printf("APIKey is empty. Please write TogglConfig.APIKey to %s", configFile)
-        err = fmt.Errorf("APIKey is empty. Please write TogglConfig.APIKey to %s", configFile)
-        return
     }
-    if config.FirestoreConfig.CollectionName == "" {
+    if config.FirestoreConfig.CollectionName == "" && config.WorkflowConfig.RecordEstimate {
         dlog.Printf("Firestore collection name is empty. Please write Firestore.CollectionName to %s", configFile)
-        err = fmt.Errorf("CollectionName is empty. Please write Firestore.CollectionName to %s", configFile)
         return
     }
 
@@ -79,6 +78,8 @@ func NewCache(cacheFile myCache.CacheFile) (cache myCache.ICache, err error) {
 
 func NewCommands(
     firstCall bool,
+    config *workflowConfig.Config,
+    optionCommand optionCom.OptionCommand,
     addCommand add.AddEntryCommand,
     listCommand list.ListEntryCommand,
     getCommand get.GetEntryCommand,
@@ -87,10 +88,14 @@ func NewCommands(
     deleteCommand delete.DeleteEntryCommand,
     continueCommand continue_entry.ContinueEntryCommand,
 ) []alfred.Command {
+    if config.TogglConfig.APIKey == "" {
+        return []alfred.Command{optionCommand}
+    }
     if firstCall {
         return []alfred.Command{
             addCommand,
             listCommand,
+            optionCommand,
         }
     } else {
         return []alfred.Command{
@@ -101,6 +106,7 @@ func NewCommands(
             stopCommand,
             deleteCommand,
             continueCommand,
+            optionCommand,
         }
     }
 }
