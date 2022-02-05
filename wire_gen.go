@@ -43,8 +43,8 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) ([]alfred.Comm
 	if err != nil {
 		return nil, err
 	}
-	timeEntryRepository := repository.NewTimeEntryRepository(togglClient, iEstimationClient)
-	cachedRepository := repository.NewCachedRepository(cache, timeEntryRepository)
+	iTimeEntryRepository := repository.NewTimeEntryRepository(togglClient, iEstimationClient)
+	cachedRepository := repository.NewCachedRepository(cache, iTimeEntryRepository)
 	workflowConfig := config.WorkflowConfig
 	addEntryCommand := add.NewAddEntryCommand(cachedRepository, workflowConfig)
 	listEntryCommand := list.NewListEntryCommand(cachedRepository, workflowConfig)

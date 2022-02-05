@@ -33,7 +33,7 @@ type TimeEntryRepository struct {
 
 func NewTimeEntryRepository(
     togglClient client.ITogglClient,
-    estimationClient client.IEstimationClient) (repo *TimeEntryRepository) {
+    estimationClient client.IEstimationClient) (repo ITimeEntryRepository) {
     repo = &TimeEntryRepository{
         togglClient: togglClient,
         estimationClient: estimationClient,
