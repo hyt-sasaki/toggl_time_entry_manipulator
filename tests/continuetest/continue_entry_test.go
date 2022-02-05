@@ -83,6 +83,32 @@ func (suite *ContinueEntryTestSuite) TestDo() {
     suite.mockedRepo.AssertExpectations(t)
 }
 
+func (suite *ContinueEntryTestSuite) TestDo_byId() {
+    // given
+    dataStr := tests.StringifyDetailRefData(command.DetailRefData{ID: 42})
+    entity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Duration: 1200},
+        Estimation: domain.Estimation{Duration: 31},
+    }
+    originalEntity := domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 42, Description: "item42", Duration: 1200},
+        Estimation: domain.Estimation{Duration: 31, Memo: "memo"},
+    }
+    suite.mockedRepo.On("FindOneById", 42).Return(originalEntity, nil).Once()
+    suite.mockedRepo.On("Continue", &entity).Return(domain.TimeEntryEntity{
+        Entry: toggl.TimeEntry{ID: 43, Description: "item42", Duration: 1200},
+        Estimation: domain.Estimation{Duration: 31},
+    }, nil).Once()
+
+    // when
+    out, _ := suite.com.Do(dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, "Entry has been copied. Description: item42", out)
+    suite.mockedRepo.AssertExpectations(t)
+}
+
 func assertItemArg(t *testing.T, actualItem alfred.Item, expected domain.TimeEntryEntity) {
     actualItemArg := actualItem.Arg
     assert.Equal(t, alfred.ModeDo, actualItemArg.Mode)

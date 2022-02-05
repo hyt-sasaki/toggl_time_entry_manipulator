@@ -231,7 +231,7 @@ var processOrders = []state{ProjectEdit, TagEdit, DescriptionEdit, TimeEstimatio
 var processOrdersWithoutEstimation = []state{ProjectEdit, TagEdit, DescriptionEdit, EndEdit}
 func (command AddEntryCommand) next(c state) (state, alfred.ModeType) {
     var orders []state
-    if command.Config.RecordEstimate {
+    if command.Config != nil && command.Config.RecordEstimate {
         orders = processOrders
     } else {
         orders = processOrdersWithoutEstimation

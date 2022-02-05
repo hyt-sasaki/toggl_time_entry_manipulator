@@ -49,7 +49,7 @@ func (c ContinueEntryCommand) Items(arg, data string) (items []alfred.Item, err 
 }
 
 func (c ContinueEntryCommand) Do(data string) (out string, err error) {
-    entity, err := getEntity(data)
+    entity, err := c.getEntity(data)
 
     newEntity, err := c.Repo.Continue(&entity)
     if err != nil {
@@ -76,11 +76,14 @@ func (c ContinueEntryCommand) getEntityFromId(data string) (entity domain.TimeEn
     return
 }
 
-func getEntity(data string) (entity domain.TimeEntryEntity, err error) {
+func (c ContinueEntryCommand) getEntity(data string) (entity domain.TimeEntryEntity, err error) {
     err = json.Unmarshal([]byte(data), &entity)
     if err != nil {
-        dlog.Printf("Invalid data")
         return
+    } 
+    if entity.Entry.ID == 0 {
+        entity, err = c.getEntityFromId(data)
+        entity.Estimation.Memo = ""
     }
     return
 }
