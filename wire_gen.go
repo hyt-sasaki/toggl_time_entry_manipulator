@@ -23,7 +23,7 @@ import (
 
 func initializeCommands(workflow alfred.Workflow, firstCall bool) ([]alfred.Command, error) {
 	cacheFile := NewCacheFile(workflow)
-	cache, err := NewCache(cacheFile)
+	iCache, err := NewCache(cacheFile)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) ([]alfred.Comm
 		return nil, err
 	}
 	iTimeEntryRepository := repository.NewTimeEntryRepository(iTogglClient, iEstimationClient)
-	cachedRepository := repository.NewCachedRepository(cache, iTimeEntryRepository)
+	cachedRepository := repository.NewCachedRepository(iCache, iTimeEntryRepository)
 	workflowConfig := config.WorkflowConfig
 	addEntryCommand := add.NewAddEntryCommand(cachedRepository, workflowConfig)
 	listEntryCommand := list.NewListEntryCommand(cachedRepository, workflowConfig)

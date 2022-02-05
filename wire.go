@@ -8,7 +8,6 @@ import (
     "toggl_time_entry_manipulator/client"
     "toggl_time_entry_manipulator/config"
     "toggl_time_entry_manipulator/repository"
-    "toggl_time_entry_manipulator/repository/myCache"
     "toggl_time_entry_manipulator/command/add"
     "toggl_time_entry_manipulator/command/list"
     "toggl_time_entry_manipulator/command/get"
@@ -40,7 +39,6 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) (commands []al
         wire.FieldsOf(new(*config.Config), "TogglConfig"),
         wire.FieldsOf(new(*config.Config), "FirestoreConfig"),
         wire.FieldsOf(new(*config.Config), "WorkflowConfig"),
-        wire.Bind(new(myCache.ICache), new(*myCache.Cache)),
         wire.Bind(new(repository.ICachedRepository), new(*repository.CachedRepository)),
     )
     return []alfred.Command{}, nil

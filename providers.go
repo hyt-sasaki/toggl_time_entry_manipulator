@@ -60,7 +60,7 @@ func NewCacheFile(workflow alfred.Workflow) myCache.CacheFile {
     return myCache.CacheFile(cacheFile)
 }
 
-func NewCache(cacheFile myCache.CacheFile) (cache *myCache.Cache, err error) {
+func NewCache(cacheFile myCache.CacheFile) (cache myCache.ICache, err error) {
     var data *myCache.Data
 	if err = alfred.LoadJSON(string(cacheFile), &data); err != nil {
 		dlog.Println("No cache file found:", err)
