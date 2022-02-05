@@ -16,6 +16,7 @@ type WorkflowConfig struct {
     ProjectAutocompleteItems []string `desc:"autocomplete items"`
     ProjectAliases []AliasMap `desc:"Project aliases"`
     TagAliases []AliasMap `desc:"Tag aliases"`
+    RecordEstimate bool `desc:"record time estimate or not"`
 }
 
 type AliasMap struct {
