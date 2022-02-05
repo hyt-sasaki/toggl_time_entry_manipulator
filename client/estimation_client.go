@@ -14,7 +14,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-type EstimationClient struct {
+type fsEstimationClient struct {
     firestoreClient *firestore.Client
     firestoreCtx context.Context
     config config.FirestoreConfig
@@ -30,7 +30,7 @@ type IEstimationClient interface {
 
 func NewEstimationClient(serviceAccount option.ClientOption, config config.FirestoreConfig) (client IEstimationClient, err error) {
     if serviceAccount == nil {
-        client = &EmptyEstimationClient{}
+        client = &emptyEstimationClient{}
         return
     }
 
@@ -52,7 +52,7 @@ func NewEstimationClient(serviceAccount option.ClientOption, config config.Fires
         return
     }
 
-    client = &EstimationClient{
+    client = &fsEstimationClient{
         firestoreClient: firestoreClient,
         firestoreCtx: firestoreCtx,
         config: config,
@@ -60,7 +60,7 @@ func NewEstimationClient(serviceAccount option.ClientOption, config config.Fires
     return 
 }
 
-func (client *EstimationClient) Fetch(entryIds []int64) (estimations []*domain.Estimation, err error) {
+func (client *fsEstimationClient) Fetch(entryIds []int64) (estimations []*domain.Estimation, err error) {
     // https://qiita.com/miyukiaizawa/items/88c174c00e9e99d3871b
     collectionRef := client.firestoreClient.Collection(client.config.CollectionName)
 
@@ -83,24 +83,24 @@ func (client *EstimationClient) Fetch(entryIds []int64) (estimations []*domain.E
     return
 }
 
-func (client *EstimationClient) Insert(id string, estimation domain.Estimation) (err error){
+func (client *fsEstimationClient) Insert(id string, estimation domain.Estimation) (err error){
     _, err = client.firestoreClient.Collection(client.config.CollectionName).Doc(id).Set(client.firestoreCtx, estimation)
 
     return
 }
 
-func (client *EstimationClient) Update(id string, estimation domain.Estimation) (err error){
+func (client *fsEstimationClient) Update(id string, estimation domain.Estimation) (err error){
     estimation.UpdatedTm = time.Now()
     _, err = client.firestoreClient.Collection(client.config.CollectionName).Doc(id).Set(client.firestoreCtx, estimation)
 
     return
 }
 
-func (client *EstimationClient) Delete(id string) (err error){
+func (client *fsEstimationClient) Delete(id string) (err error){
     _, err = client.firestoreClient.Collection(client.config.CollectionName).Doc(id).Delete(client.firestoreCtx)
     return
 }
 
-func (client *EstimationClient) Close() {
+func (client *fsEstimationClient) Close() {
     client.firestoreClient.Close()
 }
