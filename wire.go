@@ -39,7 +39,6 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) (commands []al
         wire.FieldsOf(new(*config.Config), "TogglConfig"),
         wire.FieldsOf(new(*config.Config), "FirestoreConfig"),
         wire.FieldsOf(new(*config.Config), "WorkflowConfig"),
-        wire.Bind(new(repository.ICachedRepository), new(*repository.CachedRepository)),
     )
     return []alfred.Command{}, nil
 }
