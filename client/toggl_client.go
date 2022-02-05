@@ -22,7 +22,7 @@ type ITogglClient interface {
     UpdateTimeEntry(toggl.TimeEntry) (toggl.TimeEntry, error)
 }
 
-func NewTogglClient(config config.TogglConfig) (*TogglClient) {
+func NewTogglClient(config config.TogglConfig) (ITogglClient) {
     return &TogglClient{
         config: config,
     }
