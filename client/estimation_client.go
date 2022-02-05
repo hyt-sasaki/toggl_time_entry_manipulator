@@ -27,7 +27,7 @@ type IEstimationClient interface {
     Close()
 }
 
-func NewEstimationClient(serviceAccount option.ClientOption, config config.FirestoreConfig) (client *EstimationClient, err error) {
+func NewEstimationClient(serviceAccount option.ClientOption, config config.FirestoreConfig) (client IEstimationClient, err error) {
     var firestoreClient *firestore.Client
     var firestoreCtx = context.Background()
 

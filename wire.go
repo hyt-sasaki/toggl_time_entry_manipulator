@@ -41,7 +41,6 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) (commands []al
         wire.FieldsOf(new(*config.Config), "FirestoreConfig"),
         wire.FieldsOf(new(*config.Config), "WorkflowConfig"),
         wire.Bind(new(client.ITogglClient), new(*client.TogglClient)),
-        wire.Bind(new(client.IEstimationClient), new(*client.EstimationClient)),
         wire.Bind(new(repository.ITimeEntryRepository), new(*repository.TimeEntryRepository)),
         wire.Bind(new(myCache.ICache), new(*myCache.Cache)),
         wire.Bind(new(repository.ICachedRepository), new(*repository.CachedRepository)),

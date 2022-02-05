@@ -39,11 +39,11 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) ([]alfred.Comm
 		return nil, err
 	}
 	firestoreConfig := config.FirestoreConfig
-	estimationClient, err := client.NewEstimationClient(clientOption, firestoreConfig)
+	iEstimationClient, err := client.NewEstimationClient(clientOption, firestoreConfig)
 	if err != nil {
 		return nil, err
 	}
-	timeEntryRepository := repository.NewTimeEntryRepository(togglClient, estimationClient)
+	timeEntryRepository := repository.NewTimeEntryRepository(togglClient, iEstimationClient)
 	cachedRepository := repository.NewCachedRepository(cache, timeEntryRepository)
 	workflowConfig := config.WorkflowConfig
 	addEntryCommand := add.NewAddEntryCommand(cachedRepository, workflowConfig)
