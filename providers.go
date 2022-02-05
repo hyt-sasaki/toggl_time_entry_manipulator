@@ -24,7 +24,7 @@ const cacheFileName = "cache.json"
 func NewServiceAccount(workflow alfred.Workflow) (serviceAccount option.ClientOption, err error) {
     filePath := path.Join(workflow.DataDir(), "secret.json")
     if !exists(filePath) {
-        err = fmt.Errorf("%s does not exist.", filePath)
+		dlog.Printf("%s does not exist.\n", filePath)
         return
     }
     serviceAccount = option.WithCredentialsFile(filePath)
