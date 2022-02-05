@@ -15,6 +15,7 @@ import (
     "toggl_time_entry_manipulator/command/stop"
     "toggl_time_entry_manipulator/command/delete"
     "toggl_time_entry_manipulator/command/continue_entry"
+    "toggl_time_entry_manipulator/command/option"
 )
 
 func initializeCommands(workflow alfred.Workflow, firstCall bool) (commands []alfred.Command, err error) {
@@ -36,6 +37,7 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) (commands []al
         stop.NewStopEntryCommand,
         delete.NewDeleteEntryCommand,
         continue_entry.NewContinueEntryCommand,
+        option.NewOptionCommand,
         wire.FieldsOf(new(*config.Config), "TogglConfig"),
         wire.FieldsOf(new(*config.Config), "FirestoreConfig"),
         wire.FieldsOf(new(*config.Config), "WorkflowConfig"),
