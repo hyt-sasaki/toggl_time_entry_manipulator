@@ -28,7 +28,8 @@ configは以下のファイルを編集する。
         ],
         "TagAliases": [
             {"ID": 1111111, "Alias": "project alias"}
-        ]
+        ],
+        "RecordEstimate": false
     }
 }
 
@@ -39,9 +40,12 @@ configは以下のファイルを編集する。
 - `WorkflowConfig.ProjectAutocompleteItems`: プロジェクト一覧にオートコンプリート用のitemを追加 (プロジェクトに共通のprefixがついているときに使う想定)
 - `WorkflowConfig.ProjectAutocompleteItems`: プロジェクトのIDに対してエイリアスを設定する (例: 日本語のプロジェクト名に対して英語のエイリアスを設定)
 - `WorkflowConfig.TagAutocompleteItems`: タグのIDに対してエイリアスを設定する (例: 日本語のタグ名に対して英語のエイリアスを設定)
+- `WorkflowConfig.RecordEstimate`: 見積もり記録の有効・無効を切り替える
 ### Firestoreの認証
 サービスアカウントのjsonキーを使う。  
 
 参考: https://www.ipentec.com/document/software-google-cloud-platform-get-service-account-key
 
-jsonキーは `$HOME/Library/Application Support/Alfred/Workflow Data/com.hytssk.toggl_time_entry_manipulator/secret.json` に保存する
+#### 見積もりを記録するために必要な設定
+- jsonキーは `$HOME/Library/Application Support/Alfred/Workflow Data/com.hytssk.toggl_time_entry_manipulator/secret.json` に保存する
+- configファイルのRecordEstimateをtrueにする

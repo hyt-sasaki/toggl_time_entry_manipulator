@@ -29,7 +29,7 @@ type ICachedRepository interface {
 
 func NewCachedRepository(
     cache myCache.ICache,
-    timeEntryRepository ITimeEntryRepository) (repo *CachedRepository) {
+    timeEntryRepository ITimeEntryRepository) (repo ICachedRepository) {
     repo = &CachedRepository{
         cache: cache,
         timeEntryRepository: timeEntryRepository,

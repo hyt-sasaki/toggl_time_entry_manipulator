@@ -40,10 +40,10 @@ type EntryArgs struct {
 
 type AddEntryCommand struct {
     Repo repository.ICachedRepository
-    Config config.WorkflowConfig
+    Config *config.WorkflowConfig
 }
 
-func NewAddEntryCommand(repo repository.ICachedRepository, config config.WorkflowConfig) (AddEntryCommand) {
+func NewAddEntryCommand(repo repository.ICachedRepository, config *config.WorkflowConfig) (AddEntryCommand) {
     return AddEntryCommand{Repo: repo, Config: config}
 }
 
@@ -129,19 +129,20 @@ func (c AddEntryCommand) generateDescriptionItems(sd StateData, enteredDescripti
         tag = entity.Entry.Tags[0]
         subtitle = fmt.Sprintf("autocomplete: %s", tag)
     }
+    nextState, mode := c.next(sd.Current)
     item := alfred.Item{
         Title: fmt.Sprintf("New description: %s", enteredDescription),
         Subtitle: subtitle,
         Autocomplete: tag,
         Arg: &alfred.ItemArg{
             Keyword: command.AddEntryKeyword,
-            Mode: alfred.ModeTell,
-            Data: alfred.Stringify(StateData{Current: next(sd.Current), Entity: entity}),
+            Mode: mode,
+            Data: alfred.Stringify(StateData{Current: nextState, Entity: entity}),
         },
     }
     items = append(items, item)
     if hasPrevState(sd.Current) {
-        items = append(items, generateBackItem(sd))
+        items = append(items, c.generateBackItem(sd))
     }
     return
 }
@@ -149,23 +150,24 @@ func (c AddEntryCommand) generateDescriptionItems(sd StateData, enteredDescripti
 // project
 func (c AddEntryCommand) generateProjectItems(sd StateData, enteredArg string, projects []toggl.Project) (items []alfred.Item) {
     entity := sd.Entity
+    nextState, mode := c.next(sd.Current)
     items = command.GenerateItemsForProject(
         projects,
         enteredArg,
         entity,
-        c.Config,
+        *c.Config,
         func(e domain.TimeEntryEntity) (alfred.ItemArg) {
             return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
-                Mode: alfred.ModeTell,
+                Mode: mode,
                 Data: alfred.Stringify(StateData{
-                    Current: next(sd.Current),
+                    Current: nextState,
                     Entity: e,
                 })}
         },
     )
     if hasPrevState(sd.Current) {
-        items = append(items, generateBackItem(sd))
+        items = append(items, c.generateBackItem(sd))
     }
     return
 }
@@ -174,21 +176,22 @@ func (c AddEntryCommand) generateProjectItems(sd StateData, enteredArg string, p
 func (c AddEntryCommand) generateTagItems(sd StateData, enteredArg string, tags []toggl.Tag) (items []alfred.Item) {
     entity := sd.Entity
 
+    nextState, mode := c.next(sd.Current)
     items = command.GenerateItemsForTag(
         tags,
         enteredArg,
         entity,
-        c.Config,
+        *c.Config,
         func(e domain.TimeEntryEntity) (alfred.ItemArg) {
             return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
-                Mode: alfred.ModeTell,
+                Mode: mode,
                 Data: alfred.Stringify(StateData{
-                    Current: next(sd.Current),
+                    Current: nextState,
                     Entity: e,
                 })}})
     if hasPrevState(sd.Current) {
-        items = append(items, generateBackItem(sd))
+        items = append(items, c.generateBackItem(sd))
     }
     return
 }
@@ -205,47 +208,68 @@ func (c AddEntryCommand) generateTimeEstimationItems(sd StateData, enteredEstima
     }
 
     entity.Estimation.Duration = estimationTime
+    nextState, mode := c.next(sd.Current)
     item := alfred.Item{
         Title: fmt.Sprintf("Time estimation [min]: %d", estimationTime),
         Arg: &alfred.ItemArg{
             Keyword: command.AddEntryKeyword,
-            Mode: alfred.ModeDo,
+            Mode: mode,
             Data: alfred.Stringify(StateData{
-                Current: next(sd.Current),
+                Current: nextState,
                 Entity: entity,
             }),
         },
     }
     items = append(items, item)
     if hasPrevState(sd.Current) {
-        items = append(items, generateBackItem(sd))
+        items = append(items, c.generateBackItem(sd))
     }
     return
 }
 
 var processOrders = []state{ProjectEdit, TagEdit, DescriptionEdit, TimeEstimationEdit, EndEdit}
-func next(c state) state {
-    n := len(processOrders)
+var processOrdersWithoutEstimation = []state{ProjectEdit, TagEdit, DescriptionEdit, EndEdit}
+func (command AddEntryCommand) next(c state) (state, alfred.ModeType) {
+    var orders []state
+    if command.Config != nil && command.Config.RecordEstimate {
+        orders = processOrders
+    } else {
+        orders = processOrdersWithoutEstimation
+    }
+    n := len(orders)
 
     next_i := n - 1
-    for i, s := range processOrders[:n-1] {
+    for i, s := range orders[:n-1] {
         if (s == c) {
             next_i = i + 1
             break
         }
     }
-    return processOrders[next_i]
+    var mode alfred.ModeType
+    nextState := orders[next_i]
+    if nextState == EndEdit {
+        mode = alfred.ModeDo
+    } else {
+        mode = alfred.ModeTell
+    }
+    return nextState, mode
 }
 
-func prev(c state) state {
+func (command AddEntryCommand) prev(c state) (state, alfred.ModeType) {
+    var orders []state
+    if command.Config.RecordEstimate {
+        orders = processOrders
+    } else {
+        orders = processOrdersWithoutEstimation
+    }
     prev_i := 0
-    for i, s := range processOrders[1:] {
+    for i, s := range orders[1:] {
         if (s == c) {
             prev_i = i
             break
         }
     }
-    return processOrders[prev_i]
+    return orders[prev_i], alfred.ModeTell
 }
 
 func getPrevEntity(entity domain.TimeEntryEntity, prevState state) (prevEntity domain.TimeEntryEntity) {
@@ -267,8 +291,8 @@ func hasPrevState(c state) bool {
     return processOrders[0] != c
 }
 
-func generateBackItem(stateData StateData) (alfred.Item) {
-    prevState := prev(stateData.Current)
+func (c AddEntryCommand)generateBackItem(stateData StateData) (alfred.Item) {
+    prevState, _ := c.prev(stateData.Current)
     return command.GenerateBackItem(command.AddEntryKeyword, alfred.Stringify(StateData{
         Current: prevState,
         Entity: getPrevEntity(stateData.Entity, prevState),

@@ -24,7 +24,7 @@ const cacheFileName = "cache.json"
 func NewServiceAccount(workflow alfred.Workflow) (serviceAccount option.ClientOption, err error) {
     filePath := path.Join(workflow.DataDir(), "secret.json")
     if !exists(filePath) {
-        err = fmt.Errorf("%s does not exist.", filePath)
+		dlog.Printf("%s does not exist.\n", filePath)
         return
     }
     serviceAccount = option.WithCredentialsFile(filePath)
@@ -60,11 +60,12 @@ func NewCacheFile(workflow alfred.Workflow) myCache.CacheFile {
     return myCache.CacheFile(cacheFile)
 }
 
-func NewCache(cacheFile myCache.CacheFile) (cache *myCache.Cache, err error) {
+func NewCache(cacheFile myCache.CacheFile) (cache myCache.ICache, err error) {
     var data *myCache.Data
 	if err = alfred.LoadJSON(string(cacheFile), &data); err != nil {
-		dlog.Println("Error loading cache:", err)
-        return
+		dlog.Println("No cache file found:", err)
+        data = &myCache.Data{}
+        alfred.SaveJSON(string(cacheFile), *data)
 	}
     cache = &myCache.Cache{
         Data: data,

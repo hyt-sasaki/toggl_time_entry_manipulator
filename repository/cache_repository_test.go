@@ -16,7 +16,7 @@ type CacheRepositoryTestSuite struct {
     suite.Suite
     mockedTimeEntryRepository *MockedTimeEntryRepository
     mockedCache *myCache.MockedCache
-    repo *CachedRepository
+    repo ICachedRepository
 }
 
 func TestCacheRepositoryTestSuite(t *testing.T) {

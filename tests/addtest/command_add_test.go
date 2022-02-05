@@ -1,13 +1,14 @@
 package addtest
 
 import (
+	"toggl_time_entry_manipulator/config"
 	_ "toggl_time_entry_manipulator/supports"
 
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 
 	"fmt"
 
@@ -15,8 +16,8 @@ import (
 	"github.com/jason0x43/go-toggl"
 
 	"toggl_time_entry_manipulator/command/add"
-	"toggl_time_entry_manipulator/repository"
 	"toggl_time_entry_manipulator/domain"
+	"toggl_time_entry_manipulator/repository"
 )
 
 type AddEntryTestSuite struct {
@@ -24,6 +25,7 @@ type AddEntryTestSuite struct {
     mockedRepo *repository.MockedCachedRepository
     projects []toggl.Project
     tags []toggl.Tag
+    config *config.WorkflowConfig
     com *add.AddEntryCommand
 }
 
@@ -33,8 +35,10 @@ func TestSuite(t *testing.T) {
 
 func (suite *AddEntryTestSuite) SetupTest() {
     suite.mockedRepo = &repository.MockedCachedRepository{}
+    suite.config = &config.WorkflowConfig{}
     suite.com = &add.AddEntryCommand{
         Repo: suite.mockedRepo,
+        Config: suite.config,
     }
 
     suite.projects = []toggl.Project{
@@ -124,12 +128,34 @@ func (suite *AddEntryTestSuite) TestItems_DescriptionEdit() {
     assert.Equal(t, fmt.Sprintf("New description: %s", arg), items[0].Title)
 
     assertAddItemArg(t, items[0], add.StateData{
+        Current: add.EndEdit,
+        Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}, Description: arg}}}, alfred.ModeDo)
+}
+
+func (suite *AddEntryTestSuite) TestItems_DescriptionEdit_withReocordEstimateConfig() {
+    // given
+    suite.config.RecordEstimate = true
+    dataStr := convertAddStateData(add.StateData{
+            Current: add.DescriptionEdit,
+            Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}}}})
+    arg := "new description"
+
+    // when
+    items, _ := suite.com.Items(arg, dataStr)
+
+    // then
+    t := suite.T()
+    assert.Equal(t, 2, len(items))
+    assert.Equal(t, fmt.Sprintf("New description: %s", arg), items[0].Title)
+
+    assertAddItemArg(t, items[0], add.StateData{
         Current: add.TimeEstimationEdit,
         Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}, Description: arg}}}, alfred.ModeTell)
 }
 
 func (suite *AddEntryTestSuite) TestItems_TimeEstimationEdit() {
     // given
+    suite.config.RecordEstimate = true
     dataStr := convertAddStateData(add.StateData{
             Current: add.TimeEstimationEdit,
             Entity: domain.TimeEntryEntity{Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}, Description: "new description"}}})
@@ -148,6 +174,11 @@ func (suite *AddEntryTestSuite) TestItems_TimeEstimationEdit() {
         Entity: domain.TimeEntryEntity{
             Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}, Description: "new description"},
             Estimation: domain.Estimation{Duration: 31},}}, alfred.ModeDo)
+    assertAddItemArg(t, items[1], add.StateData{
+        Current: add.DescriptionEdit,
+        Entity: domain.TimeEntryEntity{
+            Entry: toggl.TimeEntry{Pid: 1, Tags:[]string{"hoge"}}},
+        }, alfred.ModeTell)
 }
 
 func (suite *AddEntryTestSuite) TestItems_TimeEstimationEdit_Invalid() {

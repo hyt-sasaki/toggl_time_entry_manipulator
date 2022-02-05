@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 	"toggl_time_entry_manipulator/command"
+	"toggl_time_entry_manipulator/config"
 	"toggl_time_entry_manipulator/repository"
 
 	"github.com/jason0x43/go-alfred"
@@ -18,10 +19,11 @@ var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.get]", log.
 
 type GetEntryCommand struct {
     Repo repository.ICachedRepository
+    Config *config.WorkflowConfig
 }
 
-func NewGetEntryCommand(repo repository.ICachedRepository) (GetEntryCommand) {
-    return GetEntryCommand{Repo: repo}
+func NewGetEntryCommand(repo repository.ICachedRepository, config *config.WorkflowConfig) (GetEntryCommand) {
+    return GetEntryCommand{Repo: repo, Config: config}
 }
 
 func (c GetEntryCommand) About() alfred.CommandDef {
@@ -195,11 +197,17 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     }
 
     if !entity.IsRunning() && alfred.FuzzyMatches("continue this entry", arg) {
+        var mode alfred.ModeType
+        if c.Config != nil && c.Config.RecordEstimate {
+            mode = alfred.ModeTell
+        } else {
+            mode = alfred.ModeDo
+        }
         continueItem := alfred.Item{
             Title: "Continue this entry",
             Arg: &alfred.ItemArg{
                 Keyword: command.ContinueEntryKeyword,
-                Mode: alfred.ModeTell,
+                Mode: mode,
                 Data: data,
             },
         }

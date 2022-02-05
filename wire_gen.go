@@ -23,7 +23,7 @@ import (
 
 func initializeCommands(workflow alfred.Workflow, firstCall bool) ([]alfred.Command, error) {
 	cacheFile := NewCacheFile(workflow)
-	cache, err := NewCache(cacheFile)
+	iCache, err := NewCache(cacheFile)
 	if err != nil {
 		return nil, err
 	}
@@ -33,26 +33,27 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) ([]alfred.Comm
 		return nil, err
 	}
 	togglConfig := config.TogglConfig
-	togglClient := client.NewTogglClient(togglConfig)
+	iTogglClient := client.NewTogglClient(togglConfig)
 	clientOption, err := NewServiceAccount(workflow)
 	if err != nil {
 		return nil, err
 	}
 	firestoreConfig := config.FirestoreConfig
-	estimationClient, err := client.NewEstimationClient(clientOption, firestoreConfig)
+	iEstimationClient, err := client.NewEstimationClient(clientOption, firestoreConfig)
 	if err != nil {
 		return nil, err
 	}
-	timeEntryRepository := repository.NewTimeEntryRepository(togglClient, estimationClient)
-	cachedRepository := repository.NewCachedRepository(cache, timeEntryRepository)
-	workflowConfig := config.WorkflowConfig
-	addEntryCommand := add.NewAddEntryCommand(cachedRepository, workflowConfig)
-	listEntryCommand := list.NewListEntryCommand(cachedRepository, workflowConfig)
-	getEntryCommand := get.NewGetEntryCommand(cachedRepository)
-	modifyEntryCommand := modify.NewModifyEntryCommand(cachedRepository, workflowConfig)
-	stopEntryCommand := stop.NewStopEntryCommand(cachedRepository)
-	deleteEntryCommand := delete2.NewDeleteEntryCommand(cachedRepository)
-	continueEntryCommand := continue_entry.NewContinueEntryCommand(cachedRepository)
+	iTimeEntryRepository := repository.NewTimeEntryRepository(iTogglClient, iEstimationClient)
+	iCachedRepository := repository.NewCachedRepository(iCache, iTimeEntryRepository)
+	workflowConfig := &config.WorkflowConfig
+	addEntryCommand := add.NewAddEntryCommand(iCachedRepository, workflowConfig)
+	configWorkflowConfig := config.WorkflowConfig
+	listEntryCommand := list.NewListEntryCommand(iCachedRepository, configWorkflowConfig)
+	getEntryCommand := get.NewGetEntryCommand(iCachedRepository, workflowConfig)
+	modifyEntryCommand := modify.NewModifyEntryCommand(iCachedRepository, configWorkflowConfig)
+	stopEntryCommand := stop.NewStopEntryCommand(iCachedRepository)
+	deleteEntryCommand := delete2.NewDeleteEntryCommand(iCachedRepository)
+	continueEntryCommand := continue_entry.NewContinueEntryCommand(iCachedRepository)
 	v := NewCommands(firstCall, addEntryCommand, listEntryCommand, getEntryCommand, modifyEntryCommand, stopEntryCommand, deleteEntryCommand, continueEntryCommand)
 	return v, nil
 }
