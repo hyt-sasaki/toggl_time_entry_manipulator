@@ -83,8 +83,8 @@ func NewCommands(
     getCommand get.IGetEntryCommand,
     modifyComamnd modify.IModifyEntryCommand,
     stopCommand stop.IStopEntryCommand,
-    deleteCommand delete.DeleteEntryCommand,
-    continueCommand continue_entry.ContinueEntryCommand,
+    deleteCommand delete.IDeleteEntryCommand,
+    continueCommand continue_entry.IContinueEntryCommand,
 ) []alfred.Command {
     if config.TogglConfig.APIKey == "" {
         return []alfred.Command{optionCommand}
