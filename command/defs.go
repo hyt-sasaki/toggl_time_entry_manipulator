@@ -18,7 +18,6 @@ type ModifyData struct {
     Ref DetailRefData
     Target modifyTarget
 }
-
 type modifyTarget int
 const (
     ModifyDescription modifyTarget = iota
@@ -29,6 +28,17 @@ const (
     ModifyStop
     ModifyMemo
 )
+
+type FavoriteRefData struct {
+    Ref DetailRefData
+    Action favoriteAction
+}
+type favoriteAction int
+const (
+    AddToFavorite favoriteAction = iota
+    RemoveFromFavorite
+)
+
 
 const iconDir = "./icons/"
 const (

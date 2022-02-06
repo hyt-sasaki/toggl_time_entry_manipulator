@@ -55,14 +55,26 @@ func (c FavoriteEntryCommand) Items(arg, data string) (items []alfred.Item, err 
         if !command.Match(title + projectAlias, arg) {
             continue
         }
+        detailRefData := command.DetailRefData{ID: entity.Entry.ID}
         item := alfred.Item{
             Title: getTitle(entity, projects),
             Arg: &alfred.ItemArg{
                 Keyword: command.ContinueEntryKeyword,
                 Mode: mode,
-                Data: alfred.Stringify(command.DetailRefData{ID: entity.Entry.ID}),
+                Data: alfred.Stringify(detailRefData),
             },
         }
+        item.AddMod(alfred.ModCmd, alfred.ItemMod{
+            Subtitle: "Remove this entry from favorite list",
+            Arg: &alfred.ItemArg{
+                Keyword: command.FavoriteEntryKeyword,
+                Mode: alfred.ModeDo,
+                Data: alfred.Stringify(command.FavoriteRefData{
+                    Ref: detailRefData,
+                    Action: command.RemoveFromFavorite,
+                }),
+            },
+        })
         items = append(items, item)
     }
 
@@ -70,7 +82,7 @@ func (c FavoriteEntryCommand) Items(arg, data string) (items []alfred.Item, err 
 }
 
 func (c FavoriteEntryCommand) Do(data string) (out string, err error) {
-    var itemData command.DetailRefData
+    var itemData command.FavoriteRefData
 
     err = json.Unmarshal([]byte(data), &itemData)
     if err != nil {
@@ -78,9 +90,26 @@ func (c FavoriteEntryCommand) Do(data string) (out string, err error) {
         return
     }
 
-    c.Config.WorkflowConfig.Favorites = append(c.Config.WorkflowConfig.Favorites, itemData.ID)
-    alfred.SaveJSON(string(c.ConfigFile), *c.Config)
-    out = "Entry has been added to favorite list."
+    switch itemData.Action {
+    case command.AddToFavorite:
+        c.Config.WorkflowConfig.Favorites = append(c.Config.WorkflowConfig.Favorites, itemData.Ref.ID)
+        alfred.SaveJSON(string(c.ConfigFile), *c.Config)
+        out = "Entry has been added to favorite list."
+    case command.RemoveFromFavorite:
+        removeIdx := -1
+        for idx, entryId := range c.Config.WorkflowConfig.Favorites {
+            if entryId == itemData.Ref.ID {
+                removeIdx = idx
+            }
+        }
+        if removeIdx != -1 {
+            c.Config.WorkflowConfig.Favorites = append(c.Config.WorkflowConfig.Favorites[:removeIdx], c.Config.WorkflowConfig.Favorites[removeIdx+1:]...)
+            alfred.SaveJSON(string(c.ConfigFile), *c.Config)
+            out = "Entry has been removed from favorite list."
+        } else {
+            out = fmt.Sprintf("Not found %d in favorite list.", itemData.Ref.ID)
+        } 
+    }
 
     return
 }
