@@ -24,7 +24,7 @@ type FavoriteEntryTestSuite struct {
     suite.Suite
     mockedRepo *repository.MockedCachedRepository
     config *config.Config
-    com *favorite.FavoriteEntryCommand
+    com favorite.IFavoriteEntryCommand
 }
 
 func TestFavoriteEntriesTestSuite(t *testing.T) {
@@ -35,10 +35,7 @@ func (suite *FavoriteEntryTestSuite) SetupTest() {
     suite.mockedRepo = &repository.MockedCachedRepository{}
     suite.config = &config.Config{}
     suite.config.WorkflowConfig.Favorites = []int{1, 3, 5}
-    suite.com = &favorite.FavoriteEntryCommand{
-        Repo: suite.mockedRepo,
-        Config: suite.config,
-    }
+    suite.com, _ = favorite.NewFavoriteEntryCommand(suite.mockedRepo, suite.config, "")
 
     suite.mockedRepo.On("GetProjects").Return([]toggl.Project{
         {ID: 0, Name: "project1"},

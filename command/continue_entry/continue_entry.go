@@ -13,12 +13,16 @@ import (
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.continue]", log.LstdFlags)
 
+type IContinueEntryCommand interface {
+    alfred.Filter
+    alfred.Action
+}
 type ContinueEntryCommand struct {
-    Repo repository.ICachedRepository
+    repo repository.ICachedRepository
 }
 
-func NewContinueEntryCommand(repo repository.ICachedRepository) (ContinueEntryCommand) {
-    return ContinueEntryCommand{Repo: repo}
+func NewContinueEntryCommand(repo repository.ICachedRepository) (IContinueEntryCommand) {
+    return &ContinueEntryCommand{repo: repo}
 }
 
 func (c ContinueEntryCommand) About() alfred.CommandDef {
@@ -51,7 +55,7 @@ func (c ContinueEntryCommand) Items(arg, data string) (items []alfred.Item, err 
 func (c ContinueEntryCommand) Do(data string) (out string, err error) {
     entity, err := c.getEntity(data)
 
-    newEntity, err := c.Repo.Continue(&entity)
+    newEntity, err := c.repo.Continue(&entity)
     if err != nil {
         return
     }
@@ -69,7 +73,7 @@ func (c ContinueEntryCommand) getEntityFromId(data string) (entity domain.TimeEn
         return
     }
 
-    entity, err = c.Repo.FindOneById(itemData.ID)
+    entity, err = c.repo.FindOneById(itemData.ID)
     if err != nil {
         return
     }

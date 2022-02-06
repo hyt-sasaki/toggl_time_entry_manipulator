@@ -67,11 +67,7 @@ func NewCache(cacheFile myCache.CacheFile) (cache myCache.ICache, err error) {
         data = &myCache.Data{}
         alfred.SaveJSON(string(cacheFile), *data)
 	}
-    cache = &myCache.Cache{
-        Data: data,
-        File: cacheFile,
-        SaveCallback: alfred.SaveJSON,
-    }
+    cache = myCache.NewCache(data, cacheFile, alfred.SaveJSON)
     dlog.Println(cache)
 
     return
@@ -80,15 +76,15 @@ func NewCache(cacheFile myCache.CacheFile) (cache myCache.ICache, err error) {
 func NewCommands(
     firstCall bool,
     config *workflowConfig.Config,
-    optionCommand optionCom.OptionCommand,
-    addCommand add.AddEntryCommand,
-    listCommand list.ListEntryCommand,
-    favoriteCommand favorite.FavoriteEntryCommand,
-    getCommand get.GetEntryCommand,
-    modifyComamnd modify.ModifyEntryCommand,
-    stopCommand stop.StopEntryCommand,
-    deleteCommand delete.DeleteEntryCommand,
-    continueCommand continue_entry.ContinueEntryCommand,
+    optionCommand optionCom.IOptionCommand,
+    addCommand add.IAddEntryCommand,
+    listCommand list.IListEntryCommand,
+    favoriteCommand favorite.IFavoriteEntryCommand,
+    getCommand get.IGetEntryCommand,
+    modifyComamnd modify.IModifyEntryCommand,
+    stopCommand stop.IStopEntryCommand,
+    deleteCommand delete.IDeleteEntryCommand,
+    continueCommand continue_entry.IContinueEntryCommand,
 ) []alfred.Command {
     if config.TogglConfig.APIKey == "" {
         return []alfred.Command{optionCommand}

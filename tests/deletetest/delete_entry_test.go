@@ -20,7 +20,7 @@ import (
 type DeleteEntryTestSuite struct {
     suite.Suite
     mockedRepo *repository.MockedCachedRepository
-    com *delete.DeleteEntryCommand
+    com delete.IDeleteEntryCommand
 }
 
 func TestDeleteEntryTestSuite(t *testing.T) {
@@ -29,9 +29,7 @@ func TestDeleteEntryTestSuite(t *testing.T) {
 
 func (suite *DeleteEntryTestSuite) SetupTest() {
     suite.mockedRepo = &repository.MockedCachedRepository{}
-    suite.com = &delete.DeleteEntryCommand{
-        Repo: suite.mockedRepo,
-    }
+    suite.com = delete.NewDeleteEntryCommand(suite.mockedRepo)
 }
 
 func (suite *DeleteEntryTestSuite) TestDo() {

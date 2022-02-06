@@ -10,7 +10,7 @@ import (
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.client]", log.LstdFlags)
 
-type TogglClient struct {
+type togglClient struct {
     config config.TogglConfig
 }
 type ITogglClient interface {
@@ -23,12 +23,12 @@ type ITogglClient interface {
 }
 
 func NewTogglClient(config config.TogglConfig) (ITogglClient) {
-    return &TogglClient{
+    return &togglClient{
         config: config,
     }
 }
 
-func (c *TogglClient) GetAccount() (account toggl.Account, err error) {
+func (c *togglClient) GetAccount() (account toggl.Account, err error) {
 	s := c.getSession()
 	account, err = s.GetAccount()
 	if err != nil {
@@ -37,7 +37,7 @@ func (c *TogglClient) GetAccount() (account toggl.Account, err error) {
     return
 }
 
-func (c *TogglClient) StartTimeEntry(description string, pid int, tags []string) (entry toggl.TimeEntry, err error) {
+func (c *togglClient) StartTimeEntry(description string, pid int, tags []string) (entry toggl.TimeEntry, err error) {
     s := c.getSession()
 
     entry, err = s.StartTimeEntryForProject(description, pid, false)
@@ -56,7 +56,7 @@ func (c *TogglClient) StartTimeEntry(description string, pid int, tags []string)
     return
 }
 
-func (c *TogglClient) StopTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.TimeEntry, err error) {
+func (c *togglClient) StopTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.TimeEntry, err error) {
     s := c.getSession()
 
     resultEntry, err = s.StopTimeEntry(entry)
@@ -64,7 +64,7 @@ func (c *TogglClient) StopTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.Ti
     return
 }
 
-func (c *TogglClient) ContinueTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.TimeEntry, err error) {
+func (c *togglClient) ContinueTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.TimeEntry, err error) {
     s := c.getSession()
 
     resultEntry, err = s.ContinueTimeEntry(entry, false)
@@ -72,7 +72,7 @@ func (c *TogglClient) ContinueTimeEntry(entry toggl.TimeEntry) (resultEntry togg
     return
 }
 
-func (c *TogglClient) UpdateTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.TimeEntry, err error) {
+func (c *togglClient) UpdateTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.TimeEntry, err error) {
     s := c.getSession()
 
     resultEntry, err = s.UpdateTimeEntry(entry)
@@ -80,7 +80,7 @@ func (c *TogglClient) UpdateTimeEntry(entry toggl.TimeEntry) (resultEntry toggl.
     return
 }
 
-func (c *TogglClient) DeleteTimeEntry(entry toggl.TimeEntry) (err error) {
+func (c *togglClient) DeleteTimeEntry(entry toggl.TimeEntry) (err error) {
     s := c.getSession()
 
     _, err = s.DeleteTimeEntry(entry)
@@ -88,6 +88,6 @@ func (c *TogglClient) DeleteTimeEntry(entry toggl.TimeEntry) (err error) {
     return
 }
 
-func (c *TogglClient) getSession() (toggl.Session) {
+func (c *togglClient) getSession() (toggl.Session) {
     return toggl.OpenSession(string(c.config.APIKey))
 }

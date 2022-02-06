@@ -13,12 +13,16 @@ import (
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.delete]", log.LstdFlags)
 
-type DeleteEntryCommand struct {
-    Repo repository.ICachedRepository
+type IDeleteEntryCommand interface {
+    alfred.Action
 }
 
-func NewDeleteEntryCommand(repo repository.ICachedRepository) (DeleteEntryCommand) {
-    return DeleteEntryCommand{Repo: repo}
+type DeleteEntryCommand struct {
+    repo repository.ICachedRepository
+}
+
+func NewDeleteEntryCommand(repo repository.ICachedRepository) (IDeleteEntryCommand) {
+    return &DeleteEntryCommand{repo: repo}
 }
 
 func (c DeleteEntryCommand) About() alfred.CommandDef {
@@ -38,12 +42,12 @@ func (c DeleteEntryCommand) Do(data string) (out string, err error) {
         return
     }
 
-    entity, err := c.Repo.FindOneById(itemData.ID)
+    entity, err := c.repo.FindOneById(itemData.ID)
     if err != nil {
         return
     }
 
-    err = c.Repo.Delete(&entity)
+    err = c.repo.Delete(&entity)
     if err != nil {
         return
     }

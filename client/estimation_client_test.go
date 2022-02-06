@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var estimationClient *EstimationClient
+var estimationClient *fsEstimationClient
 
 func TestMain(m *testing.M) {
     if os.Getenv("FIRESTORE_EMULATOR_HOST") == "" {
@@ -120,10 +120,10 @@ func TestDelete(t *testing.T) {
     assert.Nil(t, afterDelete[0])
 }
 
-func initTestClient() (client *EstimationClient) {
+func initTestClient() (client *fsEstimationClient) {
     ctx := context.Background()
     fc, _ := firestore.NewClient(ctx, "test")
-    client = &EstimationClient{
+    client = &fsEstimationClient{
         firestoreClient: fc,
         firestoreCtx: ctx,
         config: config.FirestoreConfig{

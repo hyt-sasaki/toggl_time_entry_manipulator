@@ -22,7 +22,7 @@ import (
 type ContinueEntryTestSuite struct {
     suite.Suite
     mockedRepo *repository.MockedCachedRepository
-    com *continue_entry.ContinueEntryCommand
+    com continue_entry.IContinueEntryCommand
 }
 
 func TestContinueEntryTestSuite(t *testing.T) {
@@ -31,9 +31,7 @@ func TestContinueEntryTestSuite(t *testing.T) {
 
 func (suite *ContinueEntryTestSuite) SetupTest() {
     suite.mockedRepo = &repository.MockedCachedRepository{}
-    suite.com = &continue_entry.ContinueEntryCommand{
-        Repo: suite.mockedRepo,
-    }
+    suite.com = continue_entry.NewContinueEntryCommand(suite.mockedRepo)
 }
 
 func (suite *ContinueEntryTestSuite) TestItems() {

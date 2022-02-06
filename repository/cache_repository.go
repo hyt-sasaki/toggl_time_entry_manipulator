@@ -10,7 +10,7 @@ import (
 )
 
 
-type CachedRepository struct {
+type cachedRepository struct {
     cache myCache.ICache
     timeEntryRepository ITimeEntryRepository
 }
@@ -30,14 +30,14 @@ type ICachedRepository interface {
 func NewCachedRepository(
     cache myCache.ICache,
     timeEntryRepository ITimeEntryRepository) (repo ICachedRepository) {
-    repo = &CachedRepository{
+    repo = &cachedRepository{
         cache: cache,
         timeEntryRepository: timeEntryRepository,
     }
     return
 }
 
-func (c *CachedRepository) Fetch() (entities []domain.TimeEntryEntity, err error) {
+func (c *cachedRepository) Fetch() (entities []domain.TimeEntryEntity, err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
 	}
@@ -45,7 +45,7 @@ func (c *CachedRepository) Fetch() (entities []domain.TimeEntryEntity, err error
     return
 }
 
-func (c *CachedRepository) FindOneById(entryId int) (entity domain.TimeEntryEntity, err error) {
+func (c *cachedRepository) FindOneById(entryId int) (entity domain.TimeEntryEntity, err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
 	}
@@ -63,7 +63,7 @@ func (c *CachedRepository) FindOneById(entryId int) (entity domain.TimeEntryEnti
     return
 }
 
-func (c *CachedRepository) GetProjects() (projects []toggl.Project, err error) {
+func (c *cachedRepository) GetProjects() (projects []toggl.Project, err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
 	}
@@ -72,7 +72,7 @@ func (c *CachedRepository) GetProjects() (projects []toggl.Project, err error) {
     return
 }
 
-func (c *CachedRepository) GetTags() (tags []toggl.Tag, err error) {
+func (c *cachedRepository) GetTags() (tags []toggl.Tag, err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
 	}
@@ -81,7 +81,7 @@ func (c *CachedRepository) GetTags() (tags []toggl.Tag, err error) {
     return
 }
 
-func (c *CachedRepository) Insert(entity *domain.TimeEntryEntity) (err error) {
+func (c *cachedRepository) Insert(entity *domain.TimeEntryEntity) (err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
 	}
@@ -95,7 +95,7 @@ func (c *CachedRepository) Insert(entity *domain.TimeEntryEntity) (err error) {
     return
 }
 
-func (c *CachedRepository) Update(entity *domain.TimeEntryEntity) (err error) {
+func (c *cachedRepository) Update(entity *domain.TimeEntryEntity) (err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
 	}
@@ -109,7 +109,7 @@ func (c *CachedRepository) Update(entity *domain.TimeEntryEntity) (err error) {
     return
 }
 
-func (c *CachedRepository) Stop(entity *domain.TimeEntryEntity) (err error) {
+func (c *cachedRepository) Stop(entity *domain.TimeEntryEntity) (err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
 	}
@@ -122,7 +122,7 @@ func (c *CachedRepository) Stop(entity *domain.TimeEntryEntity) (err error) {
     return
 }
 
-func (c *CachedRepository) Delete(entity *domain.TimeEntryEntity) (err error) {
+func (c *cachedRepository) Delete(entity *domain.TimeEntryEntity) (err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
 	}
@@ -135,7 +135,7 @@ func (c *CachedRepository) Delete(entity *domain.TimeEntryEntity) (err error) {
     return
 }
 
-func (c *CachedRepository) Continue(entity *domain.TimeEntryEntity) (newEntity domain.TimeEntryEntity, err error) {
+func (c *cachedRepository) Continue(entity *domain.TimeEntryEntity) (newEntity domain.TimeEntryEntity, err error) {
 	if err = c.checkRefresh(); err != nil {
 		return
 	}
@@ -150,7 +150,7 @@ func (c *CachedRepository) Continue(entity *domain.TimeEntryEntity) (newEntity d
 }
 
 
-func (c *CachedRepository) checkRefresh() error {
+func (c *cachedRepository) checkRefresh() error {
     t := c.cache.GetData().Time
 	if time.Now().Sub(t).Minutes() < 1.0 {
 		return nil
@@ -164,7 +164,7 @@ func (c *CachedRepository) checkRefresh() error {
 	return err
 }
 
-func (c *CachedRepository) refresh() (err error) {
+func (c *cachedRepository) refresh() (err error) {
 	account, err := c.timeEntryRepository.FetchTogglAccount()
 	if err != nil {
 		return

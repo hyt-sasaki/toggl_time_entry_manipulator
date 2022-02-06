@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+    "errors"
 
 	"toggl_time_entry_manipulator/config"
 	"toggl_time_entry_manipulator/command"
@@ -38,16 +39,27 @@ type EntryArgs struct {
     TimeEstimation int  // minutes
 }
 
-type AddEntryCommand struct {
-    Repo repository.ICachedRepository
-    Config *config.WorkflowConfig
+type IAddEntryCommand interface {
+    alfred.Filter
+    alfred.Action
 }
 
-func NewAddEntryCommand(repo repository.ICachedRepository, config *config.WorkflowConfig) (AddEntryCommand) {
-    return AddEntryCommand{Repo: repo, Config: config}
+type addEntryCommand struct {
+    repo repository.ICachedRepository
+    config *config.WorkflowConfig
 }
 
-func (c AddEntryCommand) About() alfred.CommandDef {
+func NewAddEntryCommand(repo repository.ICachedRepository, config *config.WorkflowConfig) (com IAddEntryCommand, err error) {
+    if config == nil {
+        err = errors.New("Workflow config is nil.")
+        return
+    }
+
+    com = &addEntryCommand{repo: repo, config: config}
+    return
+}
+
+func (c addEntryCommand) About() alfred.CommandDef {
     return alfred.CommandDef{
         Keyword: command.AddEntryKeyword,
         Description: "add entry: project -> tag -> description -> estimation",
@@ -55,7 +67,7 @@ func (c AddEntryCommand) About() alfred.CommandDef {
     }
 }
 
-func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
+func (c addEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
     // load from alfred variable
     var sd StateData
 
@@ -77,14 +89,14 @@ func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error
             items = append(items, c.generateDescriptionItems(sd, arg)...)
         case ProjectEdit:
             var projects []toggl.Project
-            projects, err = c.Repo.GetProjects()
+            projects, err = c.repo.GetProjects()
             if err != nil {
                 return
             }
             items = append(items, c.generateProjectItems(sd, arg, projects)...)
         case TagEdit:
             var tags []toggl.Tag
-            tags, err = c.Repo.GetTags()
+            tags, err = c.repo.GetTags()
             if err != nil {
                 return
             }
@@ -98,7 +110,7 @@ func (c AddEntryCommand) Items(arg, data string) (items []alfred.Item, err error
 
 
 
-func (c AddEntryCommand) Do(data string) (out string, err error) {
+func (c addEntryCommand) Do(data string) (out string, err error) {
     var sd StateData
 	if data != "" {
 		if err := json.Unmarshal([]byte(data), &sd); err != nil {
@@ -110,7 +122,7 @@ func (c AddEntryCommand) Do(data string) (out string, err error) {
 
     entity := sd.Entity
 
-    if err = c.Repo.Insert(&entity); err != nil {
+    if err = c.repo.Insert(&entity); err != nil {
         return
     }
 
@@ -120,7 +132,7 @@ func (c AddEntryCommand) Do(data string) (out string, err error) {
 }
 
 // descrption
-func (c AddEntryCommand) generateDescriptionItems(sd StateData, enteredDescription string) (items []alfred.Item) {
+func (c addEntryCommand) generateDescriptionItems(sd StateData, enteredDescription string) (items []alfred.Item) {
     entity := sd.Entity
     entity.Entry.Description = enteredDescription
     tag := ""
@@ -148,14 +160,14 @@ func (c AddEntryCommand) generateDescriptionItems(sd StateData, enteredDescripti
 }
 
 // project
-func (c AddEntryCommand) generateProjectItems(sd StateData, enteredArg string, projects []toggl.Project) (items []alfred.Item) {
+func (c addEntryCommand) generateProjectItems(sd StateData, enteredArg string, projects []toggl.Project) (items []alfred.Item) {
     entity := sd.Entity
     nextState, mode := c.next(sd.Current)
     items = command.GenerateItemsForProject(
         projects,
         enteredArg,
         entity,
-        *c.Config,
+        *c.config,
         func(e domain.TimeEntryEntity) (alfred.ItemArg) {
             return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
@@ -173,7 +185,7 @@ func (c AddEntryCommand) generateProjectItems(sd StateData, enteredArg string, p
 }
 
 // tag
-func (c AddEntryCommand) generateTagItems(sd StateData, enteredArg string, tags []toggl.Tag) (items []alfred.Item) {
+func (c addEntryCommand) generateTagItems(sd StateData, enteredArg string, tags []toggl.Tag) (items []alfred.Item) {
     entity := sd.Entity
 
     nextState, mode := c.next(sd.Current)
@@ -181,7 +193,7 @@ func (c AddEntryCommand) generateTagItems(sd StateData, enteredArg string, tags 
         tags,
         enteredArg,
         entity,
-        *c.Config,
+        *c.config,
         func(e domain.TimeEntryEntity) (alfred.ItemArg) {
             return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
@@ -197,7 +209,7 @@ func (c AddEntryCommand) generateTagItems(sd StateData, enteredArg string, tags 
 }
 
 // time estimation
-func (c AddEntryCommand) generateTimeEstimationItems(sd StateData, enteredEstimationStr string) (items []alfred.Item) {
+func (c addEntryCommand) generateTimeEstimationItems(sd StateData, enteredEstimationStr string) (items []alfred.Item) {
     entity := sd.Entity
     var estimationTime int
     var err error
@@ -229,9 +241,9 @@ func (c AddEntryCommand) generateTimeEstimationItems(sd StateData, enteredEstima
 
 var processOrders = []state{ProjectEdit, TagEdit, DescriptionEdit, TimeEstimationEdit, EndEdit}
 var processOrdersWithoutEstimation = []state{ProjectEdit, TagEdit, DescriptionEdit, EndEdit}
-func (command AddEntryCommand) next(c state) (state, alfred.ModeType) {
+func (command addEntryCommand) next(c state) (state, alfred.ModeType) {
     var orders []state
-    if command.Config != nil && command.Config.RecordEstimate {
+    if command.config != nil && command.config.RecordEstimate {
         orders = processOrders
     } else {
         orders = processOrdersWithoutEstimation
@@ -255,9 +267,9 @@ func (command AddEntryCommand) next(c state) (state, alfred.ModeType) {
     return nextState, mode
 }
 
-func (command AddEntryCommand) prev(c state) (state, alfred.ModeType) {
+func (command addEntryCommand) prev(c state) (state, alfred.ModeType) {
     var orders []state
-    if command.Config.RecordEstimate {
+    if command.config.RecordEstimate {
         orders = processOrders
     } else {
         orders = processOrdersWithoutEstimation
@@ -291,7 +303,7 @@ func hasPrevState(c state) bool {
     return processOrders[0] != c
 }
 
-func (c AddEntryCommand)generateBackItem(stateData StateData) (alfred.Item) {
+func (c addEntryCommand)generateBackItem(stateData StateData) (alfred.Item) {
     prevState, _ := c.prev(stateData.Current)
     return command.GenerateBackItem(command.AddEntryKeyword, alfred.Stringify(StateData{
         Current: prevState,

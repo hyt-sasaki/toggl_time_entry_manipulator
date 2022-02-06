@@ -10,14 +10,19 @@ import (
 	"github.com/jason0x43/go-alfred"
 )
 
-var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.get]", log.LstdFlags)
+var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.stop]", log.LstdFlags)
 
-type StopEntryCommand struct {
-    Repo repository.ICachedRepository
+type IStopEntryCommand interface {
+    alfred.Action
 }
 
-func NewStopEntryCommand(repo repository.ICachedRepository) (StopEntryCommand) {
-    return StopEntryCommand{Repo: repo}
+type StopEntryCommand struct {
+    repo repository.ICachedRepository
+}
+
+func NewStopEntryCommand(repo repository.ICachedRepository) (com IStopEntryCommand) {
+    com = &StopEntryCommand{repo: repo}
+    return
 }
 
 func (c StopEntryCommand) About() alfred.CommandDef {
@@ -37,12 +42,12 @@ func (c StopEntryCommand) Do(data string) (out string, err error) {
         return
     }
 
-    entity, err := c.Repo.FindOneById(itemData.ID)
+    entity, err := c.repo.FindOneById(itemData.ID)
     if err != nil {
         return
     }
 
-    err = c.Repo.Stop(&entity)
+    err = c.repo.Stop(&entity)
     if err != nil {
         return
     }
