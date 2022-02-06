@@ -94,7 +94,7 @@ func GenerateItemsForEstimatedDuration(
 ) (items []alfred.Item) {
     autocomplete := fmt.Sprintf("%d", entity.Estimation.Duration)
     estimatedDuration, parseErr := strconv.Atoi(arg)
-    icon := "power_off.png"
+    icon := OffIcon
     var title string
     var itemArg *alfred.ItemArg
     if parseErr != nil {
@@ -104,7 +104,7 @@ func GenerateItemsForEstimatedDuration(
         entity.Estimation.Duration = estimatedDuration
         _itemArg := itemArgGenerator(entity)
         itemArg = &_itemArg
-        icon = "power_on.png"
+        icon = OnIcon
         title = fmt.Sprintf("Duration: %d", estimatedDuration)
     }
     items = append(items, alfred.Item{
@@ -132,7 +132,7 @@ func Match(target, query string) (bool) {
 func GenerateBackItem(keyword, data string) (alfred.Item) {
     return alfred.Item{
         Title: "Back",
-        Icon: "back.png",
+        Icon: BackIcon,
         Arg: &alfred.ItemArg{
             Keyword: keyword,
             Mode: alfred.ModeTell,

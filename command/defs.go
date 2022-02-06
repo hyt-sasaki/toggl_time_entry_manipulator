@@ -28,3 +28,12 @@ const (
     ModifyStop
     ModifyMemo
 )
+
+const (
+    OffIcon = "power_off.png"
+    OnIcon = "power_on.png"
+    WarningIcon = "warning.png"
+    LateIcon = "late.png"
+    LateCheckedIcon = "late_checked.png"
+    BackIcon = "back.png"
+)

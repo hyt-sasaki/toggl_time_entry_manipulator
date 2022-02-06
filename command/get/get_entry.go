@@ -168,7 +168,7 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
     if alfred.FuzzyMatches("delete this entry", arg) {
         descriptionItem := alfred.Item{
             Title: "Delete this entry (Press Cmd+Enter)",
-            Icon: "warning.png",
+            Icon: command.WarningIcon,
         }
         descriptionItem.AddMod(
             alfred.ModCmd,

@@ -53,14 +53,14 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
     switch target {
         case command.ModifyDescription:
             var itemArg *alfred.ItemArg = nil
-            icon := "power_off.png"
+            icon := command.OffIcon
             if arg != "" {
                 entity.Entry.Description = arg
                 itemArg = &alfred.ItemArg{
                     Keyword: command.ModifyEntryKeyword,
                     Mode: alfred.ModeDo,
                     Data: alfred.Stringify(entity)}
-                icon = "power_on.png"
+                icon = command.OnIcon
             }
             items = append(items, alfred.Item{
                 Title: fmt.Sprintf("Description: %s", arg),
@@ -107,7 +107,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
             autocomplete := c.calcLatestStop(entity)
             var itemArg *alfred.ItemArg
             var title string
-            icon := "power_off.png"
+            icon := command.OffIcon
             beforeUpdated := *entity.Entry.Start
             if err == nil {
                 entity.Entry.SetStartTime(start, false)
@@ -117,7 +117,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
                     Data: alfred.Stringify(entity),
                 }
                 title = fmt.Sprintf("Start: %s", start.Format("06/01/02 15:04"))
-                icon = "power_on.png"
+                icon = command.OnIcon
             } else {
                 itemArg = nil
                 title = "Start: -"
@@ -136,7 +136,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
             stop, err := convertToTime(arg, entity.Entry.Stop)
             var itemArg *alfred.ItemArg
             var title string
-            icon := "poewr_off.png"
+            icon := command.OffIcon
             beforeUpdated := *entity.Entry.Stop
             if err == nil {
                 entity.Entry.SetStopTime(stop)
@@ -146,7 +146,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
                     Data: alfred.Stringify(entity),
                 }
                 title = fmt.Sprintf("Stop: %s", stop.Format("06/01/02 15:04"))
-                icon = "power_on.png"
+                icon = command.OnIcon
             } else {
                 itemArg = nil
                 title = "Stop: -"
@@ -164,14 +164,14 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
 
         case command.ModifyMemo:
             var itemArg *alfred.ItemArg = nil
-            icon := "poewr_off.png"
+            icon := command.OffIcon
             if arg != "" {
                 entity.Estimation.Memo = arg
                 itemArg = &alfred.ItemArg{
                     Keyword: command.ModifyEntryKeyword,
                     Mode: alfred.ModeDo,
                     Data: alfred.Stringify(entity) }
-                icon = "power_on.png"
+                icon = command.OnIcon
             }
             items = append(items, alfred.Item{
                 Title: fmt.Sprintf("Memo: %s", arg),

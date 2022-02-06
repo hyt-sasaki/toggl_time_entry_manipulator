@@ -114,15 +114,15 @@ func convertDuration(duration int64) string {
 }
 
 func getIcon(entity domain.TimeEntryEntity) (icon string) {
-    icon = "power_off.png"
+    icon = command.OffIcon
     if entity.IsRunning() {
-        icon = "power_on.png"
+        icon = command.OnIcon
     }
     if entity.IsLate() {
         if entity.Estimation.Memo == "" {
-            icon = "late.png"
+            icon = command.LateIcon
         } else {
-            icon = "late_checked.png"
+            icon = command.LateCheckedIcon
         }
     }
     return
