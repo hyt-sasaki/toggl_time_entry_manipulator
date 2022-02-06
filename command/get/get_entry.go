@@ -2,6 +2,7 @@ package get
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -17,13 +18,22 @@ import (
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.get]", log.LstdFlags)
 
 
-type GetEntryCommand struct {
-    Repo repository.ICachedRepository
-    Config *config.WorkflowConfig
+type IGetEntryCommand interface {
+    alfred.Filter
 }
 
-func NewGetEntryCommand(repo repository.ICachedRepository, config *config.WorkflowConfig) (GetEntryCommand) {
-    return GetEntryCommand{Repo: repo, Config: config}
+type GetEntryCommand struct {
+    repo repository.ICachedRepository
+    config *config.WorkflowConfig
+}
+
+func NewGetEntryCommand(repo repository.ICachedRepository, config *config.WorkflowConfig) (com IGetEntryCommand, err error) {
+    if config == nil {
+        err = errors.New("Workflow config is nil.")
+        return
+    }
+    com = &GetEntryCommand{repo: repo, config: config}
+    return
 }
 
 func (c GetEntryCommand) About() alfred.CommandDef {
@@ -43,7 +53,7 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         return
     }
 
-    entity, err := c.Repo.FindOneById(itemData.ID)
+    entity, err := c.repo.FindOneById(itemData.ID)
     if err != nil {
         item := alfred.Item{
             Title: "Something went wrong",
@@ -51,7 +61,7 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
         items = append(items, item)
         return
     }
-    projects, err := c.Repo.GetProjects()
+    projects, err := c.repo.GetProjects()
     if err != nil {
         item := alfred.Item{
             Title: "Something went wrong",
@@ -198,7 +208,7 @@ func (c GetEntryCommand) Items(arg, data string) (items []alfred.Item, err error
 
     if !entity.IsRunning() && alfred.FuzzyMatches("continue this entry", arg) {
         var mode alfred.ModeType
-        if c.Config != nil && c.Config.RecordEstimate {
+        if c.config != nil && c.config.RecordEstimate {
             mode = alfred.ModeTell
         } else {
             mode = alfred.ModeDo

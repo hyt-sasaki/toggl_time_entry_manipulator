@@ -22,7 +22,7 @@ type GetEntryTestSuite struct {
     suite.Suite
     mockedRepo *repository.MockedCachedRepository
     config *config.WorkflowConfig
-    com *get.GetEntryCommand
+    com get.IGetEntryCommand
 }
 
 func TestGetEntryTestSuite(t *testing.T) {
@@ -32,10 +32,7 @@ func TestGetEntryTestSuite(t *testing.T) {
 func (suite *GetEntryTestSuite) SetupTest() {
     suite.mockedRepo = &repository.MockedCachedRepository{}
     suite.config = &config.WorkflowConfig{RecordEstimate: true}
-    suite.com = &get.GetEntryCommand{
-        Repo: suite.mockedRepo,
-        Config: suite.config,
-    }
+    suite.com, _ = get.NewGetEntryCommand(suite.mockedRepo, suite.config)
 }
 
 func (suite *GetEntryTestSuite) TestItems_with_record_estimate() {

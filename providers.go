@@ -80,7 +80,7 @@ func NewCommands(
     addCommand add.IAddEntryCommand,
     listCommand list.IListEntryCommand,
     favoriteCommand favorite.FavoriteEntryCommand,
-    getCommand get.GetEntryCommand,
+    getCommand get.IGetEntryCommand,
     modifyComamnd modify.ModifyEntryCommand,
     stopCommand stop.StopEntryCommand,
     deleteCommand delete.DeleteEntryCommand,
