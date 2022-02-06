@@ -78,7 +78,7 @@ func NewCommands(
     config *workflowConfig.Config,
     optionCommand optionCom.OptionCommand,
     addCommand add.IAddEntryCommand,
-    listCommand list.ListEntryCommand,
+    listCommand list.IListEntryCommand,
     favoriteCommand favorite.FavoriteEntryCommand,
     getCommand get.GetEntryCommand,
     modifyComamnd modify.ModifyEntryCommand,

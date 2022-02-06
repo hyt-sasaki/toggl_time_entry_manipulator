@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
     "strconv"
+    "errors"
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/config"
 	"toggl_time_entry_manipulator/domain"
@@ -17,13 +18,22 @@ import (
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.list]", log.LstdFlags)
 
-type ListEntryCommand struct {
-    Repo repository.ICachedRepository
-    Config config.WorkflowConfig
+type IListEntryCommand interface {
+    alfred.Filter
 }
 
-func NewListEntryCommand(repo repository.ICachedRepository, workflowConfig config.WorkflowConfig) (ListEntryCommand) {
-    return ListEntryCommand{Repo: repo, Config: workflowConfig}
+type ListEntryCommand struct {
+    repo repository.ICachedRepository
+    config *config.WorkflowConfig
+}
+
+func NewListEntryCommand(repo repository.ICachedRepository, workflowConfig *config.WorkflowConfig) (com IListEntryCommand, err error) {
+    if workflowConfig == nil {
+        err = errors.New("Workflow config is nil.")
+        return
+    }
+    com = &ListEntryCommand{repo: repo, config: workflowConfig}
+    return 
 }
 
 func (c ListEntryCommand) About() alfred.CommandDef {
@@ -35,18 +45,18 @@ func (c ListEntryCommand) About() alfred.CommandDef {
 }
 
 func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
-    entities, err := c.Repo.Fetch()
+    entities, err := c.repo.Fetch()
     if err != nil {
         return
     }
-    projects, err := c.Repo.GetProjects()
+    projects, err := c.repo.GetProjects()
     if err != nil {
         return
     }
 
     for _, entity := range entities {
         title := getTitle(entity, projects)
-        projectAlias := config.GetAlias(c.Config.ProjectAliases, entity.Entry.Pid)
+        projectAlias := config.GetAlias(c.config.ProjectAliases, entity.Entry.Pid)
         // TODO tagのalias
         if !command.Match(title + projectAlias, arg) {
             continue
