@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+    "errors"
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/config"
 	"toggl_time_entry_manipulator/domain"
@@ -16,14 +17,25 @@ import (
 
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.favorite]", log.LstdFlags)
 
-type FavoriteEntryCommand struct {
-    Repo repository.ICachedRepository
-    Config *config.Config
-    ConfigFile config.ConfigFile
+type IFavoriteEntryCommand interface {
+    alfred.Filter
+    alfred.Action
 }
 
-func NewFavoriteEntryCommand(repo repository.ICachedRepository, config *config.Config, configFile config.ConfigFile) (FavoriteEntryCommand) {
-    return FavoriteEntryCommand{Repo: repo, Config: config, ConfigFile: configFile}
+type FavoriteEntryCommand struct {
+    repo repository.ICachedRepository
+    config *config.Config
+    configFile config.ConfigFile
+}
+
+func NewFavoriteEntryCommand(repo repository.ICachedRepository, config *config.Config, configFile config.ConfigFile) (com IFavoriteEntryCommand, err error) {
+    if config == nil {
+        err = errors.New("Config is nil.")
+        return
+    }
+
+    com = &FavoriteEntryCommand{repo: repo, config: config, configFile: configFile}
+    return 
 }
 
 func (c FavoriteEntryCommand) About() alfred.CommandDef {
@@ -35,23 +47,23 @@ func (c FavoriteEntryCommand) About() alfred.CommandDef {
 }
 
 func (c FavoriteEntryCommand) Items(arg, data string) (items []alfred.Item, err error) {
-    projects, err := c.Repo.GetProjects()
+    projects, err := c.repo.GetProjects()
     if err != nil {
         return
     }
     var mode alfred.ModeType
-    if c.Config != nil && c.Config.WorkflowConfig.RecordEstimate {
+    if c.config != nil && c.config.WorkflowConfig.RecordEstimate {
         mode = alfred.ModeTell
     } else {
         mode = alfred.ModeDo
     }
-    for _, entityId := range c.Config.WorkflowConfig.Favorites {
-        entity, findErr := c.Repo.FindOneById(entityId)
+    for _, entityId := range c.config.WorkflowConfig.Favorites {
+        entity, findErr := c.repo.FindOneById(entityId)
         if findErr != nil {
             continue
         }
         title := getTitle(entity, projects)
-        projectAlias := config.GetAlias(c.Config.WorkflowConfig.ProjectAliases, entity.Entry.Pid)
+        projectAlias := config.GetAlias(c.config.WorkflowConfig.ProjectAliases, entity.Entry.Pid)
         if !command.Match(title + projectAlias, arg) {
             continue
         }
@@ -92,19 +104,19 @@ func (c FavoriteEntryCommand) Do(data string) (out string, err error) {
 
     switch itemData.Action {
     case command.AddToFavorite:
-        c.Config.WorkflowConfig.Favorites = append(c.Config.WorkflowConfig.Favorites, itemData.Ref.ID)
-        alfred.SaveJSON(string(c.ConfigFile), *c.Config)
+        c.config.WorkflowConfig.Favorites = append(c.config.WorkflowConfig.Favorites, itemData.Ref.ID)
+        alfred.SaveJSON(string(c.configFile), *c.config)
         out = "Entry has been added to favorite list."
     case command.RemoveFromFavorite:
         removeIdx := -1
-        for idx, entryId := range c.Config.WorkflowConfig.Favorites {
+        for idx, entryId := range c.config.WorkflowConfig.Favorites {
             if entryId == itemData.Ref.ID {
                 removeIdx = idx
             }
         }
         if removeIdx != -1 {
-            c.Config.WorkflowConfig.Favorites = append(c.Config.WorkflowConfig.Favorites[:removeIdx], c.Config.WorkflowConfig.Favorites[removeIdx+1:]...)
-            alfred.SaveJSON(string(c.ConfigFile), *c.Config)
+            c.config.WorkflowConfig.Favorites = append(c.config.WorkflowConfig.Favorites[:removeIdx], c.config.WorkflowConfig.Favorites[removeIdx+1:]...)
+            alfred.SaveJSON(string(c.configFile), *c.config)
             out = "Entry has been removed from favorite list."
         } else {
             out = fmt.Sprintf("Not found %d in favorite list.", itemData.Ref.ID)

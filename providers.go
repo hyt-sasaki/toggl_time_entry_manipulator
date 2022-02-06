@@ -79,7 +79,7 @@ func NewCommands(
     optionCommand optionCom.IOptionCommand,
     addCommand add.IAddEntryCommand,
     listCommand list.IListEntryCommand,
-    favoriteCommand favorite.FavoriteEntryCommand,
+    favoriteCommand favorite.IFavoriteEntryCommand,
     getCommand get.IGetEntryCommand,
     modifyComamnd modify.IModifyEntryCommand,
     stopCommand stop.IStopEntryCommand,
