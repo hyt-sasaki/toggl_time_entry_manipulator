@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+    "errors"
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/config"
 	"toggl_time_entry_manipulator/repository"
@@ -15,14 +16,24 @@ import (
 var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.option]", log.LstdFlags)
 
 
-type OptionCommand struct {
-    Repo repository.ICachedRepository
-    Config *config.Config
-    ConfigFile config.ConfigFile
+type IOptionCommand interface {
+    alfred.Filter
+    alfred.Action
 }
 
-func NewOptionCommand(repo repository.ICachedRepository, config *config.Config, configFile config.ConfigFile) (OptionCommand) {
-    return OptionCommand{Repo: repo, Config: config, ConfigFile: configFile}
+type OptionCommand struct {
+    repo repository.ICachedRepository
+    config *config.Config
+    configFile config.ConfigFile
+}
+
+func NewOptionCommand(repo repository.ICachedRepository, config *config.Config, configFile config.ConfigFile) (com IOptionCommand, err error) {
+    if config == nil {
+        err = errors.New("Workflow config is nil.")
+        return
+    }
+    com = OptionCommand{repo: repo, config: config, configFile: configFile}
+    return
 }
 
 func (c OptionCommand) About() alfred.CommandDef {
@@ -35,12 +46,12 @@ func (c OptionCommand) About() alfred.CommandDef {
 
 
 func (c OptionCommand) Items(arg, data string) (items []alfred.Item, err error) {
-    copied := *c.Config
+    copied := *c.config
     copied.TogglConfig.APIKey = arg
     item := alfred.Item{
         Title: fmt.Sprintf("Toggl API key: %s", arg),
-        Subtitle: fmt.Sprintf("Old API key: %s", c.Config.TogglConfig.APIKey),
-        Autocomplete: c.Config.TogglConfig.APIKey,
+        Subtitle: fmt.Sprintf("Old API key: %s", c.config.TogglConfig.APIKey),
+        Autocomplete: c.config.TogglConfig.APIKey,
         Arg: &alfred.ItemArg{
             Keyword: command.OptionKeyword,
             Mode: alfred.ModeDo,
@@ -61,8 +72,8 @@ func (c OptionCommand) Do(data string) (out string, err error) {
         dlog.Printf("data should not be empty")
     }
 
-    c.Config = &newConfig
-    alfred.SaveJSON(string(c.ConfigFile), *c.Config)
+    c.config = &newConfig
+    alfred.SaveJSON(string(c.configFile), *c.config)
     out = "Config has been saved"
     return
 }

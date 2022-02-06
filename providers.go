@@ -76,7 +76,7 @@ func NewCache(cacheFile myCache.CacheFile) (cache myCache.ICache, err error) {
 func NewCommands(
     firstCall bool,
     config *workflowConfig.Config,
-    optionCommand optionCom.OptionCommand,
+    optionCommand optionCom.IOptionCommand,
     addCommand add.IAddEntryCommand,
     listCommand list.IListEntryCommand,
     favoriteCommand favorite.FavoriteEntryCommand,
