@@ -21,7 +21,6 @@ func main() {
     dlog.Printf("cache file dir: %s", workflow.CacheDir())
     dlog.Printf("config file dir: %s", workflow.DataDir())
 
-    // firestore
     firstCall := os.Args[2] == ""
     commands, err := initializeCommands(workflow, firstCall)
     if err != nil {
