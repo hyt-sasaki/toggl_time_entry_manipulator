@@ -26,7 +26,7 @@ type AddEntryTestSuite struct {
     projects []toggl.Project
     tags []toggl.Tag
     config *config.WorkflowConfig
-    com *add.AddEntryCommand
+    com add.IAddEntryCommand
 }
 
 func TestSuite(t *testing.T) {
@@ -36,10 +36,7 @@ func TestSuite(t *testing.T) {
 func (suite *AddEntryTestSuite) SetupTest() {
     suite.mockedRepo = &repository.MockedCachedRepository{}
     suite.config = &config.WorkflowConfig{}
-    suite.com = &add.AddEntryCommand{
-        Repo: suite.mockedRepo,
-        Config: suite.config,
-    }
+    suite.com = add.NewAddEntryCommand(suite.mockedRepo, suite.config)
 
     suite.projects = []toggl.Project{
         { ID: 1, Name: "hoge", }, 
