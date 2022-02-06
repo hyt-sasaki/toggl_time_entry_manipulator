@@ -21,7 +21,7 @@ import (
 type StopEntryTestSuite struct {
     suite.Suite
     mockedRepo *repository.MockedCachedRepository
-    com *stop.StopEntryCommand
+    com stop.IStopEntryCommand
 }
 
 func TestStopEntryTestSuite(t *testing.T) {
@@ -30,9 +30,7 @@ func TestStopEntryTestSuite(t *testing.T) {
 
 func (suite *StopEntryTestSuite) SetupTest() {
     suite.mockedRepo = &repository.MockedCachedRepository{}
-    suite.com = &stop.StopEntryCommand{
-        Repo: suite.mockedRepo,
-    }
+    suite.com = stop.NewStopEntryCommand(suite.mockedRepo)
 }
 
 func (suite *StopEntryTestSuite) TestDo() {

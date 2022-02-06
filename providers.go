@@ -82,7 +82,7 @@ func NewCommands(
     favoriteCommand favorite.FavoriteEntryCommand,
     getCommand get.IGetEntryCommand,
     modifyComamnd modify.IModifyEntryCommand,
-    stopCommand stop.StopEntryCommand,
+    stopCommand stop.IStopEntryCommand,
     deleteCommand delete.DeleteEntryCommand,
     continueCommand continue_entry.ContinueEntryCommand,
 ) []alfred.Command {
