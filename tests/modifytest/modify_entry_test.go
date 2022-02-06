@@ -1,11 +1,12 @@
 package modifytest
 
 import (
-	_ "toggl_time_entry_manipulator/supports"
 	"encoding/json"
 	"fmt"
-    "time"
 	"testing"
+	"time"
+	"toggl_time_entry_manipulator/config"
+	_ "toggl_time_entry_manipulator/supports"
 
 	"github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
@@ -13,15 +14,16 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
-	"toggl_time_entry_manipulator/domain"
-	"toggl_time_entry_manipulator/repository"
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/command/modify"
+	"toggl_time_entry_manipulator/domain"
+	"toggl_time_entry_manipulator/repository"
 )
 type ModifyEntryTestSuite struct {
     suite.Suite
     mockedRepo *repository.MockedCachedRepository
-    com *modify.ModifyEntryCommand
+    config *config.WorkflowConfig
+    com modify.IModifyEntryCommand
 }
 
 func TestModifyEntryTestSuite(t *testing.T) {
@@ -30,9 +32,8 @@ func TestModifyEntryTestSuite(t *testing.T) {
 
 func (suite *ModifyEntryTestSuite) SetupTest() {
     suite.mockedRepo = &repository.MockedCachedRepository{}
-    suite.com = &modify.ModifyEntryCommand{
-        Repo: suite.mockedRepo,
-    }
+    suite.config = &config.WorkflowConfig{}
+    suite.com, _ = modify.NewModifyEntryCommand( suite.mockedRepo, suite.config)
     suite.mockedRepo.On("Fetch").Return([]domain.TimeEntryEntity{
         {Entry: toggl.TimeEntry{ID: 1, Description: "item1"}},
     }, nil)

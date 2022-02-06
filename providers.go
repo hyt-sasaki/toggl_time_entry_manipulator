@@ -81,7 +81,7 @@ func NewCommands(
     listCommand list.IListEntryCommand,
     favoriteCommand favorite.FavoriteEntryCommand,
     getCommand get.IGetEntryCommand,
-    modifyComamnd modify.ModifyEntryCommand,
+    modifyComamnd modify.IModifyEntryCommand,
     stopCommand stop.StopEntryCommand,
     deleteCommand delete.DeleteEntryCommand,
     continueCommand continue_entry.ContinueEntryCommand,

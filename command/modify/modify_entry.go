@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"time"
+    "errors"
 	"toggl_time_entry_manipulator/config"
 	"toggl_time_entry_manipulator/command"
 	"toggl_time_entry_manipulator/domain"
@@ -14,15 +15,25 @@ import (
 	"github.com/jason0x43/go-alfred"
 )
 
-var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.get]", log.LstdFlags)
+var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.modify]", log.LstdFlags)
 
-type ModifyEntryCommand struct {
-    Repo repository.ICachedRepository
-    Config config.WorkflowConfig
+type IModifyEntryCommand interface {
+    alfred.Filter
+    alfred.Action
 }
 
-func NewModifyEntryCommand(repo repository.ICachedRepository, config config.WorkflowConfig) (ModifyEntryCommand) {
-    return ModifyEntryCommand{Repo: repo, Config: config}
+type ModifyEntryCommand struct {
+    repo repository.ICachedRepository
+    config *config.WorkflowConfig
+}
+
+func NewModifyEntryCommand(repo repository.ICachedRepository, config *config.WorkflowConfig) (com IModifyEntryCommand, err error) {
+    if config == nil {
+        err = errors.New("Workflow config is nil.")
+        return
+    }
+    com = ModifyEntryCommand{repo: repo, config: config}
+    return
 }
 
 func (c ModifyEntryCommand) About() alfred.CommandDef {
@@ -44,7 +55,7 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
     target := modifyData.Target
 
     id := modifyData.Ref.ID
-    entity, err := c.Repo.FindOneById(id)
+    entity, err := c.repo.FindOneById(id)
     if err != nil {
         dlog.Printf("Not found: id = %d", id)
         return
@@ -81,9 +92,9 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
             items = append(items, generateBackItem(modifyData))
 
         case command.ModifyProject:
-            projects, _ := c.Repo.GetProjects()     // TODO error handling
+            projects, _ := c.repo.GetProjects()     // TODO error handling
             items = command.GenerateItemsForProject(
-                projects, arg, entity, c.Config,
+                projects, arg, entity, *c.config,
                 func (e domain.TimeEntryEntity) (alfred.ItemArg) {
                     return alfred.ItemArg{
                         Keyword: command.ModifyEntryKeyword,
@@ -92,9 +103,9 @@ func (c ModifyEntryCommand) Items(arg, data string) (items []alfred.Item, err er
             items = append(items, generateBackItem(modifyData))
 
         case command.ModifyTag:
-            tags, _ := c.Repo.GetTags()     // TODO error handling
+            tags, _ := c.repo.GetTags()     // TODO error handling
             items = command.GenerateItemsForTag(
-                tags, arg, entity, c.Config,
+                tags, arg, entity, *c.config,
                 func(e domain.TimeEntryEntity) (alfred.ItemArg) {
                      return alfred.ItemArg{
                          Keyword: command.ModifyEntryKeyword,
@@ -195,7 +206,7 @@ func (c ModifyEntryCommand) Do(data string) (out string, err error) {
         return
     }
 
-    err = c.Repo.Update(&entity)
+    err = c.repo.Update(&entity)
     if err != nil {
         dlog.Printf("Failed to update entity")
         return
@@ -228,7 +239,7 @@ func (c ModifyEntryCommand) calcLatestStop(entity domain.TimeEntryEntity) (out s
         return
     }
 
-    entities, _ := c.Repo.Fetch()   // sort済み
+    entities, _ := c.repo.Fetch()   // sort済み
     // entityが1個しかない場合は何もしない
     if len(entities) < 2 {
         return
