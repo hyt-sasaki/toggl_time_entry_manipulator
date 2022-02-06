@@ -36,7 +36,7 @@ func TestSuite(t *testing.T) {
 func (suite *AddEntryTestSuite) SetupTest() {
     suite.mockedRepo = &repository.MockedCachedRepository{}
     suite.config = &config.WorkflowConfig{}
-    suite.com = add.NewAddEntryCommand(suite.mockedRepo, suite.config)
+    suite.com, _ = add.NewAddEntryCommand(suite.mockedRepo, suite.config)
 
     suite.projects = []toggl.Project{
         { ID: 1, Name: "hoge", }, 

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+    "errors"
 
 	"toggl_time_entry_manipulator/config"
 	"toggl_time_entry_manipulator/command"
@@ -44,12 +45,18 @@ type IAddEntryCommand interface {
 }
 
 type addEntryCommand struct {
-    Repo repository.ICachedRepository
-    Config *config.WorkflowConfig
+    repo repository.ICachedRepository
+    config *config.WorkflowConfig
 }
 
-func NewAddEntryCommand(repo repository.ICachedRepository, config *config.WorkflowConfig) (IAddEntryCommand) {
-    return &addEntryCommand{Repo: repo, Config: config}
+func NewAddEntryCommand(repo repository.ICachedRepository, config *config.WorkflowConfig) (com IAddEntryCommand, err error) {
+    if config == nil {
+        err = errors.New("Workflow config is nil.")
+        return
+    }
+
+    com = &addEntryCommand{repo: repo, config: config}
+    return
 }
 
 func (c addEntryCommand) About() alfred.CommandDef {
@@ -82,14 +89,14 @@ func (c addEntryCommand) Items(arg, data string) (items []alfred.Item, err error
             items = append(items, c.generateDescriptionItems(sd, arg)...)
         case ProjectEdit:
             var projects []toggl.Project
-            projects, err = c.Repo.GetProjects()
+            projects, err = c.repo.GetProjects()
             if err != nil {
                 return
             }
             items = append(items, c.generateProjectItems(sd, arg, projects)...)
         case TagEdit:
             var tags []toggl.Tag
-            tags, err = c.Repo.GetTags()
+            tags, err = c.repo.GetTags()
             if err != nil {
                 return
             }
@@ -115,7 +122,7 @@ func (c addEntryCommand) Do(data string) (out string, err error) {
 
     entity := sd.Entity
 
-    if err = c.Repo.Insert(&entity); err != nil {
+    if err = c.repo.Insert(&entity); err != nil {
         return
     }
 
@@ -160,7 +167,7 @@ func (c addEntryCommand) generateProjectItems(sd StateData, enteredArg string, p
         projects,
         enteredArg,
         entity,
-        *c.Config,
+        *c.config,
         func(e domain.TimeEntryEntity) (alfred.ItemArg) {
             return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
@@ -186,7 +193,7 @@ func (c addEntryCommand) generateTagItems(sd StateData, enteredArg string, tags 
         tags,
         enteredArg,
         entity,
-        *c.Config,
+        *c.config,
         func(e domain.TimeEntryEntity) (alfred.ItemArg) {
             return alfred.ItemArg{
                 Keyword: command.AddEntryKeyword,
@@ -236,7 +243,7 @@ var processOrders = []state{ProjectEdit, TagEdit, DescriptionEdit, TimeEstimatio
 var processOrdersWithoutEstimation = []state{ProjectEdit, TagEdit, DescriptionEdit, EndEdit}
 func (command addEntryCommand) next(c state) (state, alfred.ModeType) {
     var orders []state
-    if command.Config != nil && command.Config.RecordEstimate {
+    if command.config != nil && command.config.RecordEstimate {
         orders = processOrders
     } else {
         orders = processOrdersWithoutEstimation
@@ -262,7 +269,7 @@ func (command addEntryCommand) next(c state) (state, alfred.ModeType) {
 
 func (command addEntryCommand) prev(c state) (state, alfred.ModeType) {
     var orders []state
-    if command.Config.RecordEstimate {
+    if command.config.RecordEstimate {
         orders = processOrders
     } else {
         orders = processOrdersWithoutEstimation
