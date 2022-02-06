@@ -2,6 +2,7 @@ package favorite
 
 import (
     "fmt"
+	"encoding/json"
 	"log"
 	"os"
 	"toggl_time_entry_manipulator/command"
@@ -13,15 +14,16 @@ import (
 	"github.com/jason0x43/go-toggl"
 )
 
-var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.list]", log.LstdFlags)
+var dlog = log.New(os.Stderr, "[toggl_time_entry_manipulator.command.favorite]", log.LstdFlags)
 
 type FavoriteEntryCommand struct {
     Repo repository.ICachedRepository
-    Config *config.WorkflowConfig
+    Config *config.Config
+    ConfigFile config.ConfigFile
 }
 
-func NewFavoriteEntryCommand(repo repository.ICachedRepository, workflowConfig *config.WorkflowConfig) (FavoriteEntryCommand) {
-    return FavoriteEntryCommand{Repo: repo, Config: workflowConfig}
+func NewFavoriteEntryCommand(repo repository.ICachedRepository, config *config.Config, configFile config.ConfigFile) (FavoriteEntryCommand) {
+    return FavoriteEntryCommand{Repo: repo, Config: config, ConfigFile: configFile}
 }
 
 func (c FavoriteEntryCommand) About() alfred.CommandDef {
@@ -38,15 +40,18 @@ func (c FavoriteEntryCommand) Items(arg, data string) (items []alfred.Item, err 
         return
     }
     var mode alfred.ModeType
-    if c.Config != nil && c.Config.RecordEstimate {
+    if c.Config != nil && c.Config.WorkflowConfig.RecordEstimate {
         mode = alfred.ModeTell
     } else {
         mode = alfred.ModeDo
     }
-    for _, entityId := range c.Config.Favorites {
-        entity, _ := c.Repo.FindOneById(entityId)
+    for _, entityId := range c.Config.WorkflowConfig.Favorites {
+        entity, findErr := c.Repo.FindOneById(entityId)
+        if findErr != nil {
+            continue
+        }
         title := getTitle(entity, projects)
-        projectAlias := config.GetAlias(c.Config.ProjectAliases, entity.Entry.Pid)
+        projectAlias := config.GetAlias(c.Config.WorkflowConfig.ProjectAliases, entity.Entry.Pid)
         if !command.Match(title + projectAlias, arg) {
             continue
         }
@@ -64,6 +69,22 @@ func (c FavoriteEntryCommand) Items(arg, data string) (items []alfred.Item, err 
     return
 }
 
+func (c FavoriteEntryCommand) Do(data string) (out string, err error) {
+    var itemData command.DetailRefData
+
+    err = json.Unmarshal([]byte(data), &itemData)
+    if err != nil {
+        dlog.Printf("Invalid data")
+        return
+    }
+
+    c.Config.WorkflowConfig.Favorites = append(c.Config.WorkflowConfig.Favorites, itemData.ID)
+    alfred.SaveJSON(string(c.ConfigFile), *c.Config)
+    out = "Entry has been added to favorite list."
+
+    return
+}
+
 
 func getTitle(entity domain.TimeEntryEntity, projects []toggl.Project) (title string){
     projectName := "-"
@@ -72,6 +93,10 @@ func getTitle(entity domain.TimeEntryEntity, projects []toggl.Project) (title st
             projectName = p.Name
         }
     }
-    title = fmt.Sprintf("%s (%s)", entity.Entry.Description, projectName)
+    tags := entity.Entry.Tags
+    if len(tags) == 0 {
+        tags = append(tags, "No Tag")
+    }
+    title = fmt.Sprintf("%s (%s) %s", entity.Entry.Description, projectName, tags)
     return
 }
