@@ -10,6 +10,7 @@ import (
     "toggl_time_entry_manipulator/repository"
     "toggl_time_entry_manipulator/command/add"
     "toggl_time_entry_manipulator/command/list"
+    "toggl_time_entry_manipulator/command/favorite"
     "toggl_time_entry_manipulator/command/get"
     "toggl_time_entry_manipulator/command/modify"
     "toggl_time_entry_manipulator/command/stop"
@@ -32,6 +33,7 @@ func initializeCommands(workflow alfred.Workflow, firstCall bool) (commands []al
         repository.NewCachedRepository,
         add.NewAddEntryCommand,
         list.NewListEntryCommand,
+        favorite.NewFavoriteEntryCommand,
         get.NewGetEntryCommand,
         modify.NewModifyEntryCommand,
         stop.NewStopEntryCommand,

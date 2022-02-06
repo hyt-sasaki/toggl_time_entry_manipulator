@@ -6,6 +6,7 @@ const DeleteEntryKeyword = "delete_entry"
 const GetEntryKeyword = "get_entry"
 const ModifyEntryKeyword = "modify_entry"
 const ListEntryKeyword = "list_entries"
+const FavoriteEntryKeyword = "favorite_entries"
 const ContinueEntryKeyword = "continue_entry"
 const OptionKeyword = "option"
 
@@ -17,7 +18,6 @@ type ModifyData struct {
     Ref DetailRefData
     Target modifyTarget
 }
-
 type modifyTarget int
 const (
     ModifyDescription modifyTarget = iota
@@ -28,6 +28,17 @@ const (
     ModifyStop
     ModifyMemo
 )
+
+type FavoriteRefData struct {
+    Ref DetailRefData
+    Action favoriteAction
+}
+type favoriteAction int
+const (
+    AddToFavorite favoriteAction = iota
+    RemoveFromFavorite
+)
+
 
 const iconDir = "./icons/"
 const (

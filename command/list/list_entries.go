@@ -51,6 +51,7 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
         if !command.Match(title + projectAlias, arg) {
             continue
         }
+        detailRefData := command.DetailRefData{ID: entity.Entry.ID}
         item := alfred.Item{
             Title: getTitle(entity, projects),
             Subtitle: getSubtitle(entity),
@@ -58,9 +59,23 @@ func (c ListEntryCommand) Items(arg, data string) (items []alfred.Item, err erro
             Arg: &alfred.ItemArg{
                 Keyword: command.GetEntryKeyword,
                 Mode: alfred.ModeTell,
-                Data: alfred.Stringify(command.DetailRefData{ID: entity.Entry.ID}),
+                Data: alfred.Stringify(detailRefData),
             },
         }
+        item.AddMod(
+            alfred.ModCmd,
+            alfred.ItemMod{
+                Subtitle: "Add this entry to favorite list",
+                Arg: &alfred.ItemArg{
+                    Keyword: command.FavoriteEntryKeyword,
+                    Mode: alfred.ModeDo,
+                    Data: alfred.Stringify(command.FavoriteRefData{
+                        Ref: detailRefData,
+                        Action: command.AddToFavorite,
+                    }),
+                },
+            },
+        )
         items = append(items, item)
     }
     return
