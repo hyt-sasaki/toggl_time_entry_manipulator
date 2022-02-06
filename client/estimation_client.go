@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"time"
 
@@ -31,6 +32,11 @@ func NewEstimationClient(serviceAccount option.ClientOption, config config.Fires
     if serviceAccount == nil {
         client = &EmptyEstimationClient{}
         return
+    }
+
+    if config.CollectionName == "" {
+        err = errors.New("Firestore collection name is empty.")
+        return 
     }
     var firestoreClient *firestore.Client
     var firestoreCtx = context.Background()
