@@ -29,11 +29,12 @@ const (
     ModifyMemo
 )
 
+const iconDir = "./icons/"
 const (
-    OffIcon = "power_off.png"
-    OnIcon = "power_on.png"
-    WarningIcon = "warning.png"
-    LateIcon = "late.png"
-    LateCheckedIcon = "late_checked.png"
-    BackIcon = "back.png"
+    OffIcon = iconDir + "power_off.png" 
+    OnIcon = iconDir + "power_on.png"
+    WarningIcon = iconDir + "warning.png"
+    LateIcon = iconDir + "late.png"
+    LateCheckedIcon = iconDir + "late_checked.png"
+    BackIcon = iconDir + "back.png"
 )
