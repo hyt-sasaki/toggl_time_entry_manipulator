@@ -4,7 +4,6 @@ import (
 	"time"
 	"toggl_time_entry_manipulator/domain"
 
-	//"github.com/jason0x43/go-alfred"
 	"github.com/jason0x43/go-toggl"
 )
 
@@ -13,10 +12,10 @@ type ICache interface {
     Save()
     GetData() *Data
 }
-type Cache struct {
-    Data *Data
-    File CacheFile
-    SaveCallback (func(string, interface{}) error)
+type cache struct {
+    data *Data
+    file CacheFile
+    saveCallback (func(string, interface{}) error)
 }
 type Data struct {
 	Workspace int
@@ -26,11 +25,18 @@ type Data struct {
 	Time      time.Time
 }
 
-func (c *Cache) Save() {
-    c.SaveCallback(string(c.File), c.Data)
-	// alfred.SaveJSON(string(c.File), &c.Data)
+func NewCache(data *Data, file CacheFile, callback func(string, interface{}) error) ICache {
+    return &cache{
+        data: data,
+        file: file,
+        saveCallback: callback,
+    }
 }
 
-func (c *Cache) GetData() *Data {
-    return c.Data
+func (c *cache) Save() {
+    c.saveCallback(string(c.file), c.data)
+}
+
+func (c *cache) GetData() *Data {
+    return c.data
 }

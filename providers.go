@@ -67,11 +67,7 @@ func NewCache(cacheFile myCache.CacheFile) (cache myCache.ICache, err error) {
         data = &myCache.Data{}
         alfred.SaveJSON(string(cacheFile), *data)
 	}
-    cache = &myCache.Cache{
-        Data: data,
-        File: cacheFile,
-        SaveCallback: alfred.SaveJSON,
-    }
+    cache = myCache.NewCache(data, cacheFile, alfred.SaveJSON)
     dlog.Println(cache)
 
     return
