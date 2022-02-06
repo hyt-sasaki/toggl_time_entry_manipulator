@@ -17,6 +17,7 @@ type WorkflowConfig struct {
     ProjectAliases []AliasMap `desc:"Project aliases"`
     TagAliases []AliasMap `desc:"Tag aliases"`
     RecordEstimate bool `desc:"record time estimate or not"`
+    Favorites []int `desc:"id list of favorite entries"`
 }
 
 type AliasMap struct {

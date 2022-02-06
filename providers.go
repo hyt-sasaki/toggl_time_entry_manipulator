@@ -10,6 +10,7 @@ import (
     "toggl_time_entry_manipulator/repository/myCache"
     "toggl_time_entry_manipulator/command/add"
     "toggl_time_entry_manipulator/command/list"
+    "toggl_time_entry_manipulator/command/favorite"
     "toggl_time_entry_manipulator/command/get"
     "toggl_time_entry_manipulator/command/modify"
     "toggl_time_entry_manipulator/command/stop"
@@ -82,6 +83,7 @@ func NewCommands(
     optionCommand optionCom.OptionCommand,
     addCommand add.AddEntryCommand,
     listCommand list.ListEntryCommand,
+    favoriteCommand favorite.FavoriteEntryCommand,
     getCommand get.GetEntryCommand,
     modifyComamnd modify.ModifyEntryCommand,
     stopCommand stop.StopEntryCommand,
@@ -95,12 +97,14 @@ func NewCommands(
         return []alfred.Command{
             addCommand,
             listCommand,
+            favoriteCommand,
             optionCommand,
         }
     } else {
         return []alfred.Command{
             addCommand,
             listCommand,
+            favoriteCommand,
             getCommand,
             modifyComamnd,
             stopCommand,

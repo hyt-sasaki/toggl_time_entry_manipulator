@@ -6,6 +6,7 @@ const DeleteEntryKeyword = "delete_entry"
 const GetEntryKeyword = "get_entry"
 const ModifyEntryKeyword = "modify_entry"
 const ListEntryKeyword = "list_entries"
+const FavoriteEntryKeyword = "favorite_entries"
 const ContinueEntryKeyword = "continue_entry"
 const OptionKeyword = "option"
 
