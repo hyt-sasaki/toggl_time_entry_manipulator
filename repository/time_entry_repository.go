@@ -26,7 +26,7 @@ type ITimeEntryRepository interface {
     Continue(*domain.TimeEntryEntity) (domain.TimeEntryEntity, error)
 }
 
-type TimeEntryRepository struct {
+type timeEntryRepository struct {
     togglClient client.ITogglClient
     estimationClient client.IEstimationClient
 }
@@ -34,14 +34,14 @@ type TimeEntryRepository struct {
 func NewTimeEntryRepository(
     togglClient client.ITogglClient,
     estimationClient client.IEstimationClient) (repo ITimeEntryRepository) {
-    repo = &TimeEntryRepository{
+    repo = &timeEntryRepository{
         togglClient: togglClient,
         estimationClient: estimationClient,
     }
     return
 }
 
-func (repo *TimeEntryRepository) FetchTogglAccount() (account toggl.Account, err error) {
+func (repo *timeEntryRepository) FetchTogglAccount() (account toggl.Account, err error) {
 	account, err = repo.togglClient.GetAccount()
 	if err != nil {
 		return 
@@ -49,7 +49,7 @@ func (repo *TimeEntryRepository) FetchTogglAccount() (account toggl.Account, err
     return
 }
 
-func (repo *TimeEntryRepository) Fetch(account toggl.Account) (entities []domain.TimeEntryEntity, err error) {
+func (repo *timeEntryRepository) Fetch(account toggl.Account) (entities []domain.TimeEntryEntity, err error) {
     entries := account.Data.TimeEntries
     sort.SliceStable(entries, func(i, j int) bool {
         return entries[i].StartTime().After(entries[j].StartTime());
@@ -74,7 +74,7 @@ func (repo *TimeEntryRepository) Fetch(account toggl.Account) (entities []domain
     return
 }
 
-func (repo *TimeEntryRepository) Insert(entity *domain.TimeEntryEntity, tags []toggl.Tag) (err error) {
+func (repo *timeEntryRepository) Insert(entity *domain.TimeEntryEntity, tags []toggl.Tag) (err error) {
     setProperTags(&entity.Entry, tags)
     entry, err := repo.togglClient.StartTimeEntry(entity.Entry.Description, entity.Entry.Pid, entity.Entry.Tags)
     entity.UpdateTimeEntry(entry)
@@ -88,7 +88,7 @@ func (repo *TimeEntryRepository) Insert(entity *domain.TimeEntryEntity, tags []t
     return
 }
 
-func (repo *TimeEntryRepository) Update(entity *domain.TimeEntryEntity, tags []toggl.Tag) (err error) {
+func (repo *timeEntryRepository) Update(entity *domain.TimeEntryEntity, tags []toggl.Tag) (err error) {
     setProperTags(&entity.Entry, tags)
     entry, err := repo.togglClient.UpdateTimeEntry(entity.Entry)
     entity.UpdateTimeEntry(entry)
@@ -100,14 +100,14 @@ func (repo *TimeEntryRepository) Update(entity *domain.TimeEntryEntity, tags []t
     return
 }
 
-func (repo *TimeEntryRepository) Stop(entity *domain.TimeEntryEntity) (err error) {
+func (repo *timeEntryRepository) Stop(entity *domain.TimeEntryEntity) (err error) {
     entry, err := repo.togglClient.StopTimeEntry(entity.Entry)
     entity.UpdateTimeEntry(entry)
 
     return
 }
 
-func (repo *TimeEntryRepository) Continue(entity *domain.TimeEntryEntity) (newEntity domain.TimeEntryEntity, err error) {
+func (repo *timeEntryRepository) Continue(entity *domain.TimeEntryEntity) (newEntity domain.TimeEntryEntity, err error) {
     // TODO
     newEntry, err := repo.togglClient.ContinueTimeEntry(entity.Entry)
     if err != nil {
@@ -127,7 +127,7 @@ func (repo *TimeEntryRepository) Continue(entity *domain.TimeEntryEntity) (newEn
     return
 }
 
-func (repo *TimeEntryRepository) Delete(entity *domain.TimeEntryEntity) (err error) {
+func (repo *timeEntryRepository) Delete(entity *domain.TimeEntryEntity) (err error) {
     err = repo.estimationClient.Delete(entity.GetId())
     if err != nil {
         return

@@ -18,7 +18,7 @@ type RepositoryTestSuite struct {
     mockedToggleClient *client.MockedToggleClient
     mockedEstimationClient *client.MockedEstimationClient
     mockedAccount toggl.Account
-    repo *TimeEntryRepository
+    repo *timeEntryRepository
 }
 
 func TestRepositoryTestSuite(t *testing.T) {
@@ -41,7 +41,7 @@ func (suite *RepositoryTestSuite) SetupTest() {
         { ID: 5, Name: "tag1", }, 
         { ID: 6, Name: "tag2", },
     }
-    suite.repo = &TimeEntryRepository{
+    suite.repo = &timeEntryRepository{
         estimationClient: suite.mockedEstimationClient,
         togglClient: suite.mockedToggleClient,
     }
